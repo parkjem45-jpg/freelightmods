@@ -137,6 +137,8 @@
           <a href="#">Apps</a>
           <a href="#">Games</a>
           <a href="#">Request Mod</a>
+<!-- Add this to nav-links div -->
+<a href="admin.html"><i class="fas fa-lock"></i> Admin</a>
         </div>
         <div class="link-group">
           <h4>Support</h4>
@@ -156,5 +158,30 @@
 
   <!-- JavaScript -->
   <script src="script.js"></script>
+<!-- AI Assistant Widget -->
+<div class="ai-assistant" id="aiAssistant">
+  <button class="ai-toggle" id="aiToggle">
+    <i class="fas fa-robot"></i>
+  </button>
+  <div class="ai-chat-window" id="aiChatWindow" style="display: none;">
+    <div class="ai-header">
+      <span><i class="fas fa-robot"></i> AI Assistant</span>
+      <button class="ai-close" id="aiClose">×</button>
+    </div>
+    <div class="ai-messages" id="aiMessages">
+      <div class="ai-message bot">
+        <i class="fas fa-robot"></i>
+        <div>Hello! I'm here to help with any website issues. What's wrong?</div>
+      </div>
+    </div>
+    <div class="ai-input-area">
+      <input type="text" id="aiInput" placeholder="Describe your issue..." />
+      <button id="aiSend"><i class="fas fa-paper-plane"></i></button>
+    </div>
+  </div>
+</div>
+
+<script src="tracker.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
