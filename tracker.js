@@ -1,70 +1,29 @@
-// ===== Real-time View Tracker =====
+// ===== Real-time View Tracker with Firestore =====
 class ViewTracker {
   constructor() {
-    this.trackingKey = 'flm_page_views';
-    this.sessionKey = 'flm_visitor_session';
-    this.realtimeKey = 'flm_realtime_views';
+    this.sessionId = this.getOrCreateSessionId();
+    this.trackingEnabled = true;
     this.init();
   }
 
   init() {
     this.trackPageView();
-    this.updateRealtimeViews();
-    this.startRealtimeCleanup();
+    this.updateRealtimeStats();
     
-    // Update every 30 seconds
-    setInterval(() => this.updateRealtimeViews(), 30000);
+    // Update stats every 30 seconds
+    setInterval(() => this.updateRealtimeStats(), 30000);
+    
+    // Heartbeat every minute
+    setInterval(() => this.sendHeartbeat(), 60000);
   }
 
-  trackPageView() {
-    // Get or create session
-    let session = this.getSession();
-    
-    const pageView = {
-      page: window.location.pathname,
-      timestamp: Date.now(),
-      sessionId: session.id,
-      referrer: document.referrer || 'direct',
-      isAdmin: window.location.pathname.includes('admin.html')
-    };
-
-    // Save to views history
-    const views = this.getViews();
-    views.push(pageView);
-    
-    // Keep last 30 days
-    const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
-    const filteredViews = views.filter(v => v.timestamp > thirtyDaysAgo);
-    
-    localStorage.setItem(this.trackingKey, JSON.stringify(filteredViews));
-    
-    // Update session last active
-    session.lastActive = Date.now();
-    localStorage.setItem(this.sessionKey, JSON.stringify(session));
-    
-    // Update realtime
-    this.updateRealtimeViews();
-  }
-
-  getSession() {
-    let session = JSON.parse(localStorage.getItem(this.sessionKey) || 'null');
-    
-    // Create new session if expired (>30 min inactive)
-    if (!session || (Date.now() - session.lastActive) > 30 * 60 * 1000) {
-      session = {
-        id: this.generateSessionId(),
-        startTime: Date.now(),
-        lastActive: Date.now(),
-        device: this.getDeviceInfo(),
-        location: 'Unknown' // Would need IP geolocation service
-      };
+  getOrCreateSessionId() {
+    let sessionId = sessionStorage.getItem('flm_session_id');
+    if (!sessionId) {
+      sessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
+      sessionStorage.setItem('flm_session_id', sessionId);
     }
-    
-    return session;
-  }
-
-  generateSessionId() {
-    return 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
+    return sessionId;
   }
 
   getDeviceInfo() {
@@ -74,103 +33,189 @@ class ViewTracker {
     return 'Desktop';
   }
 
-  getViews() {
-    return JSON.parse(localStorage.getItem(this.trackingKey) || '[]');
+  getBrowserInfo() {
+    const ua = navigator.userAgent;
+    if (ua.includes('Chrome')) return 'Chrome';
+    if (ua.includes('Firefox')) return 'Firefox';
+    if (ua.includes('Safari')) return 'Safari';
+    if (ua.includes('Edge')) return 'Edge';
+    return 'Other';
   }
 
-  updateRealtimeViews() {
-    const views = this.getViews();
-    const now = Date.now();
-    const fiveMinutesAgo = now - (5 * 60 * 1000);
-    
-    // Count active sessions in last 5 minutes
-    const activeSessions = new Set();
-    const recentViews = views.filter(v => v.timestamp > fiveMinutesAgo);
-    
-    recentViews.forEach(v => activeSessions.add(v.sessionId));
-    
-    const realtimeData = {
-      activeUsers: activeSessions.size,
-      pageViewsLast5Min: recentViews.length,
-      lastUpdate: now
-    };
-    
-    localStorage.setItem(this.realtimeKey, JSON.stringify(realtimeData));
-    
-    // Update display if on admin page
-    this.updateDisplay();
+  async trackPageView() {
+    if (!this.trackingEnabled) return;
+
+    try {
+      const pageView = {
+        page: window.location.pathname || '/',
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        sessionId: this.sessionId,
+        referrer: document.referrer || 'direct',
+        device: this.getDeviceInfo(),
+        browser: this.getBrowserInfo(),
+        screenSize: `${window.innerWidth}x${window.innerHeight}`,
+        language: navigator.language,
+        isAdmin: window.location.pathname.includes('admin.html')
+      };
+
+      await db.collection('analytics').add(pageView);
+      
+      // Update session last active
+      sessionStorage.setItem('flm_last_active', Date.now().toString());
+    } catch (error) {
+      console.warn('Analytics tracking error:', error);
+      this.fallbackToLocalStorage();
+    }
   }
 
-  startRealtimeCleanup() {
-    // Clean old sessions every minute
-    setInterval(() => {
-      const session = JSON.parse(localStorage.getItem(this.sessionKey) || 'null');
-      if (session) {
-        session.lastActive = Date.now();
-        localStorage.setItem(this.sessionKey, JSON.stringify(session));
-      }
-      this.updateRealtimeViews();
-    }, 60000);
-  }
-
-  updateDisplay() {
-    const displayElements = {
-      'activeUsers': document.getElementById('activeUsers'),
-      'viewsToday': document.getElementById('viewsToday'),
-      'totalViews': document.getElementById('totalViews'),
-      'avgTimeOnSite': document.getElementById('avgTimeOnSite')
-    };
-
-    if (!Object.values(displayElements).some(el => el)) return;
-
-    const realtime = JSON.parse(localStorage.getItem(this.realtimeKey) || '{"activeUsers":0}');
-    const views = this.getViews();
-    const today = new Date().setHours(0, 0, 0, 0);
-    
-    // Today's views
-    const todayViews = views.filter(v => v.timestamp > today).length;
-    
-    // Total views
-    const totalViews = views.length;
-    
-    // Average time (simplified calculation)
-    const sessions = {};
-    views.forEach(v => {
-      if (!sessions[v.sessionId]) {
-        sessions[v.sessionId] = { first: v.timestamp, last: v.timestamp };
-      } else {
-        sessions[v.sessionId].last = v.timestamp;
-      }
+  fallbackToLocalStorage() {
+    // Fallback to localStorage if Firestore fails
+    const views = JSON.parse(localStorage.getItem('flm_page_views') || '[]');
+    views.push({
+      page: window.location.pathname,
+      timestamp: Date.now(),
+      sessionId: this.sessionId
     });
     
-    let totalTime = 0;
-    let sessionCount = 0;
-    Object.values(sessions).forEach(s => {
-      const duration = s.last - s.first;
-      if (duration < 30 * 60 * 1000) { // Ignore sessions >30min
-        totalTime += duration;
-        sessionCount++;
-      }
-    });
-    
-    const avgTime = sessionCount > 0 ? Math.round(totalTime / sessionCount / 1000) : 0;
-    const avgTimeFormatted = avgTime > 60 
-      ? Math.round(avgTime / 60) + 'm'
-      : avgTime + 's';
+    // Keep last 1000 views
+    if (views.length > 1000) views.shift();
+    localStorage.setItem('flm_page_views', JSON.stringify(views));
+  }
 
-    // Update display
-    if (displayElements.activeUsers) {
-      displayElements.activeUsers.textContent = realtime.activeUsers || 0;
+  async sendHeartbeat() {
+    if (!this.trackingEnabled) return;
+
+    try {
+      await db.collection('analytics').add({
+        event: 'heartbeat',
+        sessionId: this.sessionId,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        page: window.location.pathname
+      });
+    } catch (error) {
+      // Silent fail
     }
-    if (displayElements.viewsToday) {
-      displayElements.viewsToday.textContent = todayViews;
+  }
+
+  async updateRealtimeStats() {
+    // Only update if we're on admin page
+    if (!window.location.pathname.includes('admin.html')) return;
+
+    try {
+      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+      
+      // Get active sessions
+      const activeSnapshot = await db.collection('analytics')
+        .where('timestamp', '>=', fiveMinutesAgo)
+        .get();
+      
+      const activeSessions = new Set();
+      let totalViews = 0;
+      
+      activeSnapshot.forEach(doc => {
+        const data = doc.data();
+        if (data.sessionId) {
+          activeSessions.add(data.sessionId);
+        }
+        totalViews++;
+      });
+      
+      // Today's views
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const todaySnapshot = await db.collection('analytics')
+        .where('timestamp', '>=', today)
+        .get();
+      
+      const todayViews = todaySnapshot.size;
+      
+      // Total all-time views
+      const allTimeSnapshot = await db.collection('analytics').count().get();
+      const allTimeViews = allTimeSnapshot.data().count;
+      
+      // Update display
+      this.updateDisplay({
+        activeUsers: activeSessions.size,
+        viewsToday: todayViews,
+        totalViews: allTimeViews,
+        avgTime: await this.calculateAvgTime()
+      });
+      
+      // Store in localStorage for quick access
+      localStorage.setItem('flm_realtime_stats', JSON.stringify({
+        activeUsers: activeSessions.size,
+        viewsToday: todayViews,
+        totalViews: allTimeViews,
+        lastUpdate: Date.now()
+      }));
+    } catch (error) {
+      console.warn('Realtime stats error:', error);
+      this.loadFromLocalStorage();
     }
-    if (displayElements.totalViews) {
-      displayElements.totalViews.textContent = this.formatNumber(totalViews);
+  }
+
+  async calculateAvgTime() {
+    try {
+      // Get sessions from today
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const snapshot = await db.collection('analytics')
+        .where('timestamp', '>=', today)
+        .orderBy('timestamp', 'asc')
+        .get();
+      
+      const sessions = {};
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        if (!sessions[data.sessionId]) {
+          sessions[data.sessionId] = {
+            first: data.timestamp?.toDate() || new Date(),
+            last: data.timestamp?.toDate() || new Date()
+          };
+        } else {
+          sessions[data.sessionId].last = data.timestamp?.toDate() || new Date();
+        }
+      });
+      
+      let totalTime = 0;
+      let sessionCount = 0;
+      
+      Object.values(sessions).forEach(s => {
+        const duration = s.last - s.first;
+        if (duration > 0 && duration < 30 * 60 * 1000) {
+          totalTime += duration;
+          sessionCount++;
+        }
+      });
+      
+      const avgSeconds = sessionCount > 0 ? Math.round(totalTime / sessionCount / 1000) : 0;
+      return avgSeconds > 60 
+        ? Math.round(avgSeconds / 60) + 'm'
+        : avgSeconds + 's';
+    } catch (error) {
+      return '--';
     }
-    if (displayElements.avgTimeOnSite) {
-      displayElements.avgTimeOnSite.textContent = avgTimeFormatted;
-    }
+  }
+
+  loadFromLocalStorage() {
+    const stats = JSON.parse(localStorage.getItem('flm_realtime_stats') || '{}');
+    this.updateDisplay(stats);
+  }
+
+  updateDisplay(stats) {
+    const elements = {
+      'activeUsers': stats.activeUsers || 0,
+      'viewsToday': stats.viewsToday || 0,
+      'totalViews': this.formatNumber(stats.totalViews || 0),
+      'avgTimeOnSite': stats.avgTime || '--'
+    };
+    
+    Object.entries(elements).forEach(([id, value]) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = value;
+    });
   }
 
   formatNumber(num) {
@@ -179,38 +224,65 @@ class ViewTracker {
     return num.toString();
   }
 
-  getDetailedStats() {
-    const views = this.getViews();
-    const today = new Date().setHours(0, 0, 0, 0);
-    const weekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
-    
-    return {
-      today: views.filter(v => v.timestamp > today).length,
-      thisWeek: views.filter(v => v.timestamp > weekAgo).length,
-      total: views.length,
-      pages: this.getPageStats(views),
-      hourly: this.getHourlyStats(views)
-    };
-  }
-
-  getPageStats(views) {
-    const stats = {};
-    views.forEach(v => {
-      const page = v.page.replace('/', 'home') || 'home';
-      stats[page] = (stats[page] || 0) + 1;
-    });
-    return stats;
-  }
-
-  getHourlyStats(views) {
-    const hourly = Array(24).fill(0);
-    views.forEach(v => {
-      const hour = new Date(v.timestamp).getHours();
-      hourly[hour]++;
-    });
-    return hourly;
+  async getDetailedStats() {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      
+      const [todayCount, weekCount, totalCount] = await Promise.all([
+        db.collection('analytics').where('timestamp', '>=', today).count().get(),
+        db.collection('analytics').where('timestamp', '>=', weekAgo).count().get(),
+        db.collection('analytics').count().get()
+      ]);
+      
+      return {
+        today: todayCount.data().count,
+        thisWeek: weekCount.data().count,
+        total: totalCount.data().count
+      };
+    } catch (error) {
+      return { today: 0, thisWeek: 0, total: 0 };
+    }
   }
 }
 
 // Initialize tracker
 const tracker = new ViewTracker();
+
+// Track downloads (called from download buttons)
+window.trackDownload = async function(appId, appName) {
+  try {
+    await db.collection('analytics').add({
+      event: 'download',
+      appId: appId,
+      appName: appName,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+      sessionId: tracker.sessionId
+    });
+    
+    // Increment download count on the APK
+    if (appId) {
+      await db.collection('apks').doc(appId).update({
+        downloads: firebase.firestore.FieldValue.increment(1)
+      });
+    }
+  } catch (error) {
+    console.warn('Download tracking error:', error);
+  }
+};
+
+// Track search queries
+window.trackSearch = async function(query) {
+  try {
+    await db.collection('analytics').add({
+      event: 'search',
+      query: query,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+      sessionId: tracker.sessionId
+    });
+  } catch (error) {
+    // Silent fail
+  }
+};

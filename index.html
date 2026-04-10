@@ -14,8 +14,18 @@
   
   <!-- Custom Styles -->
   <link rel="stylesheet" href="style.css">
+  
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
 </head>
 <body>
+  <!-- Theme Toggle -->
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+    <i class="fas fa-moon"></i>
+  </button>
 
   <!-- Header / Navigation -->
   <header class="header">
@@ -29,6 +39,7 @@
         <a href="#apps">Apps</a>
         <a href="#games">Games</a>
         <a href="#request">Request</a>
+        <a href="admin.html"><i class="fas fa-lock"></i> Admin</a>
       </nav>
       <button class="mobile-menu-toggle" aria-label="Menu">
         <i class="fas fa-bars"></i>
@@ -59,7 +70,7 @@
       </div>
       <div class="hero-stats">
         <div class="stat-item">
-          <span class="stat-number">500+</span>
+          <span class="stat-number" id="totalModsCount">0</span>
           <span class="stat-label">Mods Available</span>
         </div>
         <div class="stat-item">
@@ -84,12 +95,12 @@
       </div>
       
       <div class="app-grid" id="appGrid">
-        <!-- Cards will be injected via JavaScript, or you can hardcode them -->
+        <!-- Cards will be injected via JavaScript -->
       </div>
     </div>
   </section>
 
-  <!-- How to Install Section (Premium touch) -->
+  <!-- How to Install Section -->
   <section id="how" class="how-section">
     <div class="container">
       <div class="section-header center">
@@ -137,8 +148,6 @@
           <a href="#">Apps</a>
           <a href="#">Games</a>
           <a href="#">Request Mod</a>
-<!-- Add this to nav-links div -->
-<a href="admin.html"><i class="fas fa-lock"></i> Admin</a>
         </div>
         <div class="link-group">
           <h4>Support</h4>
@@ -156,32 +165,32 @@
     </div>
   </footer>
 
-  <!-- JavaScript -->
-  <script src="script.js"></script>
-<!-- AI Assistant Widget -->
-<div class="ai-assistant" id="aiAssistant">
-  <button class="ai-toggle" id="aiToggle">
-    <i class="fas fa-robot"></i>
-  </button>
-  <div class="ai-chat-window" id="aiChatWindow" style="display: none;">
-    <div class="ai-header">
-      <span><i class="fas fa-robot"></i> AI Assistant</span>
-      <button class="ai-close" id="aiClose">×</button>
-    </div>
-    <div class="ai-messages" id="aiMessages">
-      <div class="ai-message bot">
-        <i class="fas fa-robot"></i>
-        <div>Hello! I'm here to help with any website issues. What's wrong?</div>
+  <!-- AI Assistant Widget -->
+  <div class="ai-assistant" id="aiAssistant">
+    <button class="ai-toggle" id="aiToggle">
+      <i class="fas fa-robot"></i>
+    </button>
+    <div class="ai-chat-window" id="aiChatWindow" style="display: none;">
+      <div class="ai-header">
+        <span><i class="fas fa-robot"></i> AI Assistant</span>
+        <button class="ai-close" id="aiClose">×</button>
+      </div>
+      <div class="ai-messages" id="aiMessages">
+        <div class="ai-message bot">
+          <i class="fas fa-robot"></i>
+          <div>Hello! I'm here to help with any website issues. What's wrong?</div>
+        </div>
+      </div>
+      <div class="ai-input-area">
+        <input type="text" id="aiInput" placeholder="Describe your issue..." />
+        <button id="aiSend"><i class="fas fa-paper-plane"></i></button>
       </div>
     </div>
-    <div class="ai-input-area">
-      <input type="text" id="aiInput" placeholder="Describe your issue..." />
-      <button id="aiSend"><i class="fas fa-paper-plane"></i></button>
-    </div>
   </div>
-</div>
 
-<script src="tracker.js"></script>
-<script src="script.js"></script>
+  <!-- Scripts -->
+  <script src="firebase.js"></script>
+  <script src="tracker.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>

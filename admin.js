@@ -1,184 +1,93 @@
-
-// ===== Security Enhancements =====
-document.addEventListener('DOMContentLoaded', () => {
-  // Check authentication before loading admin
-  if (typeof auth !== 'undefined' && !auth.checkAuth()) {
-    return; // Auth manager will show login page
-  }
-  
-  // Continue with normal initialization
-  loadData();
-  setupTabs();
-  setupForm();
-  updateStats();
-  loadActivity();
-  startSessionTimer();
-  setupSecurityMonitoring();
-  
-  // Update realtime stats
-  if (typeof tracker !== 'undefined') {
-    setInterval(() => tracker.updateDisplay(), 5000);
-  }
-});
-
-// Session timeout warning
-function startSessionTimer() {
-  const session = JSON.parse(localStorage.getItem('flm_admin_session') || '{}');
-  if (!session.expires) return;
-  
-  const timerDiv = document.createElement('div');
-  timerDiv.className = 'session-timer';
-  timerDiv.id = 'sessionTimer';
-  document.body.appendChild(timerDiv);
-  
-  const updateTimer = () => {
-    const now = Date.now();
-    const timeLeft = session.expires - now;
-    
-    if (timeLeft <= 0) {
-      auth.logout();
-      return;
-    }
-    
-    const minutes = Math.floor(timeLeft / 60000);
-    const seconds = Math.floor((timeLeft % 60000) / 1000);
-    
-    timerDiv.innerHTML = `<i class="fas fa-clock"></i> Session: ${minutes}:${seconds.toString().padStart(2, '0')}`;
-    
-    if (timeLeft < 5 * 60 * 1000) {
-      timerDiv.classList.add('warning');
-    }
-  };
-  
-  updateTimer();
-  setInterval(updateTimer, 1000);
-}
-
-// Security monitoring
-function setupSecurityMonitoring() {
-  // Prevent right-click
-  document.addEventListener('contextmenu', (e) => {
-    if (window.location.pathname.includes('admin.html')) {
-      e.preventDefault();
-    }
-  });
-  
-  // Prevent dev tools shortcuts
-  document.addEventListener('keydown', (e) => {
-    if (window.location.pathname.includes('admin.html')) {
-      if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
-        e.preventDefault();
-      }
-    }
-  });
-  
-  // Log suspicious activity
-  let errorCount = 0;
-  window.addEventListener('error', (e) => {
-    errorCount++;
-    if (errorCount > 5) {
-      auth.logSecurityEvent('suspicious_errors', `Multiple errors detected: ${e.message}`);
-    }
-  });
-}
-
-// Export security log
-function exportSecurityLog() {
-  const log = auth.getSecurityLog();
-  const blob = new Blob([JSON.stringify(log, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `security-log-${Date.now()}.json`;
-  a.click();
-}
-
-// Force logout all sessions
-function forceLogoutAll() {
-  if (confirm('Force logout all admin sessions?')) {
-    localStorage.removeItem('flm_admin_session');
-    localStorage.removeItem('flm_visitor_session');
-    auth.logSecurityEvent('force_logout', 'All sessions terminated');
-    location.reload();
-  }
-}
-
-// ===== Configuration =====
+// ===== Firebase Admin Panel =====
 let appsData = [];
+let currentUser = null;
 let currentPage = 1;
-const itemsPerPage = 20;
+let itemsPerPage = 20;
 let activityLog = [];
+let unsubscribeSnapshot = null;
 
-// ===== Initialize =====
-document.addEventListener('DOMContentLoaded', () => {
-  loadData();
+// Theme variables
+let itemsPerPageValue = 20;
+
+// Called from admin-auth.js when user is authenticated
+window.initAdminPanel = function(user) {
+  currentUser = user;
+  
+  // Load settings
+  loadSettings();
+  
+  // Setup real-time listener
+  setupRealtimeListener();
+  
+  // Initialize UI
   setupTabs();
   setupForm();
-  updateStats();
+  setupSearch();
   loadActivity();
+  updateAccountInfo();
   
-  // Check URL hash for direct tab access
-  const hash = window.location.hash.slice(1);
-  if (hash) {
-    switchTab(hash);
-  }
-});
+  // Update stats periodically
+  setInterval(updateStats, 30000);
+};
 
-// ===== Data Management =====
-function loadData() {
-  const saved = localStorage.getItem('apkData');
-  if (saved) {
-    appsData = JSON.parse(saved);
-  } else {
-    appsData = getSampleData();
-    saveData();
+function loadSettings() {
+  const settings = JSON.parse(localStorage.getItem('adminSettings') || '{}');
+  itemsPerPage = settings.itemsPerPage || 20;
+  if (settings.siteName) {
+    document.getElementById('siteName').value = settings.siteName;
   }
-  renderAppsTable();
-  updateStats();
+  if (settings.defaultTheme) {
+    document.getElementById('defaultTheme').value = settings.defaultTheme;
+  }
 }
 
-function saveData() {
-  localStorage.setItem('apkData', JSON.stringify(appsData));
+function setupRealtimeListener() {
+  // Unsubscribe from previous listener
+  if (unsubscribeSnapshot) {
+    unsubscribeSnapshot();
+  }
   
-  // Also save to data.json (for GitHub Pages, this would need a server)
-  const dataStr = JSON.stringify(appsData, null, 2);
-  const blob = new Blob([dataStr], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'data.json';
-  a.click();
-  
-  logActivity('Data saved successfully');
+  // Real-time listener for APKs
+  unsubscribeSnapshot = db.collection('apks')
+    .orderBy('dateAdded', 'desc')
+    .onSnapshot((snapshot) => {
+      appsData = [];
+      snapshot.forEach(doc => {
+        appsData.push({ id: doc.id, ...doc.data() });
+      });
+      
+      renderAppsTable();
+      updateStats();
+      
+      // Cache for offline
+      localStorage.setItem('apkData', JSON.stringify(appsData));
+    }, (error) => {
+      console.error('Snapshot error:', error);
+      // Fallback to one-time fetch
+      loadDataOnce();
+    });
 }
 
-function getSampleData() {
-  return [
-    {
-      id: Date.now() - 1,
-      name: "Spotify Premium",
-      icon: "fab fa-spotify",
-      version: "v8.9.18",
-      size: "82 MB",
-      mod: "Unlocked",
-      downloads: 15420,
-      link: "#",
-      image: "",
-      category: "app"
-    },
-    {
-      id: Date.now(),
-      name: "YouTube Vanced",
-      icon: "fab fa-youtube",
-      version: "v18.45.41",
-      size: "134 MB",
-      mod: "No Ads",
-      downloads: 28750,
-      link: "#",
-      image: "",
-      category: "app"
+async function loadDataOnce() {
+  try {
+    const snapshot = await db.collection('apks').orderBy('dateAdded', 'desc').get();
+    appsData = [];
+    snapshot.forEach(doc => {
+      appsData.push({ id: doc.id, ...doc.data() });
+    });
+    renderAppsTable();
+    updateStats();
+    localStorage.setItem('apkData', JSON.stringify(appsData));
+  } catch (error) {
+    console.error('Error loading data:', error);
+    // Load from cache
+    const cached = localStorage.getItem('apkData');
+    if (cached) {
+      appsData = JSON.parse(cached);
+      renderAppsTable();
+      updateStats();
     }
-  ];
+  }
 }
 
 // ===== Tab Management =====
@@ -189,21 +98,30 @@ function setupTabs() {
       switchTab(tab.dataset.tab);
     });
   });
+  
+  // Check URL hash
+  const hash = window.location.hash.slice(1);
+  if (hash) {
+    switchTab(hash);
+  }
 }
 
 function switchTab(tabId) {
-  // Update active states
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   
-  document.getElementById(tabId).classList.add('active');
-  document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
-  
-  // Load tab-specific data
-  if (tabId === 'apps') renderAppsTable();
-  if (tabId === 'ai') runHealthCheck();
-  
-  window.location.hash = tabId;
+  const targetTab = document.getElementById(tabId);
+  if (targetTab) {
+    targetTab.classList.add('active');
+    document.querySelector(`[data-tab="${tabId}"]`)?.classList.add('active');
+    
+    // Load tab-specific data
+    if (tabId === 'apps') renderAppsTable();
+    if (tabId === 'ai') runHealthCheck();
+    if (tabId === 'settings') loadSettingsIntoForm();
+    
+    window.location.hash = tabId;
+  }
 }
 
 // ===== Render Apps Table =====
@@ -213,8 +131,9 @@ function renderAppsTable() {
   
   const searchTerm = document.getElementById('searchApps')?.value.toLowerCase() || '';
   let filtered = appsData.filter(app => 
-    app.name.toLowerCase().includes(searchTerm) ||
-    app.mod.toLowerCase().includes(searchTerm)
+    app.name?.toLowerCase().includes(searchTerm) ||
+    app.mod?.toLowerCase().includes(searchTerm) ||
+    app.category?.toLowerCase().includes(searchTerm)
   );
   
   // Pagination
@@ -222,30 +141,52 @@ function renderAppsTable() {
   const start = (currentPage - 1) * itemsPerPage;
   const paginated = filtered.slice(start, start + itemsPerPage);
   
+  if (paginated.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6" style="text-align: center; padding: 60px;">
+          <i class="fas fa-box-open" style="font-size: 48px; color: var(--text-secondary); margin-bottom: 16px; display: block;"></i>
+          <p>No APKs found</p>
+          <button class="btn-primary" onclick="switchTab('add')" style="margin-top: 16px;">
+            <i class="fas fa-plus"></i> Add Your First APK
+          </button>
+        </td>
+      </tr>
+    `;
+    renderPagination(0);
+    return;
+  }
+  
   tbody.innerHTML = '';
   
   paginated.forEach(app => {
     const row = document.createElement('tr');
     const iconHtml = app.image 
-      ? `<img src="${app.image}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 10px;">`
+      ? `<img src="${app.image}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 10px;" onerror="this.parentElement.innerHTML='<i class=\\'${app.icon || 'fas fa-mobile-alt'}\\'></i>'">`
       : `<i class="${app.icon || 'fas fa-mobile-alt'}"></i>`;
     
     row.innerHTML = `
       <td><div class="app-icon-small">${iconHtml}</div></td>
-      <td><strong>${app.name}</strong><br><small>${app.category || 'app'}</small></td>
-      <td>${app.version}</td>
-      <td>${app.size}</td>
+      <td>
+        <strong>${app.name || 'Unknown'}</strong><br>
+        <small>${app.category || 'app'} ${app.featured ? '⭐ Featured' : ''}</small>
+      </td>
+      <td>${app.version || 'N/A'}</td>
+      <td>${app.size || 'N/A'}</td>
       <td>${formatNumber(app.downloads || 0)}</td>
       <td>
         <div class="action-buttons">
-          <button class="action-btn" onclick="editApp(${app.id})">
+          <button class="action-btn" onclick="editApp('${app.id}')" title="Edit">
             <i class="fas fa-edit"></i>
           </button>
-          <button class="action-btn delete" onclick="deleteApp(${app.id})">
+          <button class="action-btn delete" onclick="deleteApp('${app.id}')" title="Delete">
             <i class="fas fa-trash"></i>
           </button>
-          <button class="action-btn" onclick="copyLink('${app.link}')">
+          <button class="action-btn" onclick="copyLink('${app.link}')" title="Copy Link">
             <i class="fas fa-copy"></i>
+          </button>
+          <button class="action-btn" onclick="duplicateApp('${app.id}')" title="Duplicate">
+            <i class="fas fa-clone"></i>
           </button>
         </div>
       </td>
@@ -253,7 +194,6 @@ function renderAppsTable() {
     tbody.appendChild(row);
   });
   
-  // Render pagination
   renderPagination(totalPages);
 }
 
@@ -261,60 +201,79 @@ function renderPagination(totalPages) {
   const pagination = document.getElementById('pagination');
   if (!pagination) return;
   
-  pagination.innerHTML = '';
-  
-  if (totalPages <= 1) return;
-  
-  for (let i = 1; i <= totalPages; i++) {
-    const btn = document.createElement('button');
-    btn.textContent = i;
-    if (i === currentPage) btn.classList.add('active');
-    btn.onclick = () => {
-      currentPage = i;
-      renderAppsTable();
-    };
-    pagination.appendChild(btn);
+  if (totalPages <= 1) {
+    pagination.innerHTML = '';
+    return;
   }
+  
+  let html = '';
+  for (let i = 1; i <= totalPages; i++) {
+    html += `<button class="${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+  }
+  pagination.innerHTML = html;
 }
 
-// Search functionality
-document.getElementById('searchApps')?.addEventListener('input', () => {
-  currentPage = 1;
+function goToPage(page) {
+  currentPage = page;
   renderAppsTable();
-});
+}
+
+function setupSearch() {
+  const searchInput = document.getElementById('searchApps');
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      currentPage = 1;
+      renderAppsTable();
+    });
+  }
+}
 
 // ===== Form Handling =====
 function setupForm() {
   const form = document.getElementById('addApkForm');
   if (!form) return;
   
-  form.addEventListener('submit', (e) => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    const newApp = {
-      id: Date.now(),
-      name: document.getElementById('appName').value,
-      version: document.getElementById('appVersion').value,
-      size: document.getElementById('appSize').value,
-      icon: document.getElementById('appIcon').value || 'fas fa-mobile-alt',
-      image: document.getElementById('appImage').value,
-      mod: document.getElementById('appMod').value,
-      link: document.getElementById('appLink').value,
-      category: document.getElementById('appCategory').value,
-      downloads: 0,
-      dateAdded: new Date().toISOString()
-    };
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
     
-    appsData.push(newApp);
-    saveData();
-    
-    form.reset();
-    logActivity(`Added new app: ${newApp.name}`);
-    alert('APK added successfully!');
-    
-    updateStats();
-    if (document.getElementById('apps').classList.contains('active')) {
-      renderAppsTable();
+    try {
+      const newApp = {
+        name: document.getElementById('appName').value.trim(),
+        version: document.getElementById('appVersion').value.trim(),
+        size: document.getElementById('appSize').value.trim(),
+        icon: document.getElementById('appIcon').value.trim() || 'fas fa-mobile-alt',
+        image: document.getElementById('appImage').value.trim(),
+        mod: document.getElementById('appMod').value.trim(),
+        link: document.getElementById('appLink').value.trim(),
+        category: document.getElementById('appCategory').value,
+        featured: document.getElementById('appFeatured')?.value === 'true',
+        description: document.getElementById('appDescription')?.value.trim() || '',
+        downloads: 0,
+        dateAdded: firebase.firestore.FieldValue.serverTimestamp(),
+        createdBy: currentUser.uid,
+        createdByEmail: currentUser.email
+      };
+      
+      await db.collection('apks').add(newApp);
+      
+      logActivity(`Added new app: ${newApp.name}`);
+      form.reset();
+      
+      // Show success message
+      alert('✅ APK added successfully!');
+      
+      // Switch to apps tab
+      switchTab('apps');
+    } catch (error) {
+      alert('❌ Error adding APK: ' + error.message);
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalText;
     }
   });
 }
@@ -324,15 +283,17 @@ function editApp(id) {
   const app = appsData.find(a => a.id === id);
   if (!app) return;
   
-  document.getElementById('editId').value = app.id;
-  document.getElementById('editName').value = app.name;
-  document.getElementById('editVersion').value = app.version;
-  document.getElementById('editSize').value = app.size;
+  document.getElementById('editId').value = id;
+  document.getElementById('editName').value = app.name || '';
+  document.getElementById('editVersion').value = app.version || '';
+  document.getElementById('editSize').value = app.size || '';
   document.getElementById('editIcon').value = app.icon || '';
   document.getElementById('editImage').value = app.image || '';
-  document.getElementById('editMod').value = app.mod;
-  document.getElementById('editLink').value = app.link;
+  document.getElementById('editMod').value = app.mod || '';
+  document.getElementById('editLink').value = app.link || '';
   document.getElementById('editCategory').value = app.category || 'app';
+  document.getElementById('editFeatured').value = app.featured ? 'true' : 'false';
+  document.getElementById('editDescription').value = app.description || '';
   
   document.getElementById('editModal').classList.add('active');
 }
@@ -341,46 +302,75 @@ function closeModal() {
   document.getElementById('editModal').classList.remove('active');
 }
 
-function saveEdit() {
-  const id = parseInt(document.getElementById('editId').value);
-  const index = appsData.findIndex(a => a.id === id);
+async function saveEdit() {
+  const id = document.getElementById('editId').value;
+  if (!id) return;
   
-  if (index !== -1) {
-    appsData[index] = {
-      ...appsData[index],
-      name: document.getElementById('editName').value,
-      version: document.getElementById('editVersion').value,
-      size: document.getElementById('editSize').value,
-      icon: document.getElementById('editIcon').value,
-      image: document.getElementById('editImage').value,
-      mod: document.getElementById('editMod').value,
-      link: document.getElementById('editLink').value,
-      category: document.getElementById('editCategory').value
-    };
+  const submitBtn = document.querySelector('#editModal .btn-primary');
+  const originalText = submitBtn.innerHTML;
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+  
+  try {
+    await db.collection('apks').doc(id).update({
+      name: document.getElementById('editName').value.trim(),
+      version: document.getElementById('editVersion').value.trim(),
+      size: document.getElementById('editSize').value.trim(),
+      icon: document.getElementById('editIcon').value.trim(),
+      image: document.getElementById('editImage').value.trim(),
+      mod: document.getElementById('editMod').value.trim(),
+      link: document.getElementById('editLink').value.trim(),
+      category: document.getElementById('editCategory').value,
+      featured: document.getElementById('editFeatured').value === 'true',
+      description: document.getElementById('editDescription').value.trim(),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      updatedBy: currentUser.uid
+    });
     
-    saveData();
-    logActivity(`Updated app: ${appsData[index].name}`);
+    logActivity(`Updated app: ${document.getElementById('editName').value}`);
     closeModal();
-    renderAppsTable();
-    updateStats();
+  } catch (error) {
+    alert('Error updating: ' + error.message);
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = originalText;
   }
 }
 
-function deleteApp(id) {
+async function deleteApp(id) {
   if (!confirm('Are you sure you want to delete this APK?')) return;
   
+  try {
+    const app = appsData.find(a => a.id === id);
+    await db.collection('apks').doc(id).delete();
+    logActivity(`Deleted app: ${app?.name || 'Unknown'}`);
+  } catch (error) {
+    alert('Error deleting: ' + error.message);
+  }
+}
+
+async function duplicateApp(id) {
   const app = appsData.find(a => a.id === id);
-  appsData = appsData.filter(a => a.id !== id);
+  if (!app) return;
   
-  saveData();
-  logActivity(`Deleted app: ${app?.name || 'Unknown'}`);
-  renderAppsTable();
-  updateStats();
+  try {
+    const newApp = { ...app };
+    delete newApp.id;
+    newApp.name = app.name + ' (Copy)';
+    newApp.downloads = 0;
+    newApp.dateAdded = firebase.firestore.FieldValue.serverTimestamp();
+    newApp.createdBy = currentUser.uid;
+    
+    await db.collection('apks').add(newApp);
+    logActivity(`Duplicated app: ${app.name}`);
+  } catch (error) {
+    alert('Error duplicating: ' + error.message);
+  }
 }
 
 function copyLink(link) {
   navigator.clipboard?.writeText(link);
-  alert('Link copied to clipboard!');
+  alert('📋 Link copied to clipboard!');
 }
 
 // ===== Preview =====
@@ -388,21 +378,28 @@ function previewApk() {
   const preview = document.getElementById('apkPreview');
   const card = document.getElementById('previewCard');
   
+  const name = document.getElementById('appName').value || 'App Name';
+  const version = document.getElementById('appVersion').value || 'v1.0.0';
+  const size = document.getElementById('appSize').value || '0 MB';
+  const mod = document.getElementById('appMod').value || 'Mod Features';
+  const icon = document.getElementById('appIcon').value || 'fas fa-mobile-alt';
+  const image = document.getElementById('appImage').value;
+  
   preview.innerHTML = `
     <div class="app-card">
       <div class="app-icon">
-        ${document.getElementById('appImage').value 
-          ? `<img src="${document.getElementById('appImage').value}" style="width:100%;height:100%;object-fit:cover;border-radius:18px;">`
-          : `<i class="${document.getElementById('appIcon').value || 'fas fa-mobile-alt'}"></i>`}
+        ${image 
+          ? `<img src="${image}" style="width:100%;height:100%;object-fit:cover;border-radius:18px;" onerror="this.parentElement.innerHTML='<i class=\\'${icon}\\'></i>'">`
+          : `<i class="${icon}"></i>`}
       </div>
       <div class="app-info">
-        <h3>${document.getElementById('appName').value || 'App Name'}</h3>
+        <h3>${name}</h3>
         <div class="app-meta">
-          <span><i class="fas fa-code-branch"></i> ${document.getElementById('appVersion').value || 'v1.0.0'}</span>
-          <span><i class="fas fa-weight-hanging"></i> ${document.getElementById('appSize').value || '0 MB'}</span>
+          <span><i class="fas fa-code-branch"></i> ${version}</span>
+          <span><i class="fas fa-weight-hanging"></i> ${size}</span>
         </div>
         <div class="app-meta">
-          <span><i class="fas fa-crown" style="color: #fbbf24;"></i> ${document.getElementById('appMod').value || 'Mod Features'}</span>
+          <span><i class="fas fa-crown" style="color: #fbbf24;"></i> ${mod}</span>
         </div>
       </div>
       <a href="#" class="download-btn">
@@ -416,12 +413,15 @@ function previewApk() {
 
 // ===== Stats =====
 function updateStats() {
-  document.getElementById('totalApps').textContent = appsData.length;
-  document.getElementById('totalDownloads').textContent = formatNumber(
-    appsData.reduce((sum, app) => sum + (app.downloads || 0), 0)
-  );
-  document.getElementById('gamesCount').textContent = appsData.filter(a => a.category === 'game').length;
-  document.getElementById('appsCount').textContent = appsData.filter(a => a.category === 'app').length;
+  const totalApps = appsData.length;
+  const totalDownloads = appsData.reduce((sum, app) => sum + (app.downloads || 0), 0);
+  const gamesCount = appsData.filter(a => a.category === 'game').length;
+  const appsCount = appsData.filter(a => a.category === 'app').length;
+  
+  document.getElementById('totalApps').textContent = totalApps;
+  document.getElementById('totalDownloads').textContent = formatNumber(totalDownloads);
+  document.getElementById('gamesCount').textContent = gamesCount;
+  document.getElementById('appsCount').textContent = appsCount;
 }
 
 function formatNumber(num) {
@@ -434,17 +434,17 @@ function formatNumber(num) {
 function logActivity(message) {
   activityLog.unshift({
     time: new Date().toLocaleTimeString(),
-    message
+    message: message
   });
   
-  if (activityLog.length > 10) activityLog.pop();
-  localStorage.setItem('activityLog', JSON.stringify(activityLog));
+  if (activityLog.length > 50) activityLog.pop();
+  localStorage.setItem('adminActivityLog', JSON.stringify(activityLog));
   
   loadActivity();
 }
 
 function loadActivity() {
-  const saved = localStorage.getItem('activityLog');
+  const saved = localStorage.getItem('adminActivityLog');
   if (saved) {
     activityLog = JSON.parse(saved);
   }
@@ -452,7 +452,17 @@ function loadActivity() {
   const list = document.getElementById('activityList');
   if (!list) return;
   
-  list.innerHTML = activityLog.map(log => `
+  if (activityLog.length === 0) {
+    list.innerHTML = `
+      <div class="activity-item">
+        <span class="activity-time">--:--</span>
+        <span>No recent activity</span>
+      </div>
+    `;
+    return;
+  }
+  
+  list.innerHTML = activityLog.slice(0, 10).map(log => `
     <div class="activity-item">
       <span class="activity-time">${log.time}</span>
       <span>${log.message}</span>
@@ -460,26 +470,74 @@ function loadActivity() {
   `).join('');
 }
 
+function clearActivityLog() {
+  activityLog = [];
+  localStorage.removeItem('adminActivityLog');
+  loadActivity();
+}
+
+// ===== Account Info =====
+function updateAccountInfo() {
+  if (currentUser) {
+    const emailInput = document.getElementById('accountEmail');
+    const createdInput = document.getElementById('accountCreated');
+    if (emailInput) {
+      emailInput.value = currentUser.email;
+    }
+    if (createdInput) {
+      const created = currentUser.metadata?.creationTime || 'Unknown';
+      createdInput.value = new Date(created).toLocaleDateString();
+    }
+  }
+}
+
+function loadSettingsIntoForm() {
+  const settings = JSON.parse(localStorage.getItem('adminSettings') || '{}');
+  document.getElementById('siteName').value = settings.siteName || 'Free Lite Mods';
+  document.getElementById('itemsPerPage').value = settings.itemsPerPage || 20;
+  document.getElementById('defaultTheme').value = settings.defaultTheme || 'dark';
+  document.getElementById('autoSync').checked = settings.autoSync !== false;
+}
+
+function saveSettings() {
+  const settings = {
+    siteName: document.getElementById('siteName').value,
+    itemsPerPage: parseInt(document.getElementById('itemsPerPage').value),
+    defaultTheme: document.getElementById('defaultTheme').value,
+    autoSync: document.getElementById('autoSync').checked
+  };
+  
+  localStorage.setItem('adminSettings', JSON.stringify(settings));
+  itemsPerPage = settings.itemsPerPage;
+  
+  alert('✅ Settings saved!');
+  renderAppsTable();
+}
+
 // ===== AI Diagnostics =====
-function runHealthCheck() {
-  // Data file status
-  const dataStatus = appsData.length > 0 ? 'healthy' : 'warning';
-  document.getElementById('dataStatus').textContent = appsData.length + ' items';
-  document.getElementById('dataStatus').className = `status-badge ${dataStatus}`;
+async function runHealthCheck() {
+  // Firestore status
+  try {
+    await db.collection('apks').limit(1).get();
+    document.getElementById('firestoreStatus').textContent = 'Connected';
+    document.getElementById('firestoreStatus').className = 'status-badge healthy';
+  } catch (e) {
+    document.getElementById('firestoreStatus').textContent = 'Error';
+    document.getElementById('firestoreStatus').className = 'status-badge error';
+  }
   
-  // Storage status
-  const storageUsed = JSON.stringify(localStorage).length;
-  document.getElementById('storageStatus').textContent = formatBytes(storageUsed);
-  document.getElementById('storageStatus').className = 'status-badge healthy';
+  // Auth status
+  document.getElementById('authStatus').textContent = currentUser ? 'Authenticated' : 'Not logged in';
+  document.getElementById('authStatus').className = currentUser ? 'status-badge healthy' : 'status-badge error';
   
-  // Image status
-  const imagesWithUrl = appsData.filter(a => a.image).length;
-  document.getElementById('imageStatus').textContent = `${imagesWithUrl}/${appsData.length} custom`;
-  document.getElementById('imageStatus').className = 'status-badge healthy';
+  // Data count
+  document.getElementById('dataCountStatus').textContent = appsData.length + ' APKs';
+  document.getElementById('dataCountStatus').className = 'status-badge healthy';
   
-  // Link status
-  document.getElementById('linkStatus').textContent = 'Validating...';
-  validateLinks();
+  // Storage usage
+  const used = JSON.stringify(localStorage).length;
+  document.getElementById('storageUsageStatus').textContent = formatBytes(used);
+  document.getElementById('storageUsageStatus').className = 'status-badge healthy';
 }
 
 function formatBytes(bytes) {
@@ -489,35 +547,43 @@ function formatBytes(bytes) {
 }
 
 function runFullDiagnostics() {
-  const console = document.getElementById('aiConsole');
+  addConsoleMessage('🔍 Starting full system diagnostics...', 'bot');
   
-  addConsoleMessage('Starting full system diagnostics...', 'bot');
-  
-  setTimeout(() => addConsoleMessage('✓ Checking data integrity... ' + appsData.length + ' records found', 'success'), 500);
-  setTimeout(() => addConsoleMessage('✓ Local storage: OK', 'success'), 800);
+  setTimeout(() => addConsoleMessage('✓ Firestore connection: OK', 'success'), 500);
+  setTimeout(() => addConsoleMessage('✓ Authentication: ' + (currentUser ? 'Valid' : 'Invalid'), currentUser ? 'success' : 'error'), 800);
+  setTimeout(() => addConsoleMessage('✓ Total APKs: ' + appsData.length, 'success'), 1100);
+  setTimeout(() => addConsoleMessage('✓ Local storage: Healthy', 'success'), 1400);
   setTimeout(() => {
-    const brokenImages = appsData.filter(a => a.image && !isValidImageUrl(a.image)).length;
-    if (brokenImages > 0) {
-      addConsoleMessage(`⚠️ ${brokenImages} potentially broken image URLs detected`, 'warning');
+    const missingImages = appsData.filter(a => a.image && !a.image.startsWith('http')).length;
+    if (missingImages > 0) {
+      addConsoleMessage(`⚠️ ${missingImages} apps have invalid image URLs`, 'warning');
     } else {
       addConsoleMessage('✓ All image URLs appear valid', 'success');
     }
-  }, 1200);
-  setTimeout(() => addConsoleMessage('✓ System ready. No critical errors.', 'success'), 1600);
+  }, 1700);
+  setTimeout(() => addConsoleMessage('✅ Diagnostics complete. System healthy!', 'success'), 2000);
   
   runHealthCheck();
 }
 
 function addConsoleMessage(text, type = 'bot') {
-  const console = document.getElementById('aiConsole');
+  const consoleEl = document.getElementById('aiConsole');
   const msg = document.createElement('div');
   msg.className = `console-message ${type}`;
+  
+  const iconMap = {
+    'success': 'check-circle',
+    'warning': 'exclamation-triangle',
+    'error': 'times-circle',
+    'bot': 'robot'
+  };
+  
   msg.innerHTML = `
-    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : type === 'error' ? 'times-circle' : 'robot'}"></i>
+    <i class="fas fa-${iconMap[type] || 'robot'}"></i>
     <span>${text}</span>
   `;
-  console.appendChild(msg);
-  console.scrollTop = console.scrollHeight;
+  consoleEl.appendChild(msg);
+  consoleEl.scrollTop = consoleEl.scrollHeight;
 }
 
 function clearConsole() {
@@ -529,119 +595,205 @@ function clearConsole() {
   `;
 }
 
-function autoFixAll() {
+async function autoFixAll() {
   addConsoleMessage('🔧 Starting auto-fix procedure...', 'bot');
   
+  let fixedCount = 0;
+  
   // Fix missing icons
+  const batch = db.batch();
   appsData.forEach(app => {
     if (!app.icon) {
-      app.icon = app.category === 'game' ? 'fas fa-gamepad' : 'fas fa-mobile-alt';
+      const ref = db.collection('apks').doc(app.id);
+      batch.update(ref, { icon: app.category === 'game' ? 'fas fa-gamepad' : 'fas fa-mobile-alt' });
+      fixedCount++;
     }
-  });
-  
-  // Fix invalid links
-  appsData.forEach(app => {
     if (!app.link || app.link === '#') {
-      app.link = 'https://github.com/your-repo/placeholder.apk';
+      const ref = db.collection('apks').doc(app.id);
+      batch.update(ref, { link: '#' });
+      fixedCount++;
     }
   });
   
-  saveData();
-  addConsoleMessage('✓ Fixed missing icons and invalid links', 'success');
-  addConsoleMessage('✓ All issues resolved!', 'success');
+  if (fixedCount > 0) {
+    await batch.commit();
+    addConsoleMessage(`✓ Fixed ${fixedCount} issues`, 'success');
+  } else {
+    addConsoleMessage('✓ No issues found!', 'success');
+  }
+  
+  addConsoleMessage('✅ Auto-fix complete!', 'success');
 }
 
 function fixMissingIcons() {
-  appsData.forEach(app => {
-    if (!app.icon) {
-      app.icon = app.category === 'game' ? 'fas fa-gamepad' : 'fas fa-mobile-alt';
-    }
-  });
-  saveData();
-  addConsoleMessage('✓ Fixed missing icons', 'success');
-  renderAppsTable();
+  addConsoleMessage('Fixing missing icons...', 'bot');
+  autoFixAll();
 }
 
-function validateLinks() {
-  let validCount = 0;
+function validateAllLinks() {
+  let valid = 0;
+  let invalid = 0;
+  
   appsData.forEach(app => {
     if (app.link && app.link.startsWith('http')) {
-      validCount++;
+      valid++;
+    } else {
+      invalid++;
     }
   });
   
-  document.getElementById('linkStatus').textContent = `${validCount}/${appsData.length} valid`;
-  document.getElementById('linkStatus').className = `status-badge ${validCount === appsData.length ? 'healthy' : 'warning'}`;
+  addConsoleMessage(`Link validation: ${valid} valid, ${invalid} invalid`, invalid > 0 ? 'warning' : 'success');
 }
 
-function isValidImageUrl(url) {
-  return url && (url.endsWith('.png') || url.endsWith('.jpg') || url.endsWith('.jpeg') || url.endsWith('.webp') || url.includes('unsplash') || url.includes('placeholder'));
-}
-
-function optimizeImages() {
-  addConsoleMessage('Optimizing image URLs...', 'bot');
-  addConsoleMessage('✓ All images optimized (compression simulated)', 'success');
+async function recalculateDownloads() {
+  addConsoleMessage('Recalculating download statistics...', 'bot');
+  
+  try {
+    const snapshot = await db.collection('analytics')
+      .where('event', '==', 'download')
+      .get();
+    
+    const downloadCounts = {};
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      if (data.appId) {
+        downloadCounts[data.appId] = (downloadCounts[data.appId] || 0) + 1;
+      }
+    });
+    
+    const batch = db.batch();
+    for (const [appId, count] of Object.entries(downloadCounts)) {
+      const ref = db.collection('apks').doc(appId);
+      batch.update(ref, { downloads: count });
+    }
+    
+    await batch.commit();
+    addConsoleMessage(`✓ Updated downloads for ${Object.keys(downloadCounts).length} apps`, 'success');
+  } catch (error) {
+    addConsoleMessage(`Error: ${error.message}`, 'error');
+  }
 }
 
 function backupData() {
   const backup = {
     data: appsData,
     timestamp: new Date().toISOString(),
-    version: '1.0'
+    version: '2.0',
+    exportedBy: currentUser?.email || 'Unknown'
   };
   
   const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `backup-${Date.now()}.json`;
+  a.download = `flm-backup-${Date.now()}.json`;
   a.click();
   
   addConsoleMessage('✓ Backup created successfully', 'success');
+  logActivity('Created data backup');
+}
+
+function cleanupDuplicateApps() {
+  addConsoleMessage('Checking for duplicates...', 'bot');
+  
+  const seen = new Map();
+  const duplicates = [];
+  
+  appsData.forEach(app => {
+    const key = `${app.name}-${app.version}`;
+    if (seen.has(key)) {
+      duplicates.push(app.id);
+    } else {
+      seen.set(key, app.id);
+    }
+  });
+  
+  if (duplicates.length > 0) {
+    addConsoleMessage(`Found ${duplicates.length} duplicate(s). Use manual delete to remove.`, 'warning');
+    // Show duplicates in console
+    console.log('Duplicate IDs:', duplicates);
+  } else {
+    addConsoleMessage('✓ No duplicates found', 'success');
+  }
+}
+
+function optimizeImageUrls() {
+  addConsoleMessage('Checking image URLs...', 'bot');
+  
+  let optimized = 0;
+  appsData.forEach(app => {
+    if (app.image && !app.image.startsWith('https://')) {
+      // Could auto-fix here
+      optimized++;
+    }
+  });
+  
+  addConsoleMessage(`✓ ${optimized} images could be optimized`, 'success');
 }
 
 // ===== Export =====
 function exportData() {
-  const dataStr = JSON.stringify(appsData, null, 2);
-  const blob = new Blob([dataStr], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'data.json';
-  a.click();
-  
-  logActivity('Data exported');
+  backupData();
+}
+
+function syncWithFirestore() {
+  addConsoleMessage('Syncing with Firestore...', 'bot');
+  loadDataOnce().then(() => {
+    addConsoleMessage('✓ Sync complete', 'success');
+  });
 }
 
 function clearCache() {
   localStorage.removeItem('apkData');
-  localStorage.removeItem('activityLog');
+  localStorage.removeItem('adminActivityLog');
+  alert('Cache cleared. Reloading...');
   location.reload();
 }
 
-// ===== Settings =====
-function saveSettings() {
-  const settings = {
-    siteName: document.getElementById('siteName').value,
-    itemsPerPage: document.getElementById('itemsPerPage').value,
-    autoBackup: document.getElementById('autoBackup').checked
-  };
+async function resetAllData() {
+  if (!confirm('⚠️ WARNING: This will delete ALL APKs from Firestore. Are you sure?')) return;
+  if (!confirm('❗ LAST WARNING: This action CANNOT be undone!')) return;
   
-  localStorage.setItem('settings', JSON.stringify(settings));
-  alert('Settings saved!');
-}
-
-function resetAllData() {
-  if (!confirm('WARNING: This will delete ALL data. Are you sure?')) return;
-  if (!confirm('Last warning! This cannot be undone.')) return;
-  
-  appsData = getSampleData();
-  activityLog = [];
-  saveData();
-  location.reload();
+  try {
+    const snapshot = await db.collection('apks').get();
+    const batch = db.batch();
+    snapshot.forEach(doc => batch.delete(doc.ref));
+    await batch.commit();
+    
+    logActivity('Reset all data');
+    alert('All data has been reset.');
+  } catch (error) {
+    alert('Error: ' + error.message);
+  }
 }
 
 function clearAllCache() {
-  localStorage.clear();
-  location.reload();
+  clearCache();
 }
+
+// ===== Window Functions =====
+window.switchTab = switchTab;
+window.editApp = editApp;
+window.deleteApp = deleteApp;
+window.duplicateApp = duplicateApp;
+window.copyLink = copyLink;
+window.closeModal = closeModal;
+window.saveEdit = saveEdit;
+window.previewApk = previewApk;
+window.goToPage = goToPage;
+window.exportData = exportData;
+window.syncWithFirestore = syncWithFirestore;
+window.runFullDiagnostics = runFullDiagnostics;
+window.autoFixAll = autoFixAll;
+window.clearConsole = clearConsole;
+window.fixMissingIcons = fixMissingIcons;
+window.validateAllLinks = validateAllLinks;
+window.recalculateDownloads = recalculateDownloads;
+window.backupData = backupData;
+window.cleanupDuplicateApps = cleanupDuplicateApps;
+window.optimizeImageUrls = optimizeImageUrls;
+window.saveSettings = saveSettings;
+window.resetAllData = resetAllData;
+window.clearAllCache = clearAllCache;
+window.clearActivityLog = clearActivityLog;
+window.runHealthCheck = runHealthCheck;

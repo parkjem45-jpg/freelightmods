@@ -738,3 +738,57 @@ a {
     right: -10px;
   }
 }
+
+/* Light theme variables */
+[data-theme="light"] {
+  --bg-primary: #f5f7fa;
+  --bg-secondary: #ffffff;
+  --bg-card: #ffffff;
+  --text-primary: #1a1a2e;
+  --text-secondary: #4a5568;
+  --border-color: rgba(0, 0, 0, 0.08);
+  --shadow-card: 0 10px 30px -10px rgba(0, 0, 0, 0.1);
+  --accent-cyan: #0099cc;
+  --accent-purple: #667eea;
+}
+
+/* Theme toggle button */
+.theme-toggle {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1001;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-card);
+}
+
+.theme-toggle:hover {
+  transform: scale(1.1);
+  background: var(--accent-purple);
+  color: white;
+}
+
+/* Adjust header to not overlap toggle */
+.header {
+  padding-left: 60px;
+}
+@media (max-width: 768px) {
+  .theme-toggle {
+    top: 10px;
+    left: 10px;
+  }
+  .header {
+    padding-left: 50px;
+  }
+}

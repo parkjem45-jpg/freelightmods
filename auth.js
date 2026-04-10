@@ -1,229 +1,247 @@
-// ===== Secure Authentication System =====
-const AUTH_CONFIG = {
-  // In production, NEVER store credentials in plain text!
-  // This is hashed using SHA-256
-  username: 'jack1122',
-  passwordHash: '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', // SHA-256 of 'Jack6767@@'
-  sessionTimeout: 30 * 60 * 1000, // 30 minutes
-  maxAttempts: 5,
-  lockoutTime: 15 * 60 * 1000 // 15 minutes
-};
+// ===== Admin Authentication with Firebase =====
 
-// Session management
-class AuthManager {
-  constructor() {
-    this.sessionKey = 'flm_admin_session';
-    this.attemptsKey = 'flm_login_attempts';
-    this.lockoutKey = 'flm_lockout_until';
-    this.init();
+// Theme toggle
+const themeToggle = document.getElementById('themeToggle');
+if (themeToggle) {
+  const htmlElement = document.documentElement;
+  const themeIcon = themeToggle.querySelector('i');
+  const savedTheme = localStorage.getItem('theme') || 'dark';
+  htmlElement.setAttribute('data-theme', savedTheme);
+  updateThemeIcon(savedTheme);
+  
+  themeToggle.addEventListener('click', () => {
+    const currentTheme = htmlElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    htmlElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateThemeIcon(newTheme);
+  });
+  
+  function updateThemeIcon(theme) {
+    themeIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
   }
+}
 
-  init() {
-    // Check if we're on admin page
-    if (window.location.pathname.includes('admin.html')) {
-      this.checkAuth();
-    }
-  }
-
-  async hashPassword(password) {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(password);
-    const hash = await crypto.subtle.digest('SHA-256', data);
-    return Array.from(new Uint8Array(hash))
-      .map(b => b.toString(16).padStart(2, '0'))
-      .join('');
-  }
-
-  async login(username, password) {
-    // Check lockout
-    const lockoutUntil = localStorage.getItem(this.lockoutKey);
-    if (lockoutUntil && Date.now() < parseInt(lockoutUntil)) {
-      const minutesLeft = Math.ceil((parseInt(lockoutUntil) - Date.now()) / 60000);
-      throw new Error(`Too many failed attempts. Try again in ${minutesLeft} minutes.`);
-    }
-
-    // Verify credentials
-    const hashedInput = await this.hashPassword(password);
-    
-    if (username === AUTH_CONFIG.username && hashedInput === AUTH_CONFIG.passwordHash) {
-      // Create session
-      const session = {
-        username: username,
-        loginTime: Date.now(),
-        expires: Date.now() + AUTH_CONFIG.sessionTimeout,
-        token: this.generateToken()
-      };
+// Check auth state
+auth.onAuthStateChanged(async (user) => {
+  if (window.location.pathname.includes('admin.html')) {
+    if (user) {
+      // Update user info in sidebar
+      const userInfo = document.getElementById('userInfo');
+      if (userInfo) {
+        userInfo.innerHTML = `
+          <div class="user-avatar">
+            <i class="fas fa-user-circle"></i>
+          </div>
+          <div class="user-details">
+            <span class="user-email">${user.email}</span>
+            <span class="user-role">Administrator</span>
+          </div>
+        `;
+      }
       
-      // Encrypt session data
-      const encryptedSession = btoa(JSON.stringify(session));
-      localStorage.setItem(this.sessionKey, encryptedSession);
+      document.body.classList.add('authenticated');
       
-      // Clear attempts
-      localStorage.removeItem(this.attemptsKey);
-      
-      // Log activity
-      this.logSecurityEvent('login_success', username);
-      
-      return true;
+      // Initialize admin panel
+      if (typeof initAdminPanel === 'function') {
+        initAdminPanel(user);
+      }
     } else {
-      // Track failed attempt
-      this.trackFailedAttempt();
-      this.logSecurityEvent('login_failed', username);
-      throw new Error('Invalid username or password');
+      // Show login/signup form
+      showAuthUI();
     }
   }
+});
 
-  trackFailedAttempt() {
-    let attempts = parseInt(localStorage.getItem(this.attemptsKey) || '0');
-    attempts++;
-    localStorage.setItem(this.attemptsKey, attempts.toString());
-
-    if (attempts >= AUTH_CONFIG.maxAttempts) {
-      const lockoutUntil = Date.now() + AUTH_CONFIG.lockoutTime;
-      localStorage.setItem(this.lockoutKey, lockoutUntil.toString());
-      localStorage.removeItem(this.attemptsKey);
-      throw new Error(`Account locked for 15 minutes due to too many failed attempts.`);
-    }
-  }
-
-  generateToken() {
-    return Math.random().toString(36).substring(2) + Date.now().toString(36);
-  }
-
-  checkAuth() {
-    const encrypted = localStorage.getItem(this.sessionKey);
-    
-    if (!encrypted) {
-      this.showLoginPage();
-      return false;
-    }
-
-    try {
-      const session = JSON.parse(atob(encrypted));
-      
-      // Check expiration
-      if (Date.now() > session.expires) {
-        this.logout();
-        return false;
-      }
-
-      // Validate token (basic check)
-      if (!session.token || session.token.length < 10) {
-        this.logout();
-        return false;
-      }
-
-      // Extend session
-      session.expires = Date.now() + AUTH_CONFIG.sessionTimeout;
-      localStorage.setItem(this.sessionKey, btoa(JSON.stringify(session)));
-      
-      this.showAdminPanel();
-      return true;
-    } catch (e) {
-      this.logout();
-      return false;
-    }
-  }
-
-  showLoginPage() {
-    document.body.innerHTML = `
-      <div class="login-container">
-        <div class="login-box">
-          <div class="login-header">
-            <i class="fas fa-shield-alt"></i>
-            <h1>Secure Admin</h1>
-            <p>Free Lite Mods • Restricted Access</p>
+function showAuthUI() {
+  document.body.innerHTML = `
+    <div class="login-container">
+      <div class="login-box">
+        <div class="login-header">
+          <i class="fas fa-shield-alt"></i>
+          <h1>Admin Access</h1>
+          <p>Sign in or create an account</p>
+        </div>
+        
+        <div class="auth-tabs">
+          <button class="auth-tab active" data-tab="login">Login</button>
+          <button class="auth-tab" data-tab="signup">Sign Up</button>
+          <button class="auth-tab" data-tab="reset">Reset</button>
+        </div>
+        
+        <form id="authForm" class="login-form">
+          <div class="form-group">
+            <label><i class="fas fa-envelope"></i> Email</label>
+            <input type="email" id="email" placeholder="admin@example.com" required />
           </div>
-          
-          <form id="loginForm" class="login-form">
-            <div class="form-group">
-              <label><i class="fas fa-user"></i> Username</label>
-              <input type="text" id="username" placeholder="Enter username" autocomplete="off" required />
-            </div>
-            
-            <div class="form-group">
-              <label><i class="fas fa-lock"></i> Password</label>
-              <input type="password" id="password" placeholder="Enter password" required />
-            </div>
-            
-            <div id="loginError" class="login-error" style="display: none;"></div>
-            
-            <button type="submit" class="login-btn">
-              <i class="fas fa-sign-in-alt"></i> Authenticate
-            </button>
-          </form>
-          
-          <div class="security-badge">
-            <i class="fas fa-shield"></i>
-            <span>256-bit Encrypted • Session Protected</span>
+          <div class="form-group" id="passwordGroup">
+            <label><i class="fas fa-lock"></i> Password</label>
+            <input type="password" id="password" placeholder="••••••••" required />
           </div>
+          <div class="form-group" id="confirmPasswordGroup" style="display:none;">
+            <label><i class="fas fa-check"></i> Confirm Password</label>
+            <input type="password" id="confirmPassword" placeholder="••••••••" />
+          </div>
+          <div id="authError" class="login-error" style="display: none;"></div>
+          <div id="authSuccess" class="login-success" style="display: none;"></div>
+          <button type="submit" class="login-btn" id="authSubmitBtn">
+            <i class="fas fa-sign-in-alt"></i> <span>Login</span>
+          </button>
+        </form>
+        
+        <div class="security-badge">
+          <i class="fas fa-shield"></i>
+          <span>Firebase Secured • End-to-End Encrypted</span>
         </div>
       </div>
-    `;
+    </div>
+  `;
 
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const username = document.getElementById('username').value;
-      const password = document.getElementById('password').value;
-      const errorDiv = document.getElementById('loginError');
+  const tabs = document.querySelectorAll('.auth-tab');
+  const form = document.getElementById('authForm');
+  const submitBtn = document.getElementById('authSubmitBtn');
+  const submitSpan = submitBtn.querySelector('span');
+  const passwordGroup = document.getElementById('passwordGroup');
+  const confirmGroup = document.getElementById('confirmPasswordGroup');
+  const errorDiv = document.getElementById('authError');
+  const successDiv = document.getElementById('authSuccess');
+  let mode = 'login';
 
-      try {
-        await this.login(username, password);
-        location.reload();
-      } catch (error) {
-        errorDiv.textContent = error.message;
-        errorDiv.style.display = 'block';
-        
-        // Shake effect
-        document.querySelector('.login-box').classList.add('shake');
-        setTimeout(() => {
-          document.querySelector('.login-box').classList.remove('shake');
-        }, 500);
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      mode = tab.dataset.tab;
+      
+      errorDiv.style.display = 'none';
+      successDiv.style.display = 'none';
+      
+      if (mode === 'signup') {
+        passwordGroup.style.display = 'block';
+        confirmGroup.style.display = 'block';
+        submitSpan.textContent = 'Sign Up';
+        submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> <span>Sign Up</span>';
+      } else if (mode === 'reset') {
+        passwordGroup.style.display = 'none';
+        confirmGroup.style.display = 'none';
+        submitSpan.textContent = 'Send Reset Email';
+        submitBtn.innerHTML = '<i class="fas fa-envelope"></i> <span>Send Reset Email</span>';
+      } else {
+        passwordGroup.style.display = 'block';
+        confirmGroup.style.display = 'none';
+        submitSpan.textContent = 'Login';
+        submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> <span>Login</span>';
       }
     });
-  }
+  });
 
-  showAdminPanel() {
-    // Admin panel is already in the HTML, just remove any overlay
-    const existingOverlay = document.querySelector('.login-overlay');
-    if (existingOverlay) existingOverlay.remove();
-  }
-
-  logout() {
-    localStorage.removeItem(this.sessionKey);
-    this.logSecurityEvent('logout', 'session_ended');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password')?.value;
     
-    if (window.location.pathname.includes('admin.html')) {
-      location.reload();
+    errorDiv.style.display = 'none';
+    successDiv.style.display = 'none';
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Processing...</span>';
+
+    try {
+      if (mode === 'signup') {
+        const confirm = document.getElementById('confirmPassword').value;
+        if (password !== confirm) throw new Error('Passwords do not match');
+        if (password.length < 6) throw new Error('Password must be at least 6 characters');
+        
+        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+        successDiv.textContent = 'Account created successfully! Redirecting...';
+        successDiv.style.display = 'block';
+        setTimeout(() => location.reload(), 1500);
+        
+      } else if (mode === 'reset') {
+        await auth.sendPasswordResetEmail(email);
+        successDiv.textContent = 'Password reset email sent! Check your inbox.';
+        successDiv.style.display = 'block';
+        submitBtn.disabled = false;
+        if (mode === 'reset') {
+          submitBtn.innerHTML = '<i class="fas fa-envelope"></i> <span>Send Reset Email</span>';
+        }
+        
+      } else {
+        await auth.signInWithEmailAndPassword(email, password);
+        // Success - page will reload via onAuthStateChanged
+      }
+    } catch (error) {
+      errorDiv.textContent = getReadableError(error);
+      errorDiv.style.display = 'block';
+      submitBtn.disabled = false;
+      
+      if (mode === 'login') {
+        submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> <span>Login</span>';
+      } else if (mode === 'signup') {
+        submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> <span>Sign Up</span>';
+      } else {
+        submitBtn.innerHTML = '<i class="fas fa-envelope"></i> <span>Send Reset Email</span>';
+      }
+    }
+  });
+}
+
+function getReadableError(error) {
+  const messages = {
+    'auth/invalid-email': 'Invalid email address.',
+    'auth/user-disabled': 'This account has been disabled.',
+    'auth/user-not-found': 'No account found with this email.',
+    'auth/wrong-password': 'Incorrect password.',
+    'auth/email-already-in-use': 'Email is already registered.',
+    'auth/weak-password': 'Password should be at least 6 characters.',
+    'auth/network-request-failed': 'Network error. Check your connection.',
+    'auth/too-many-requests': 'Too many attempts. Try again later.'
+  };
+  return messages[error.code] || error.message;
+}
+
+// Logout function
+window.logout = function() {
+  if (confirm('Are you sure you want to logout?')) {
+    auth.signOut().then(() => {
+      window.location.reload();
+    });
+  }
+};
+
+// Password reset
+window.sendPasswordReset = async function() {
+  const user = auth.currentUser;
+  if (user) {
+    try {
+      await auth.sendPasswordResetEmail(user.email);
+      alert('Password reset email sent to ' + user.email);
+    } catch (error) {
+      alert('Error: ' + error.message);
     }
   }
+};
 
-  logSecurityEvent(event, details) {
-    const securityLog = JSON.parse(localStorage.getItem('flm_security_log') || '[]');
-    securityLog.push({
-      event,
-      details,
-      timestamp: new Date().toISOString(),
-      ip: 'client-side', // Would need server for real IP
-      userAgent: navigator.userAgent.substring(0, 100)
-    });
-    
-    // Keep last 100 events
-    if (securityLog.length > 100) securityLog.shift();
-    localStorage.setItem('flm_security_log', JSON.stringify(securityLog));
+// Delete account
+window.deleteAccount = async function() {
+  if (!confirm('WARNING: This will permanently delete your account and all associated data. Are you sure?')) return;
+  if (!confirm('Last chance! This action CANNOT be undone.')) return;
+  
+  const user = auth.currentUser;
+  if (user) {
+    try {
+      // Delete user data from Firestore first
+      const userApps = await db.collection('apks').where('createdBy', '==', user.uid).get();
+      const batch = db.batch();
+      userApps.forEach(doc => batch.delete(doc.ref));
+      await batch.commit();
+      
+      // Delete user account
+      await user.delete();
+      alert('Account deleted successfully.');
+      window.location.reload();
+    } catch (error) {
+      alert('Error: ' + error.message + '\nYou may need to re-login first.');
+      auth.signOut();
+    }
   }
-
-  getSecurityLog() {
-    return JSON.parse(localStorage.getItem('flm_security_log') || '[]');
-  }
-}
-
-// Initialize auth
-const auth = new AuthManager();
-
-// Global logout function
-function logout() {
-  if (confirm('Are you sure you want to logout?')) {
-    auth.logout();
-  }
-}
+};
