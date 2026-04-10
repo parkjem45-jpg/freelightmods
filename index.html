@@ -27,6 +27,9 @@
     <i class="fas fa-moon"></i>
   </button>
 
+  <!-- Hidden Admin Access (Press 'A' 5 times to reveal) -->
+  <div id="secretAdminTrigger" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999;"></div>
+
   <!-- Header / Navigation -->
   <header class="header">
     <div class="container nav-container">
@@ -39,7 +42,8 @@
         <a href="#apps">Apps</a>
         <a href="#games">Games</a>
         <a href="#request">Request</a>
-        <a href="admin.html"><i class="fas fa-lock"></i> Admin</a>
+        <!-- Admin link HIDDEN - only visible to logged-in admins -->
+        <a href="admin.html" id="adminLink" style="display: none;"><i class="fas fa-lock"></i> Admin</a>
       </nav>
       <button class="mobile-menu-toggle" aria-label="Menu">
         <i class="fas fa-bars"></i>
@@ -95,7 +99,10 @@
       </div>
       
       <div class="app-grid" id="appGrid">
-        <!-- Cards will be injected via JavaScript -->
+        <div class="loading-state">
+          <i class="fas fa-spinner fa-spin"></i>
+          <p>Loading mods...</p>
+        </div>
       </div>
     </div>
   </section>
@@ -165,24 +172,24 @@
     </div>
   </footer>
 
-  <!-- AI Assistant Widget -->
+  <!-- Real AI Assistant Widget -->
   <div class="ai-assistant" id="aiAssistant">
     <button class="ai-toggle" id="aiToggle">
       <i class="fas fa-robot"></i>
     </button>
     <div class="ai-chat-window" id="aiChatWindow" style="display: none;">
       <div class="ai-header">
-        <span><i class="fas fa-robot"></i> AI Assistant</span>
+        <span><i class="fas fa-robot"></i> AI Assistant (Gemini)</span>
         <button class="ai-close" id="aiClose">×</button>
       </div>
       <div class="ai-messages" id="aiMessages">
         <div class="ai-message bot">
           <i class="fas fa-robot"></i>
-          <div>Hello! I'm here to help with any website issues. What's wrong?</div>
+          <div>Hello! I'm a real AI assistant powered by Google Gemini. How can I help you today?</div>
         </div>
       </div>
       <div class="ai-input-area">
-        <input type="text" id="aiInput" placeholder="Describe your issue..." />
+        <input type="text" id="aiInput" placeholder="Ask me anything..." />
         <button id="aiSend"><i class="fas fa-paper-plane"></i></button>
       </div>
     </div>

@@ -39,9 +39,6 @@
         <a href="#" class="nav-item" data-tab="add">
           <i class="fas fa-plus-circle"></i> Add New
         </a>
-        <a href="#" class="nav-item" data-tab="ai">
-          <i class="fas fa-robot"></i> AI Diagnostics
-        </a>
         <a href="#" class="nav-item" data-tab="settings">
           <i class="fas fa-cog"></i> Settings
         </a>
@@ -55,7 +52,11 @@
           <i class="fas fa-arrow-left"></i> Back to Site
         </a>
         <div class="user-info" id="userInfo">
-          <!-- Will show logged in user -->
+          <div class="user-avatar"><i class="fas fa-user"></i></div>
+          <div class="user-details">
+            <span class="user-email">Loading...</span>
+            <span class="user-role">Admin</span>
+          </div>
         </div>
       </div>
     </aside>
@@ -69,39 +70,7 @@
           <p class="text-secondary">Overview of your APK repository</p>
         </div>
         
-        <!-- Realtime Stats -->
-        <div class="stats-grid realtime-stats">
-          <div class="stat-card highlight">
-            <i class="fas fa-users"></i>
-            <div>
-              <span class="stat-value" id="activeUsers">0</span>
-              <span class="stat-label">Active Users Now</span>
-            </div>
-          </div>
-          <div class="stat-card">
-            <i class="fas fa-eye"></i>
-            <div>
-              <span class="stat-value" id="viewsToday">0</span>
-              <span class="stat-label">Views Today</span>
-            </div>
-          </div>
-          <div class="stat-card">
-            <i class="fas fa-chart-bar"></i>
-            <div>
-              <span class="stat-value" id="totalViews">0</span>
-              <span class="stat-label">Total Views</span>
-            </div>
-          </div>
-          <div class="stat-card">
-            <i class="fas fa-clock"></i>
-            <div>
-              <span class="stat-value" id="avgTimeOnSite">0s</span>
-              <span class="stat-label">Avg. Time</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- APK Stats -->
+        <!-- Stats -->
         <div class="stats-grid">
           <div class="stat-card">
             <i class="fas fa-database"></i>
@@ -133,22 +102,6 @@
           </div>
         </div>
 
-        <!-- Recent Activity -->
-        <div class="card">
-          <div class="card-header">
-            <h2>Recent Activity</h2>
-            <button class="btn-icon" onclick="clearActivityLog()">
-              <i class="fas fa-trash"></i>
-            </button>
-          </div>
-          <div class="activity-list" id="activityList">
-            <div class="activity-item">
-              <span class="activity-time">--:--</span>
-              <span>Loading activities...</span>
-            </div>
-          </div>
-        </div>
-
         <!-- Quick Actions -->
         <div class="card">
           <div class="card-header">
@@ -161,11 +114,8 @@
             <button class="action-btn" onclick="exportData()">
               <i class="fas fa-download"></i> Export Data
             </button>
-            <button class="action-btn" onclick="runFullDiagnostics()">
-              <i class="fas fa-stethoscope"></i> Run Diagnostics
-            </button>
-            <button class="action-btn" onclick="syncWithFirestore()">
-              <i class="fas fa-sync"></i> Sync Now
+            <button class="action-btn" onclick="location.reload()">
+              <i class="fas fa-sync"></i> Refresh
             </button>
           </div>
         </div>
@@ -175,7 +125,7 @@
       <div class="tab-content" id="apps">
         <div class="page-header">
           <h1>Manage APKs</h1>
-          <p class="text-secondary">Edit, delete, or update your modded applications</p>
+          <p class="text-secondary">Edit or delete your modded applications</p>
         </div>
         
         <div class="search-bar">
@@ -196,11 +146,7 @@
               </tr>
             </thead>
             <tbody id="appsTableBody">
-              <tr>
-                <td colspan="6" style="text-align: center; padding: 40px;">
-                  <i class="fas fa-spinner fa-spin"></i> Loading...
-                </td>
-              </tr>
+              <tr><td colspan="6" style="text-align:center;padding:40px;">Loading...</td></tr>
             </tbody>
           </table>
         </div>
@@ -212,7 +158,7 @@
       <div class="tab-content" id="add">
         <div class="page-header">
           <h1>Add New APK</h1>
-          <p class="text-secondary">Upload a new modded application to your repository</p>
+          <p class="text-secondary">Upload a new modded application</p>
         </div>
 
         <div class="card form-card">
@@ -235,14 +181,12 @@
 
             <div class="form-group">
               <label>Font Awesome Icon Class</label>
-              <input type="text" id="appIcon" placeholder="fab fa-spotify" />
-              <small>Find icons at <a href="https://fontawesome.com/icons" target="_blank">Font Awesome</a></small>
+              <input type="text" id="appIcon" placeholder="fab fa-spotify" value="fas fa-mobile-alt" />
             </div>
 
             <div class="form-group">
-              <label>Custom Image URL</label>
+              <label>Custom Image URL (Optional)</label>
               <input type="url" id="appImage" placeholder="https://example.com/icon.png" />
-              <small>Optional: Direct link to app icon image (recommended: 512x512 PNG)</small>
             </div>
 
             <div class="form-group">
@@ -253,139 +197,26 @@
             <div class="form-group">
               <label>Download Link *</label>
               <input type="url" id="appLink" required placeholder="https://github.com/.../app.apk" />
-              <small>Direct download link to APK file</small>
-            </div>
-
-            <div class="form-row">
-              <div class="form-group">
-                <label>Category</label>
-                <select id="appCategory">
-                  <option value="app">App</option>
-                  <option value="game">Game</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Featured</label>
-                <select id="appFeatured">
-                  <option value="false">No</option>
-                  <option value="true">Yes</option>
-                </select>
-              </div>
             </div>
 
             <div class="form-group">
-              <label>Description (Optional)</label>
-              <textarea id="appDescription" rows="3" placeholder="Brief description of the mod..."></textarea>
+              <label>Category</label>
+              <select id="appCategory">
+                <option value="app">App</option>
+                <option value="game">Game</option>
+              </select>
             </div>
 
             <div class="form-actions">
               <button type="submit" class="btn-primary">
                 <i class="fas fa-plus"></i> Add APK
               </button>
-              <button type="button" class="btn-secondary" onclick="previewApk()">
-                <i class="fas fa-eye"></i> Preview
-              </button>
               <button type="reset" class="btn-secondary">
                 <i class="fas fa-undo"></i> Reset
               </button>
             </div>
           </form>
-        </div>
-
-        <div class="card preview-card" id="previewCard" style="display: none;">
-          <div class="card-header">
-            <h2>Preview</h2>
-            <button class="btn-icon" onclick="document.getElementById('previewCard').style.display='none'">
-              <i class="fas fa-times"></i>
-            </button>
-          </div>
-          <div id="apkPreview"></div>
-        </div>
-      </div>
-
-      <!-- AI Diagnostics Tab -->
-      <div class="tab-content" id="ai">
-        <div class="page-header">
-          <h1><i class="fas fa-robot"></i> AI Diagnostics & Auto-Fix</h1>
-          <p class="text-secondary">Let AI analyze and fix website issues automatically</p>
-        </div>
-
-        <div class="diagnostics-panel">
-          <div class="card">
-            <div class="card-header">
-              <h2>System Health</h2>
-              <button class="btn-icon" onclick="runHealthCheck()">
-                <i class="fas fa-sync"></i>
-              </button>
-            </div>
-            <div class="health-status" id="healthStatus">
-              <div class="status-item">
-                <span>Firestore Connection</span>
-                <span class="status-badge" id="firestoreStatus">Checking...</span>
-              </div>
-              <div class="status-item">
-                <span>Authentication</span>
-                <span class="status-badge" id="authStatus">Checking...</span>
-              </div>
-              <div class="status-item">
-                <span>Data Count</span>
-                <span class="status-badge" id="dataCountStatus">Checking...</span>
-              </div>
-              <div class="status-item">
-                <span>Storage Usage</span>
-                <span class="status-badge" id="storageUsageStatus">Checking...</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-header">
-              <h2>AI Console</h2>
-            </div>
-            <div class="ai-console" id="aiConsole">
-              <div class="console-message bot">
-                <i class="fas fa-robot"></i>
-                <span>AI Assistant ready. Click "Run Full Diagnostics" to start.</span>
-              </div>
-            </div>
-            <div class="console-actions">
-              <button class="btn-primary" onclick="runFullDiagnostics()">
-                <i class="fas fa-play"></i> Run Full Diagnostics
-              </button>
-              <button class="btn-secondary" onclick="autoFixAll()">
-                <i class="fas fa-wrench"></i> Auto-Fix Issues
-              </button>
-              <button class="btn-secondary" onclick="clearConsole()">
-                <i class="fas fa-trash"></i> Clear Console
-              </button>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-header">
-              <h2>Quick Fixes</h2>
-            </div>
-            <div class="quick-fixes">
-              <button onclick="fixMissingIcons()">
-                <i class="fas fa-icons"></i> Fix Missing Icons
-              </button>
-              <button onclick="validateAllLinks()">
-                <i class="fas fa-link"></i> Validate Links
-              </button>
-              <button onclick="recalculateDownloads()">
-                <i class="fas fa-chart-line"></i> Recalculate Stats
-              </button>
-              <button onclick="backupData()">
-                <i class="fas fa-save"></i> Create Backup
-              </button>
-              <button onclick="cleanupDuplicateApps()">
-                <i class="fas fa-broom"></i> Remove Duplicates
-              </button>
-              <button onclick="optimizeImageUrls()">
-                <i class="fas fa-image"></i> Optimize Images
-              </button>
-            </div>
-          </div>
+          <div id="formMessage" style="margin-top: 16px; display: none;"></div>
         </div>
       </div>
 
@@ -393,61 +224,20 @@
       <div class="tab-content" id="settings">
         <div class="page-header">
           <h1>Settings</h1>
-          <p class="text-secondary">Configure your admin panel preferences</p>
+          <p class="text-secondary">Configure your admin preferences</p>
         </div>
 
         <div class="card">
           <div class="card-header">
-            <h2>Account Settings</h2>
+            <h2>Account</h2>
           </div>
           <div class="settings-form">
             <div class="form-group">
               <label>Email</label>
               <input type="email" id="accountEmail" disabled />
             </div>
-            <div class="form-group">
-              <label>Account Created</label>
-              <input type="text" id="accountCreated" disabled />
-            </div>
-            <button class="btn-secondary" onclick="sendPasswordReset()">
-              <i class="fas fa-envelope"></i> Send Password Reset
-            </button>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-header">
-            <h2>General Settings</h2>
-          </div>
-          <div class="settings-form">
-            <div class="form-group">
-              <label>Site Name</label>
-              <input type="text" id="siteName" value="Free Lite Mods" />
-            </div>
-            <div class="form-group">
-              <label>Items Per Page</label>
-              <select id="itemsPerPage">
-                <option value="10">10</option>
-                <option value="20" selected>20</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Default Theme</label>
-              <select id="defaultTheme">
-                <option value="dark">Dark</option>
-                <option value="light">Light</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>
-                <input type="checkbox" id="autoSync" checked />
-                Auto-sync with Firestore
-              </label>
-            </div>
-            <button class="btn-primary" onclick="saveSettings()">
-              <i class="fas fa-save"></i> Save Settings
+            <button class="btn-secondary" onclick="logout()">
+              <i class="fas fa-sign-out-alt"></i> Logout
             </button>
           </div>
         </div>
@@ -457,14 +247,8 @@
             <h2>Danger Zone</h2>
           </div>
           <div class="danger-actions">
-            <button class="btn-danger" onclick="resetAllData()">
-              <i class="fas fa-exclamation-triangle"></i> Reset All Data
-            </button>
             <button class="btn-danger" onclick="clearAllCache()">
               <i class="fas fa-trash"></i> Clear Cache
-            </button>
-            <button class="btn-danger" onclick="deleteAccount()">
-              <i class="fas fa-user-slash"></i> Delete Account
             </button>
           </div>
         </div>
@@ -512,25 +296,12 @@
             <label>Download Link</label>
             <input type="url" id="editLink" required />
           </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Category</label>
-              <select id="editCategory">
-                <option value="app">App</option>
-                <option value="game">Game</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Featured</label>
-              <select id="editFeatured">
-                <option value="false">No</option>
-                <option value="true">Yes</option>
-              </select>
-            </div>
-          </div>
           <div class="form-group">
-            <label>Description</label>
-            <textarea id="editDescription" rows="3"></textarea>
+            <label>Category</label>
+            <select id="editCategory">
+              <option value="app">App</option>
+              <option value="game">Game</option>
+            </select>
           </div>
         </form>
       </div>
@@ -543,8 +314,6 @@
 
   <!-- Scripts -->
   <script src="firebase.js"></script>
-  <script src="admin-auth.js"></script>
-  <script src="tracker.js"></script>
   <script src="admin.js"></script>
 </body>
 </html>
