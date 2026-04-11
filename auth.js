@@ -23,35 +23,34 @@ if (themeToggle) {
 }
 
 // Check auth state
-auth.onAuthStateChanged(async (user) => {
-  if (window.location.pathname.includes('admin.html')) {
-    if (user) {
-      // Update user info in sidebar
-      const userInfo = document.getElementById('userInfo');
-      if (userInfo) {
-        userInfo.innerHTML = `
-          <div class="user-avatar">
-            <i class="fas fa-user-circle"></i>
-          </div>
-          <div class="user-details">
-            <span class="user-email">${user.email}</span>
-            <span class="user-role">Administrator</span>
-          </div>
-        `;
+if (typeof auth !== 'undefined') {
+  auth.onAuthStateChanged(async (user) => {
+    if (window.location.pathname.includes('admin.html')) {
+      if (user) {
+        const userInfo = document.getElementById('userInfo');
+        if (userInfo) {
+          userInfo.innerHTML = `
+            <div class="user-avatar">
+              <i class="fas fa-user-circle"></i>
+            </div>
+            <div class="user-details">
+              <span class="user-email">${user.email}</span>
+              <span class="user-role">Administrator</span>
+            </div>
+          `;
+        }
+        
+        document.body.classList.add('authenticated');
+        
+        if (typeof initAdminPanel === 'function') {
+          initAdminPanel(user);
+        }
+      } else {
+        showAuthUI();
       }
-      
-      document.body.classList.add('authenticated');
-      
-      // Initialize admin panel
-      if (typeof initAdminPanel === 'function') {
-        initAdminPanel(user);
-      }
-    } else {
-      // Show login/signup form
-      showAuthUI();
     }
-  }
-});
+  });
+}
 
 function showAuthUI() {
   document.body.innerHTML = `
@@ -91,12 +90,18 @@ function showAuthUI() {
         
         <div class="security-badge">
           <i class="fas fa-shield"></i>
-          <span>Firebase Secured • End-to-End Encrypted</span>
+          <span>Firebase Secured</span>
+        </div>
+        <div style="margin-top: 16px; text-align: center;">
+          <a href="index.html" style="color: var(--text-secondary);">
+            <i class="fas fa-arrow-left"></i> Back to Site
+          </a>
         </div>
       </div>
     </div>
   `;
 
+  let mode = 'login';
   const tabs = document.querySelectorAll('.auth-tab');
   const form = document.getElementById('authForm');
   const submitBtn = document.getElementById('authSubmitBtn');
@@ -105,7 +110,6 @@ function showAuthUI() {
   const confirmGroup = document.getElementById('confirmPasswordGroup');
   const errorDiv = document.getElementById('authError');
   const successDiv = document.getElementById('authSuccess');
-  let mode = 'login';
 
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
@@ -137,7 +141,7 @@ function showAuthUI() {
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const email = document.getElementById('email').value;
+    const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password')?.value;
     
     errorDiv.style.display = 'none';
@@ -151,23 +155,20 @@ function showAuthUI() {
         if (password !== confirm) throw new Error('Passwords do not match');
         if (password.length < 6) throw new Error('Password must be at least 6 characters');
         
-        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-        successDiv.textContent = 'Account created successfully! Redirecting...';
+        await auth.createUserWithEmailAndPassword(email, password);
+        successDiv.textContent = 'Account created! Redirecting...';
         successDiv.style.display = 'block';
         setTimeout(() => location.reload(), 1500);
         
       } else if (mode === 'reset') {
         await auth.sendPasswordResetEmail(email);
-        successDiv.textContent = 'Password reset email sent! Check your inbox.';
+        successDiv.textContent = 'Password reset email sent!';
         successDiv.style.display = 'block';
         submitBtn.disabled = false;
-        if (mode === 'reset') {
-          submitBtn.innerHTML = '<i class="fas fa-envelope"></i> <span>Send Reset Email</span>';
-        }
+        submitBtn.innerHTML = '<i class="fas fa-envelope"></i> <span>Send Reset Email</span>';
         
       } else {
         await auth.signInWithEmailAndPassword(email, password);
-        // Success - page will reload via onAuthStateChanged
       }
     } catch (error) {
       errorDiv.textContent = getReadableError(error);
@@ -217,31 +218,6 @@ window.sendPasswordReset = async function() {
       alert('Password reset email sent to ' + user.email);
     } catch (error) {
       alert('Error: ' + error.message);
-    }
-  }
-};
-
-// Delete account
-window.deleteAccount = async function() {
-  if (!confirm('WARNING: This will permanently delete your account and all associated data. Are you sure?')) return;
-  if (!confirm('Last chance! This action CANNOT be undone.')) return;
-  
-  const user = auth.currentUser;
-  if (user) {
-    try {
-      // Delete user data from Firestore first
-      const userApps = await db.collection('apks').where('createdBy', '==', user.uid).get();
-      const batch = db.batch();
-      userApps.forEach(doc => batch.delete(doc.ref));
-      await batch.commit();
-      
-      // Delete user account
-      await user.delete();
-      alert('Account deleted successfully.');
-      window.location.reload();
-    } catch (error) {
-      alert('Error: ' + error.message + '\nYou may need to re-login first.');
-      auth.signOut();
     }
   }
 };

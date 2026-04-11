@@ -31,26 +31,38 @@ if (themeToggle) {
 auth.onAuthStateChanged(async (user) => {
   if (user) {
     // Check if user is admin
-    const adminDoc = await db.collection('admins').doc(user.uid).get();
-    const isDefaultAdmin = user.email === 'jack1122@freelightmods.com';
-    
-    if (adminDoc.exists || isDefaultAdmin) {
-      currentUser = user;
-      document.body.classList.add('authenticated');
+    try {
+      const adminDoc = await db.collection('admins').doc(user.uid).get();
+      const isDefaultAdmin = user.email === 'jack1122@freelightmods.com';
       
-      // Update user info
-      const userEmail = document.querySelector('.user-email');
-      if (userEmail) userEmail.textContent = user.email;
-      
-      const accountEmail = document.getElementById('accountEmail');
-      if (accountEmail) accountEmail.value = user.email;
-      
-      // Initialize admin panel
-      initAdminPanel();
-    } else {
-      // Not an admin
-      alert('Access denied. Admin privileges required.');
-      auth.signOut();
+      if (adminDoc.exists || isDefaultAdmin) {
+        currentUser = user;
+        document.body.classList.add('authenticated');
+        
+        // Update user info
+        const userEmail = document.querySelector('.user-email');
+        if (userEmail) userEmail.textContent = user.email;
+        
+        const accountEmail = document.getElementById('accountEmail');
+        if (accountEmail) accountEmail.value = user.email;
+        
+        // Initialize admin panel
+        initAdminPanel();
+      } else {
+        // Not an admin
+        alert('Access denied. Admin privileges required.');
+        auth.signOut();
+      }
+    } catch (error) {
+      console.error('Auth error:', error);
+      // Fallback for default admin
+      if (user.email === 'jack1122@freelightmods.com') {
+        currentUser = user;
+        initAdminPanel();
+      } else {
+        alert('Error checking admin status. Please try again.');
+        auth.signOut();
+      }
     }
   } else {
     // Show login page
@@ -63,6 +75,16 @@ function initAdminPanel() {
   setupTabs();
   setupForm();
   setupSearch();
+  setupModalClose();
+}
+
+function setupModalClose() {
+  const modal = document.getElementById('editModal');
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+  }
 }
 
 function setupRealtimeListener() {
@@ -132,7 +154,12 @@ function showLoginPage() {
         
         <div class="security-badge">
           <i class="fas fa-shield"></i>
-          <span>Default Admin: jack1122@freelightmods.com / Jack6767@@</span>
+          <span>Default Admin: jack1122@freelightmods.com</span>
+        </div>
+        <div style="margin-top: 16px; text-align: center;">
+          <a href="index.html" style="color: var(--text-secondary);">
+            <i class="fas fa-arrow-left"></i> Back to Site
+          </a>
         </div>
       </div>
     </div>
@@ -164,7 +191,7 @@ function showLoginPage() {
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const email = document.getElementById('email').value;
+    const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
     
     errorDiv.style.display = 'none';
@@ -189,14 +216,18 @@ function showLoginPage() {
         successDiv.style.display = 'block';
         
         // Switch to login tab
-        document.querySelector('[data-tab="login"]').click();
+        setTimeout(() => {
+          document.querySelector('[data-tab="login"]').click();
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> <span>Login</span>';
+        }, 1500);
       } else {
         await auth.signInWithEmailAndPassword(email, password);
+        // Page will reload via auth state observer
       }
     } catch (error) {
-      errorDiv.textContent = error.message;
+      errorDiv.textContent = getReadableError(error);
       errorDiv.style.display = 'block';
-    } finally {
       submitBtn.disabled = false;
       if (mode === 'signup') {
         submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> <span>Create Account</span>';
@@ -205,6 +236,19 @@ function showLoginPage() {
       }
     }
   });
+}
+
+function getReadableError(error) {
+  const messages = {
+    'auth/invalid-email': 'Invalid email address.',
+    'auth/user-not-found': 'No account found with this email.',
+    'auth/wrong-password': 'Incorrect password.',
+    'auth/email-already-in-use': 'Email is already registered.',
+    'auth/weak-password': 'Password should be at least 6 characters.',
+    'auth/network-request-failed': 'Network error. Check your connection.',
+    'auth/too-many-requests': 'Too many attempts. Try again later.'
+  };
+  return messages[error.code] || error.message;
 }
 
 // Tab Management
@@ -221,8 +265,11 @@ function switchTab(tabId) {
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   
-  document.getElementById(tabId).classList.add('active');
-  document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+  const targetTab = document.getElementById(tabId);
+  const targetNav = document.querySelector(`[data-tab="${tabId}"]`);
+  
+  if (targetTab) targetTab.classList.add('active');
+  if (targetNav) targetNav.classList.add('active');
   
   if (tabId === 'apps') renderAppsTable();
 }
@@ -330,13 +377,14 @@ function setupForm() {
         category: document.getElementById('appCategory').value,
         downloads: 0,
         dateAdded: firebase.firestore.FieldValue.serverTimestamp(),
-        addedBy: currentUser.email
+        addedBy: currentUser ? currentUser.email : 'unknown'
       };
       
       await db.collection('apks').add(newApp);
       
       showMessage('✅ APK added successfully!', 'success');
       form.reset();
+      document.getElementById('appIcon').value = 'fas fa-mobile-alt';
       
       // Switch to apps tab
       setTimeout(() => switchTab('apps'), 1000);
@@ -390,6 +438,10 @@ async function saveEdit() {
   const id = document.getElementById('editId').value;
   if (!id) return;
   
+  const saveBtn = document.querySelector('#editModal .btn-primary');
+  saveBtn.disabled = true;
+  saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+  
   try {
     await db.collection('apks').doc(id).update({
       name: document.getElementById('editName').value.trim(),
@@ -407,6 +459,9 @@ async function saveEdit() {
     showMessage('✅ APK updated successfully!', 'success');
   } catch (error) {
     alert('Error: ' + error.message);
+  } finally {
+    saveBtn.disabled = false;
+    saveBtn.innerHTML = 'Save Changes';
   }
 }
 
@@ -423,12 +478,17 @@ async function deleteApp(id) {
 
 // Stats
 function updateStats() {
-  document.getElementById('totalApps').textContent = appsData.length;
-  document.getElementById('totalDownloads').textContent = formatNumber(
+  const totalAppsEl = document.getElementById('totalApps');
+  const totalDownloadsEl = document.getElementById('totalDownloads');
+  const gamesCountEl = document.getElementById('gamesCount');
+  const appsCountEl = document.getElementById('appsCount');
+  
+  if (totalAppsEl) totalAppsEl.textContent = appsData.length;
+  if (totalDownloadsEl) totalDownloadsEl.textContent = formatNumber(
     appsData.reduce((sum, app) => sum + (app.downloads || 0), 0)
   );
-  document.getElementById('gamesCount').textContent = appsData.filter(a => a.category === 'game').length;
-  document.getElementById('appsCount').textContent = appsData.filter(a => a.category === 'app').length;
+  if (gamesCountEl) gamesCountEl.textContent = appsData.filter(a => a.category === 'game').length;
+  if (appsCountEl) appsCountEl.textContent = appsData.filter(a => a.category === 'app').length;
 }
 
 function formatNumber(num) {
@@ -447,16 +507,21 @@ function exportData() {
   a.href = url;
   a.download = `flm-backup-${Date.now()}.json`;
   a.click();
+  URL.revokeObjectURL(url);
 }
 
 function clearAllCache() {
-  localStorage.clear();
-  location.reload();
+  if (confirm('Clear all cached data?')) {
+    localStorage.clear();
+    location.reload();
+  }
 }
 
 // Logout
 function logout() {
-  auth.signOut().then(() => location.reload());
+  if (confirm('Are you sure you want to logout?')) {
+    auth.signOut().then(() => location.reload());
+  }
 }
 
 // Global functions
