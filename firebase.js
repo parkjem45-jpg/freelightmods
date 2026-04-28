@@ -1,4 +1,6 @@
 // ===== Firebase Configuration & Initialization =====
+// Using Firebase Compat (namespaced) SDK
+
 const firebaseConfig = {
   apiKey: "AIzaSyB0LrQcsXD-prcam7s3O1iEJbIvcPthlgo",
   authDomain: "freelightmods.firebaseapp.com",
@@ -15,7 +17,6 @@ firebase.initializeApp(firebaseConfig);
 // Initialize services
 const auth = firebase.auth();
 const db = firebase.firestore();
-const analytics = firebase.analytics();
 
 // Enable offline persistence
 db.enablePersistence({ synchronizeTabs: true })
@@ -33,18 +34,14 @@ async function ensureAdminAccount() {
   const adminPassword = 'Jack6767@@';
   
   try {
-    // Try to sign in
     await auth.signInWithEmailAndPassword(adminEmail, adminPassword);
     console.log('✅ Admin account exists');
   } catch (error) {
     if (error.code === 'auth/user-not-found') {
-      // Create admin account
       try {
-        await auth.createUserWithEmailAndPassword(adminEmail, adminPassword);
+        const userCredential = await auth.createUserWithEmailAndPassword(adminEmail, adminPassword);
         console.log('✅ Admin account created:', adminEmail);
-        
-        // Add admin document to Firestore
-        const user = auth.currentUser;
+        const user = userCredential.user;
         if (user) {
           await db.collection('admins').doc(user.uid).set({
             email: adminEmail,
@@ -61,13 +58,12 @@ async function ensureAdminAccount() {
   }
 }
 
-// Run admin account check
+// Run admin account check after a short delay
 setTimeout(() => {
   ensureAdminAccount();
 }, 1000);
 
-// Export for global use
-window.db = db;
+// Expose auth and db globally
 window.auth = auth;
-
+window.db = db;
 console.log('🔥 Firebase initialized successfully');

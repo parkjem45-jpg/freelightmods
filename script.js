@@ -1,86 +1,19 @@
-// ===== Configuration =====
+// ===== Main Site Script =====
 let appsData = [];
 let currentUser = null;
 
-// ===== Sample Data =====
+// Sample fallback data
 const sampleData = [
-  {
-    id: '1',
-    name: 'Spotify Premium',
-    icon: 'fab fa-spotify',
-    version: 'v8.9.18',
-    size: '82 MB',
-    mod: 'Unlocked Premium',
-    downloads: 15420,
-    link: '#',
-    category: 'app',
-    image: ''
-  },
-  {
-    id: '2',
-    name: 'YouTube Premium',
-    icon: 'fab fa-youtube',
-    version: 'v18.45.41',
-    size: '134 MB',
-    mod: 'No Ads, Background Play',
-    downloads: 28750,
-    link: '#',
-    category: 'app',
-    image: ''
-  },
-  {
-    id: '3',
-    name: 'Minecraft',
-    icon: 'fas fa-cube',
-    version: 'v1.20.81',
-    size: '720 MB',
-    mod: 'Unlocked All, God Mode',
-    downloads: 35200,
-    link: '#',
-    category: 'game',
-    image: ''
-  },
-  {
-    id: '4',
-    name: 'Instagram Pro',
-    icon: 'fab fa-instagram',
-    version: 'v312.0.0',
-    size: '67 MB',
-    mod: 'Download Media, No Ads',
-    downloads: 19800,
-    link: '#',
-    category: 'app',
-    image: ''
-  },
-  {
-    id: '5',
-    name: 'CapCut Pro',
-    icon: 'fas fa-video',
-    version: 'v11.5.0',
-    size: '210 MB',
-    mod: 'No Watermark, Pro Features',
-    downloads: 22400,
-    link: '#',
-    category: 'app',
-    image: ''
-  },
-  {
-    id: '6',
-    name: 'Netflix Premium',
-    icon: 'fas fa-film',
-    version: 'v8.106.0',
-    size: '98 MB',
-    mod: '4K HDR, All Regions',
-    downloads: 12300,
-    link: '#',
-    category: 'app',
-    image: ''
-  }
+  { id: '1', name: 'Spotify Premium', icon: 'fab fa-spotify', version: 'v8.9.18', size: '82 MB', mod: 'Unlocked Premium', downloads: 15420, link: '#', category: 'app', image: '' },
+  { id: '2', name: 'YouTube Premium', icon: 'fab fa-youtube', version: 'v18.45.41', size: '134 MB', mod: 'No Ads, Background Play', downloads: 28750, link: '#', category: 'app', image: '' },
+  { id: '3', name: 'Minecraft', icon: 'fas fa-cube', version: 'v1.20.81', size: '720 MB', mod: 'Unlocked All, God Mode', downloads: 35200, link: '#', category: 'game', image: '' },
+  { id: '4', name: 'Instagram Pro', icon: 'fab fa-instagram', version: 'v312.0.0', size: '67 MB', mod: 'Download Media, No Ads', downloads: 19800, link: '#', category: 'app', image: '' },
+  { id: '5', name: 'CapCut Pro', icon: 'fas fa-video', version: 'v11.5.0', size: '210 MB', mod: 'No Watermark, Pro Features', downloads: 22400, link: '#', category: 'app', image: '' },
+  { id: '6', name: 'Netflix Premium', icon: 'fas fa-film', version: 'v8.106.0', size: '98 MB', mod: '4K HDR, All Regions', downloads: 12300, link: '#', category: 'app', image: '' }
 ];
 
 // Set current year
-const yearEl = document.getElementById('currentYear');
-if (yearEl) yearEl.textContent = new Date().getFullYear();
+document.getElementById('currentYear')?.textContent = new Date().getFullYear();
 
 // ===== Theme Toggle =====
 const themeToggle = document.getElementById('themeToggle');
@@ -114,7 +47,16 @@ const navLinks = document.getElementById('navLinks');
 if (mobileToggle && navLinks) {
   mobileToggle.addEventListener('click', () => {
     if (navLinks.style.display === 'flex') {
-      navLinks.style.display = 'none';
+      navLinks.style.display = '';
+      navLinks.style.flexDirection = '';
+      navLinks.style.position = '';
+      navLinks.style.top = '';
+      navLinks.style.left = '';
+      navLinks.style.right = '';
+      navLinks.style.background = '';
+      navLinks.style.padding = '';
+      navLinks.style.borderBottom = '';
+      navLinks.style.zIndex = '';
     } else {
       navLinks.style.display = 'flex';
       navLinks.style.flexDirection = 'column';
@@ -129,7 +71,6 @@ if (mobileToggle && navLinks) {
     }
   });
   
-  // Close menu when clicking a link
   navLinks.querySelectorAll('a').forEach(link => {
     link.addEventListener('click', () => {
       if (window.innerWidth <= 768) {
@@ -148,7 +89,6 @@ document.addEventListener('keydown', (e) => {
     aPressCount++;
     clearTimeout(pressTimer);
     pressTimer = setTimeout(() => { aPressCount = 0; }, 2000);
-    
     if (aPressCount >= 5) {
       window.location.href = 'admin.html';
       aPressCount = 0;
@@ -161,7 +101,6 @@ if (typeof auth !== 'undefined') {
   auth.onAuthStateChanged((user) => {
     currentUser = user;
     const adminLink = document.getElementById('adminLink');
-    
     if (user && adminLink) {
       const email = user.email || '';
       if (email === 'jack1122@freelightmods.com') {
@@ -183,32 +122,23 @@ async function loadAppsData() {
     if (typeof db !== 'undefined') {
       const snapshot = await db.collection('apks').orderBy('downloads', 'desc').limit(50).get();
       appsData = [];
-      snapshot.forEach(doc => {
-        appsData.push({ id: doc.id, ...doc.data() });
-      });
+      snapshot.forEach(doc => appsData.push({ id: doc.id, ...doc.data() }));
       localStorage.setItem('apkData', JSON.stringify(appsData));
     } else {
       throw new Error('Firebase not available');
     }
   } catch (error) {
-    console.log('Using cached/sample data');
+    console.log('Using cached/sample data', error);
     const cached = localStorage.getItem('apkData');
-    if (cached) {
-      appsData = JSON.parse(cached);
-    } else {
-      appsData = [...sampleData];
-    }
+    appsData = cached ? JSON.parse(cached) : [...sampleData];
   }
-  
   renderAppGrid();
   updateTotalModsCount();
 }
 
 function updateTotalModsCount() {
-  const countElement = document.getElementById('totalModsCount');
-  if (countElement) {
-    countElement.textContent = appsData.length + '+';
-  }
+  const el = document.getElementById('totalModsCount');
+  if (el) el.textContent = appsData.length + '+';
 }
 
 function formatNumber(num) {
@@ -221,18 +151,13 @@ function formatNumber(num) {
 function renderAppGrid() {
   const grid = document.getElementById('appGrid');
   if (!grid) return;
-  
-  if (appsData.length === 0) {
-    appsData = [...sampleData];
-  }
-  
+  if (appsData.length === 0) appsData = [...sampleData];
   grid.innerHTML = '';
   
   appsData.slice(0, 12).forEach(app => {
     const card = document.createElement('div');
     card.className = 'app-card';
-    
-    const iconHtml = app.image 
+    const iconHtml = app.image
       ? `<img src="${app.image}" alt="${app.name}" onerror="this.innerHTML='<i class=\\'${app.icon || 'fas fa-mobile-alt'}\\'></i>'">`
       : `<i class="${app.icon || 'fas fa-mobile-alt'}"></i>`;
     
@@ -255,36 +180,30 @@ function renderAppGrid() {
     `;
     grid.appendChild(card);
   });
-  
-  // Add click handlers to download buttons
+
+  // Download button handlers
   document.querySelectorAll('.download-btn').forEach(btn => {
     btn.addEventListener('click', async (e) => {
       e.preventDefault();
       e.stopPropagation();
-      
       const link = btn.dataset.appLink;
       const appId = btn.dataset.appId;
       const appName = btn.dataset.appName;
       
-      // Track download if Firebase available
       if (appId && appId !== 'undefined' && typeof db !== 'undefined') {
         try {
           await db.collection('apks').doc(appId).update({
             downloads: firebase.firestore.FieldValue.increment(1)
           });
-          
           await db.collection('analytics').add({
             event: 'download',
             appId: appId,
             appName: appName,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
           });
-        } catch (error) {
-          console.log('Download tracking offline');
-        }
+        } catch (err) { console.log('Download tracking offline'); }
       }
       
-      // Open download link or show coming soon
       if (link && link !== '#') {
         window.open(link, '_blank');
       } else {
@@ -294,7 +213,10 @@ function renderAppGrid() {
   });
 }
 
-// ===== AI Assistant =====
+// ===== AI Assistant with Gemini =====
+const GEMINI_API_KEY = 'AIzaSyCMzK8CkieI8yl9lSWK47VfD1ufDd_A0qg';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+
 const aiToggle = document.getElementById('aiToggle');
 const aiChatWindow = document.getElementById('aiChatWindow');
 const aiClose = document.getElementById('aiClose');
@@ -308,7 +230,6 @@ if (aiToggle) {
     aiToggle.style.display = 'none';
   });
 }
-
 if (aiClose) {
   aiClose.addEventListener('click', () => {
     aiChatWindow.style.display = 'none';
@@ -318,36 +239,24 @@ if (aiClose) {
 
 function addAIMessage(text, sender) {
   if (!aiMessages) return;
-  
-  const messageDiv = document.createElement('div');
-  messageDiv.className = `ai-message ${sender}`;
-  
+  const div = document.createElement('div');
+  div.className = `ai-message ${sender}`;
   if (sender === 'bot') {
-    messageDiv.innerHTML = `
-      <i class="fas fa-robot"></i>
-      <div>${text}</div>
-    `;
+    div.innerHTML = `<i class="fas fa-robot"></i><div>${text.replace(/\n/g, '<br>')}</div>`;
   } else {
-    messageDiv.innerHTML = `<div>${text}</div>`;
+    div.innerHTML = `<div>${text.replace(/\n/g, '<br>')}</div>`;
   }
-  
-  aiMessages.appendChild(messageDiv);
+  aiMessages.appendChild(div);
   aiMessages.scrollTop = aiMessages.scrollHeight;
 }
 
 function showTypingIndicator() {
   if (!aiMessages) return null;
-  
   const id = 'typing-' + Date.now();
   const indicator = document.createElement('div');
   indicator.id = id;
   indicator.className = 'ai-message bot';
-  indicator.innerHTML = `
-    <i class="fas fa-robot"></i>
-    <div class="typing-indicator">
-      <span></span><span></span><span></span>
-    </div>
-  `;
+  indicator.innerHTML = `<i class="fas fa-robot"></i><div class="typing-indicator"><span></span><span></span><span></span></div>`;
   aiMessages.appendChild(indicator);
   aiMessages.scrollTop = aiMessages.scrollHeight;
   return id;
@@ -360,9 +269,32 @@ function removeTypingIndicator(id) {
   }
 }
 
-function getAIResponse(query) {
+async function getGeminiResponse(query) {
+  try {
+    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: `You are a helpful AI assistant for Free Lite Mods, a website offering free modded APKs and games. Keep responses friendly and under 150 words. User question: ${query}`
+          }]
+        }]
+      })
+    });
+    const data = await response.json();
+    if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+      return data.candidates[0].content.parts[0].text;
+    }
+    return fallbackResponse(query);
+  } catch (error) {
+    console.log('Gemini error:', error);
+    return fallbackResponse(query);
+  }
+}
+
+function fallbackResponse(query) {
   const lower = query.toLowerCase();
-  
   if (lower.includes('download')) return 'Click the "Download APK" button on any app card. Make sure to enable "Unknown Sources" in your Android settings.';
   if (lower.includes('install')) return 'After downloading, open the APK file. If blocked, go to Settings > Security > Enable "Unknown Sources".';
   if (lower.includes('safe') || lower.includes('virus')) return 'All mods are scanned with VirusTotal before uploading. We prioritize your safety!';
@@ -374,7 +306,6 @@ function getAIResponse(query) {
   if (lower.includes('youtube')) return 'YouTube Premium mod includes no ads and background play!';
   if (lower.includes('minecraft')) return 'Minecraft mod with unlocked features is available!';
   if (lower.includes('contact')) return 'For support, reach us on Telegram or Discord (links in footer).';
-  
   return "I'm here to help! Ask me about downloading, installing, or finding specific modded apps.";
 }
 
@@ -387,12 +318,14 @@ async function sendAIMessage() {
   aiInput.value = '';
   
   const typingId = showTypingIndicator();
-  
-  setTimeout(() => {
+  try {
+    const response = await getGeminiResponse(message);
     removeTypingIndicator(typingId);
-    const response = getAIResponse(message);
     addAIMessage(response, 'bot');
-  }, 1000);
+  } catch {
+    removeTypingIndicator(typingId);
+    addAIMessage('Sorry, I had a problem. Please try again.', 'bot');
+  }
 }
 
 if (aiSend) aiSend.addEventListener('click', sendAIMessage);
@@ -411,8 +344,30 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
   });
 });
 
-// ===== Initialize =====
+// ===== Button Click Handlers =====
 document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('exploreBtn')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    document.getElementById('apps')?.scrollIntoView({ behavior: 'smooth' });
+  });
+  document.getElementById('howItWorksBtn')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    document.getElementById('how')?.scrollIntoView({ behavior: 'smooth' });
+  });
+  document.getElementById('viewAllBtn')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    alert('All mods page coming soon!');
+  });
+  document.getElementById('telegramLink')?.addEventListener('click', (e) => { e.preventDefault(); alert('Join our Telegram channel!'); });
+  document.getElementById('discordLink')?.addEventListener('click', (e) => { e.preventDefault(); alert('Join our Discord server!'); });
+  document.getElementById('githubLink')?.addEventListener('click', (e) => { e.preventDefault(); alert('Check out our GitHub!'); });
+  document.getElementById('footerHome')?.addEventListener('click', (e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
+  document.getElementById('footerApps')?.addEventListener('click', (e) => { e.preventDefault(); document.getElementById('apps')?.scrollIntoView({ behavior: 'smooth' }); });
+  document.getElementById('footerFaq')?.addEventListener('click', (e) => { e.preventDefault(); alert('FAQ page coming soon!'); });
+  document.getElementById('footerContact')?.addEventListener('click', (e) => { e.preventDefault(); alert('Contact page coming soon!'); });
+  document.getElementById('footerDmca')?.addEventListener('click', (e) => { e.preventDefault(); alert('DMCA page coming soon!'); });
+  document.getElementById('footerPrivacy')?.addEventListener('click', (e) => { e.preventDefault(); alert('Privacy policy coming soon!'); });
+  
   loadAppsData();
   setInterval(loadAppsData, 60000);
 });
