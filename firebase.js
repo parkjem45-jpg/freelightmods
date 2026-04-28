@@ -9,7 +9,7 @@ const firebaseConfig = {
   measurementId: "G-MT7QJW5YF7"
 };
 
-// Initialize Firebase (Compat mode for seamless global access)
+// Initialize Firebase (Compat mode)
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
@@ -23,31 +23,4 @@ try {
   });
 } catch (e) {}
 
-// Default Admin Seeder (Run ONLY if admins collection is empty)
-async function ensureDefaultAdmin() {
-  const adminEmail = 'jack1122@freelightmods.com';
-  const adminPassword = 'Jack6767@@'; // ⚠️ CHANGE THIS IN FIREBASE CONSOLE
-  
-  auth.onAuthStateChanged(async (user) => {
-    if (!user) {
-      try {
-        await auth.signInWithEmailAndPassword(adminEmail, adminPassword);
-        console.log('✅ Admin signed in');
-      } catch (e) {
-        if (e.code === 'auth/user-not-found') {
-          try {
-            const cred = await auth.createUserWithEmailAndPassword(adminEmail, adminPassword);
-            await db.collection('admins').doc(cred.user.uid).set({
-              email: adminEmail, role: 'super_admin', createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-            console.log('✅ Default admin created');
-          } catch (err) { console.error('Seeder error:', err); }
-        }
-      }
-    }
-  });
-}
-
-// Run seeder
-setTimeout(ensureDefaultAdmin, 1000);
 console.log('🔥 Firebase Initialized');

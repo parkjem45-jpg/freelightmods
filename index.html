@@ -4,14 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Free Lite Mods • Premium Modded APKs</title>
-    
-    <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Styles -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -45,7 +41,7 @@
         </div>
     </header>
 
-    <!-- Mobile Menu Overlay -->
+    <!-- Mobile Menu Overlay & Sidebar -->
     <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
     <div class="mobile-menu-sidebar" id="mobileMenuSidebar">
         <div class="mobile-menu-header">
@@ -60,13 +56,13 @@
             <a href="admin.html" id="mobileAdminLink" style="display:none"><i class="fas fa-lock"></i> Admin Panel</a>
         </nav>
         <div class="mobile-menu-footer">
-            <p>© 2026 Free Lite Mods</p>
+            <p>© <span id="currentYear">2026</span> Free Lite Mods</p>
         </div>
     </div>
 
     <!-- Hero Section -->
     <section class="hero">
-        <div class="hero-bg-glow"></div>
+        <div class="hero-glow"></div>
         <div class="container hero-content">
             <div class="hero-badge">
                 <i class="fas fa-check-circle"></i> Verified & Safe
@@ -194,7 +190,7 @@
         <button class="ai-toggle" id="aiToggle" aria-label="Open AI Chat">
             <i class="fas fa-robot"></i>
         </button>
-        <div class="ai-chat-window" id="aiChatWindow">
+        <div class="ai-chat-window" id="aiChatWindow" style="display:none;">
             <div class="ai-header">
                 <span><i class="fas fa-robot"></i> AI Assistant</span>
                 <button class="ai-close" id="aiClose">&times;</button>

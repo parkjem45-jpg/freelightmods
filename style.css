@@ -8,6 +8,7 @@
     --accent-cyan: #00f2fe;
     --accent-purple: #4facfe;
     --accent-pink: #f093fb;
+    --accent-orange: #f5576c;
     --border-color: rgba(255, 255, 255, 0.06);
     --shadow-card: 0 20px 30px -10px rgba(0, 0, 0, 0.5);
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -21,6 +22,8 @@
     --text-secondary: #4a5568;
     --border-color: #e2e8f0;
     --shadow-card: 0 10px 30px -10px rgba(0, 0, 0, 0.1);
+    --accent-cyan: #06b6d4;
+    --accent-purple: #8b5cf6;
 }
 
 /* ===== Reset & Base ===== */
@@ -75,7 +78,7 @@ a { text-decoration: none; color: inherit; transition: var(--transition); }
 }
 .mobile-menu-toggle:hover { background: rgba(255,255,255,0.1); }
 
-/* ===== Mobile Menu Sidebar (Professional Slide-in) ===== */
+/* ===== Mobile Menu Sidebar ===== */
 .mobile-menu-overlay {
     position: fixed; inset: 0; background: rgba(0,0,0,0.6);
     z-index: 998; opacity: 0; visibility: hidden; transition: var(--transition);
@@ -114,7 +117,7 @@ a { text-decoration: none; color: inherit; transition: var(--transition); }
 
 /* ===== Hero ===== */
 .hero { position: relative; padding: 100px 0 80px; overflow: hidden; }
-.hero-bg-glow {
+.hero-glow {
     position: absolute; top: -30%; right: -15%; width: 700px; height: 700px;
     background: radial-gradient(circle, rgba(0, 242, 254, 0.15) 0%, transparent 70%);
     border-radius: 50%; z-index: -1; pointer-events: none; animation: pulseGlow 4s infinite alternate;
