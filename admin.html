@@ -1,344 +1,286 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Panel • Free Lite Mods</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
-  
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="css/admin.css">
-  
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel • Free Lite Mods</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="admin.css">
 </head>
 <body>
-  <!-- Theme Toggle -->
-  <button class="theme-switch" id="themeToggle" aria-label="Toggle theme">
-    <i class="fas fa-moon"></i>
-  </button>
-
-  <div class="admin-layout">
-    <!-- Sidebar -->
-    <aside class="sidebar" id="sidebar">
-      <div class="sidebar-brand">
-        <i class="fas fa-cube"></i>
-        <span>FLM Admin</span>
-      </div>
-      
-      <nav class="sidebar-nav">
-        <a href="#" class="nav-item active" data-tab="dashboard">
-          <i class="fas fa-grid-2"></i>
-          <span>Dashboard</span>
-        </a>
-        <a href="#" class="nav-item" data-tab="apps">
-          <i class="fas fa-mobile-screen"></i>
-          <span>Manage APKs</span>
-        </a>
-        <a href="#" class="nav-item" data-tab="add">
-          <i class="fas fa-plus-circle"></i>
-          <span>Add New</span>
-        </a>
-        <a href="#" class="nav-item" data-tab="settings">
-          <i class="fas fa-gear"></i>
-          <span>Settings</span>
-        </a>
-        
-        <div class="nav-divider"></div>
-        
-        <a href="#" class="nav-item" onclick="handleLogout()">
-          <i class="fas fa-right-from-bracket"></i>
-          <span>Logout</span>
-        </a>
-        <a href="index.html" class="nav-item">
-          <i class="fas fa-arrow-left"></i>
-          <span>Back to Site</span>
-        </a>
-      </nav>
-      
-      <div class="sidebar-footer">
-        <div class="user-card" id="userCard">
-          <div class="user-avatar">
-            <i class="fas fa-user"></i>
-          </div>
-          <div class="user-info">
-            <span class="user-name">Loading...</span>
-            <span class="user-role">Administrator</span>
-          </div>
-        </div>
-      </div>
-    </aside>
-
     <!-- Mobile Toggle -->
-    <button class="sidebar-toggle" id="sidebarToggle">
-      <i class="fas fa-bars"></i>
-    </button>
+    <button class="mobile-toggle"><i class="fas fa-bars"></i></button>
 
-    <!-- Main Content -->
-    <main class="main-content">
-      <!-- Dashboard Tab -->
-      <div class="tab-content active" id="dashboard">
-        <div class="page-header">
-          <h1>Dashboard</h1>
-          <p>Overview of your APK repository</p>
-        </div>
-        
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-icon"><i class="fas fa-database"></i></div>
-            <div class="stat-info">
-              <span class="stat-value" id="totalApps">0</span>
-              <span class="stat-label">Total APKs</span>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-shield-alt"></i>
+                <span>FLM Admin</span>
             </div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon"><i class="fas fa-download"></i></div>
-            <div class="stat-info">
-              <span class="stat-value" id="totalDownloads">0</span>
-              <span class="stat-label">Total Downloads</span>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-tab="dashboard">
+                    <i class="fas fa-chart-pie"></i> Dashboard
+                </a>
+                <a href="#" class="nav-item" data-tab="apps">
+                    <i class="fas fa-box"></i> Manage APKs
+                </a>
+                <a href="#" class="nav-item" data-tab="add">
+                    <i class="fas fa-plus-circle"></i> Add New
+                </a>
+                <a href="#" class="nav-item" data-tab="settings">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+                <div class="sidebar-divider"></div>
+                <a href="index.html" class="nav-item">
+                    <i class="fas fa-external-link-alt"></i> Back to Site
+                </a>
+                <a href="#" class="nav-item" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar"><i class="fas fa-user"></i></div>
+                    <div class="user-details">
+                        <span class="user-email">Loading...</span>
+                        <span class="user-role">Admin</span>
+                    </div>
+                </div>
             </div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon"><i class="fas fa-gamepad"></i></div>
-            <div class="stat-info">
-              <span class="stat-value" id="gamesCount">0</span>
-              <span class="stat-label">Games</span>
-            </div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon"><i class="fas fa-mobile-screen"></i></div>
-            <div class="stat-info">
-              <span class="stat-value" id="appsCount">0</span>
-              <span class="stat-label">Apps</span>
-            </div>
-          </div>
-        </div>
+        </aside>
 
-        <div class="card">
-          <div class="card-header">
-            <h2>Quick Actions</h2>
-          </div>
-          <div class="quick-actions">
-            <button class="action-card" onclick="switchTab('add')">
-              <i class="fas fa-plus"></i>
-              <span>Add New APK</span>
-            </button>
-            <button class="action-card" onclick="exportData()">
-              <i class="fas fa-file-export"></i>
-              <span>Export Data</span>
-            </button>
-            <button class="action-card" onclick="location.reload()">
-              <i class="fas fa-rotate"></i>
-              <span>Refresh</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Manage APKs Tab -->
-      <div class="tab-content" id="apps">
-        <div class="page-header">
-          <h1>Manage APKs</h1>
-          <p>Edit or delete your modded applications</p>
-        </div>
-        
-        <div class="search-box">
-          <i class="fas fa-search"></i>
-          <input type="text" id="searchApps" placeholder="Search by name or mod features...">
-        </div>
-
-        <div class="table-wrapper">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Icon</th>
-                <th>Name</th>
-                <th>Version</th>
-                <th>Size</th>
-                <th>Downloads</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="appsTableBody">
-              <tr>
-                <td colspan="6">
-                  <div class="empty-state">
-                    <i class="fas fa-spinner fa-spin"></i>
-                    <p>Loading APKs...</p>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        
-        <div class="pagination" id="pagination"></div>
-      </div>
-
-      <!-- Add New Tab -->
-      <div class="tab-content" id="add">
-        <div class="page-header">
-          <h1>Add New APK</h1>
-          <p>Upload a new modded application to the repository</p>
-        </div>
-
-        <div class="card">
-          <form id="addApkForm" class="add-form">
-            <div class="form-group">
-              <label>App Name *</label>
-              <input type="text" id="appName" required placeholder="e.g., Spotify Premium">
-            </div>
+        <!-- Main Content -->
+        <main class="main-content">
             
-            <div class="form-row">
-              <div class="form-group">
-                <label>Version *</label>
-                <input type="text" id="appVersion" required placeholder="v1.0.0">
-              </div>
-              <div class="form-group">
-                <label>Size *</label>
-                <input type="text" id="appSize" required placeholder="82 MB">
-              </div>
+            <!-- Dashboard Tab -->
+            <div id="dashboard" class="tab-content active">
+                <div class="page-header">
+                    <h1>Dashboard</h1>
+                    <p class="text-secondary">Overview of your APK repository</p>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <i class="fas fa-box"></i>
+                        <div>
+                            <span class="stat-value" id="totalApps">0</span>
+                            <span class="stat-label">Total APKs</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-download"></i>
+                        <div>
+                            <span class="stat-value" id="totalDownloads">0</span>
+                            <span class="stat-label">Total Downloads</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-gamepad"></i>
+                        <div>
+                            <span class="stat-value" id="gamesCount">0</span>
+                            <span class="stat-label">Games</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-mobile-alt"></i>
+                        <div>
+                            <span class="stat-value" id="appsCount">0</span>
+                            <span class="stat-label">Apps</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Quick Actions</h2>
+                    </div>
+                    <div class="quick-actions">
+                        <button onclick="switchTab('add')"><i class="fas fa-plus"></i> Add New APK</button>
+                        <button onclick="exportData()"><i class="fas fa-file-export"></i> Export Data</button>
+                        <button onclick="location.reload()"><i class="fas fa-sync"></i> Refresh</button>
+                    </div>
+                </div>
             </div>
 
-            <div class="form-group">
-              <label>Font Awesome Icon Class</label>
-              <input type="text" id="appIcon" placeholder="fab fa-spotify" value="fas fa-mobile-screen">
+            <!-- Manage APKs Tab -->
+            <div id="apps" class="tab-content">
+                <div class="page-header">
+                    <h1>Manage APKs</h1>
+                    <p class="text-secondary">Edit or delete your modded applications</p>
+                </div>
+                
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchApps" placeholder="Search by name or mod feature...">
+                </div>
+
+                <div class="card">
+                    <div class="table-container">
+                        <table class="apps-table">
+                            <thead>
+                                <tr>
+                                    <th>Icon</th>
+                                    <th>Name</th>
+                                    <th>Version</th>
+                                    <th>Size</th>
+                                    <th>Downloads</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="appsTableBody">
+                                <tr><td colspan="6" style="text-align:center;padding:40px">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="pagination" class="pagination"></div>
+                </div>
             </div>
 
-            <div class="form-group">
-              <label>Custom Image URL (Optional)</label>
-              <input type="url" id="appImage" placeholder="https://example.com/icon.png">
+            <!-- Add New Tab -->
+            <div id="add" class="tab-content">
+                <div class="page-header">
+                    <h1>Add New APK</h1>
+                    <p class="text-secondary">Upload a new modded application</p>
+                </div>
+                <div class="card">
+                    <form id="addApkForm">
+                        <div id="formMessage" style="display:none;margin-bottom:16px;padding:12px;border-radius:8px;"></div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>App Name *</label>
+                                <input type="text" id="appName" required placeholder="e.g. Spotify Premium">
+                            </div>
+                            <div class="form-group">
+                                <label>Version *</label>
+                                <input type="text" id="appVersion" required placeholder="e.g. v8.9.18">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Size *</label>
+                                <input type="text" id="appSize" required placeholder="e.g. 82 MB">
+                            </div>
+                            <div class="form-group">
+                                <label>Category</label>
+                                <select id="appCategory">
+                                    <option value="app">App</option>
+                                    <option value="game">Game</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Mod Features *</label>
+                            <input type="text" id="appMod" required placeholder="e.g. No Ads, Unlocked">
+                        </div>
+                        <div class="form-group">
+                            <label>Download Link *</label>
+                            <input type="url" id="appLink" required placeholder="https://...">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Icon Class (FontAwesome)</label>
+                                <input type="text" id="appIcon" placeholder="fas fa-music" value="fas fa-mobile-alt">
+                                <small>Use <a href="https://fontawesome.com/icons" target="_blank">FontAwesome</a> classes</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Image URL (Optional)</label>
+                                <input type="url" id="appImage" placeholder="https://...">
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary"><i class="fas fa-plus"></i> Add APK</button>
+                            <button type="reset" class="btn-secondary">Reset</button>
+                        </div>
+                    </form>
+                </div>
             </div>
 
-            <div class="form-group">
-              <label>Mod Features *</label>
-              <input type="text" id="appMod" required placeholder="Unlocked Premium, No Ads">
+            <!-- Settings Tab -->
+            <div id="settings" class="tab-content">
+                <div class="page-header">
+                    <h1>Settings</h1>
+                    <p class="text-secondary">Configure your admin preferences</p>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h2>Account</h2></div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="text" id="accountEmail" disabled>
+                    </div>
+                    <button class="btn-danger" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                </div>
+                <div class="card danger-zone">
+                    <div class="card-header"><h2>Danger Zone</h2></div>
+                    <p class="text-secondary" style="margin-bottom:16px">Irreversible actions.</p>
+                    <button class="btn-danger" onclick="clearAllCache()"><i class="fas fa-trash"></i> Clear Local Cache</button>
+                </div>
             </div>
 
-            <div class="form-group">
-              <label>Download Link *</label>
-              <input type="url" id="appLink" required placeholder="https://github.com/.../app.apk">
-            </div>
-
-            <div class="form-group">
-              <label>Category</label>
-              <select id="appCategory">
-                <option value="app">App</option>
-                <option value="game">Game</option>
-              </select>
-            </div>
-
-            <div class="form-actions">
-              <button type="submit" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Add APK
-              </button>
-              <button type="reset" class="btn btn-secondary">
-                <i class="fas fa-undo"></i> Reset
-              </button>
-            </div>
-          </form>
-          <div id="formMessage" class="form-message" style="display:none;"></div>
-        </div>
-      </div>
-
-      <!-- Settings Tab -->
-      <div class="tab-content" id="settings">
-        <div class="page-header">
-          <h1>Settings</h1>
-          <p>Manage your admin account and preferences</p>
-        </div>
-
-        <div class="card">
-          <div class="card-header">
-            <h2>Account Information</h2>
-          </div>
-          <div class="settings-form">
-            <div class="form-group">
-              <label>Email Address</label>
-              <input type="email" id="accountEmail" disabled>
-            </div>
-            <button class="btn btn-secondary" onclick="handleLogout()">
-              <i class="fas fa-right-from-bracket"></i> Logout
-            </button>
-          </div>
-        </div>
-
-        <div class="card danger-card">
-          <div class="card-header">
-            <h2>Danger Zone</h2>
-          </div>
-          <p class="text-muted">Irreversible actions. Proceed with caution.</p>
-          <button class="btn btn-danger" onclick="clearAllCache()">
-            <i class="fas fa-trash"></i> Clear Cache & Reload
-          </button>
-        </div>
-      </div>
-    </main>
-  </div>
-
-  <!-- Edit Modal -->
-  <div class="modal" id="editModal">
-    <div class="modal-dialog">
-      <div class="modal-header">
-        <h2>Edit APK</h2>
-        <button class="modal-close" onclick="closeModal()">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
-      <div class="modal-body">
-        <form id="editForm">
-          <input type="hidden" id="editId">
-          <div class="form-group">
-            <label>App Name</label>
-            <input type="text" id="editName" required>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Version</label>
-              <input type="text" id="editVersion" required>
-            </div>
-            <div class="form-group">
-              <label>Size</label>
-              <input type="text" id="editSize" required>
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Icon Class</label>
-            <input type="text" id="editIcon">
-          </div>
-          <div class="form-group">
-            <label>Image URL</label>
-            <input type="url" id="editImage">
-          </div>
-          <div class="form-group">
-            <label>Mod Features</label>
-            <input type="text" id="editMod" required>
-          </div>
-          <div class="form-group">
-            <label>Download Link</label>
-            <input type="url" id="editLink" required>
-          </div>
-          <div class="form-group">
-            <label>Category</label>
-            <select id="editCategory">
-              <option value="app">App</option>
-              <option value="game">Game</option>
-            </select>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-        <button class="btn btn-primary" onclick="saveEdit()">Save Changes</button>
-      </div>
+        </main>
     </div>
-  </div>
 
-  <script src="js/firebase.js"></script>
-  <script src="js/admin.js"></script>
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit APK</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editId">
+                <div class="form-group">
+                    <label>App Name</label>
+                    <input type="text" id="editName">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Version</label>
+                        <input type="text" id="editVersion">
+                    </div>
+                    <div class="form-group">
+                        <label>Size</label>
+                        <input type="text" id="editSize">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Icon Class</label>
+                    <input type="text" id="editIcon">
+                </div>
+                <div class="form-group">
+                    <label>Image URL</label>
+                    <input type="text" id="editImage">
+                </div>
+                <div class="form-group">
+                    <label>Mod Features</label>
+                    <input type="text" id="editMod">
+                </div>
+                <div class="form-group">
+                    <label>Download Link</label>
+                    <input type="text" id="editLink">
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="editCategory">
+                        <option value="app">App</option>
+                        <option value="game">Game</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn-primary" onclick="saveEdit()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase Compat SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
+    
+    <!-- Custom Scripts -->
+    <script src="firebase-config.js"></script>
+    <script src="admin.js"></script>
 </body>
 </html>
