@@ -24,9 +24,18 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   
-  <style>@keyframes rainbowGlow {
-  0%, 100% { text-shadow: none; }
-}
+  <style>
+    /* ===== RAINBOW GLOWING LOGO ANIMATION ===== */
+    @keyframes rainbowGlow {
+      0% { text-shadow: 0 0 5px #ff0000, 0 0 10px #ff0000; }
+      14% { text-shadow: 0 0 5px #ff8800, 0 0 10px #ff8800; }
+      28% { text-shadow: 0 0 5px #ffff00, 0 0 10px #ffff00; }
+      42% { text-shadow: 0 0 5px #00ff00, 0 0 10px #00ff00; }
+      57% { text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff; }
+      71% { text-shadow: 0 0 5px #0088ff, 0 0 10px #0088ff; }
+      85% { text-shadow: 0 0 5px #8800ff, 0 0 10px #8800ff; }
+      100% { text-shadow: 0 0 5px #ff00ff, 0 0 10px #ff00ff; }
+    }
     
     @keyframes rainbowText {
       0% { color: #ff0000; }
@@ -67,7 +76,7 @@
     }
     
     .logo-rainbow {
-      animation: rainbowText 8s infinite, rainbowGlow 8s infinite;
+      animation: rainbowText 8s infinite,;
       display: inline-block;
     }
     
@@ -266,13 +275,13 @@
     </button>
     <div class="ai-chat-window" id="aiChatWindow" style="display: none;">
       <div class="ai-header">
-        <span><i class="fas fa-robot"></i> AI Assistant</span>
+        <span><i class="fas fa-robot"></i> AI Assistant (Gemini)</span>
         <button class="ai-close" id="aiClose">&times;</button>
       </div>
       <div class="ai-messages" id="aiMessages">
         <div class="ai-message bot">
           <i class="fas fa-robot"></i>
-          <div>Hello! How can I help you today?</div>
+          <div>Hello! I'm powered by Google Gemini. How can I help you today?</div>
         </div>
       </div>
       <div class="ai-input-area">
@@ -629,7 +638,7 @@
       document.getElementById('footerPrivacy')?.addEventListener('click', (e) => { e.preventDefault(); alert('Privacy policy coming soon!'); });
     });
 
-    // ===== Smooth Scroll for all anchor links =====
+    // ===== Smooth Scroll =====
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       anchor.addEventListener('click', function(e) {
         const href = this.getAttribute('href');
@@ -642,13 +651,17 @@
       });
     });
 
-    // ===== AI Assistant =====
+    // ===== REAL AI Assistant with Gemini API =====
     const aiToggle = document.getElementById('aiToggle');
     const aiChatWindow = document.getElementById('aiChatWindow');
     const aiClose = document.getElementById('aiClose');
     const aiSend = document.getElementById('aiSend');
     const aiInput = document.getElementById('aiInput');
     const aiMessages = document.getElementById('aiMessages');
+
+    // Your Gemini API Key
+    const GEMINI_API_KEY = 'AIzaSyCMzK8CkieI8yl9lSWK47VfD1ufDd_A0qg';
+    const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
     if (aiToggle) {
       aiToggle.addEventListener('click', () => {
@@ -671,12 +684,9 @@
       messageDiv.className = `ai-message ${sender}`;
       
       if (sender === 'bot') {
-        messageDiv.innerHTML = `
-          <i class="fas fa-robot"></i>
-          <div>${text}</div>
-        `;
+        messageDiv.innerHTML = `<i class="fas fa-robot"></i><div>${text.replace(/\n/g, '<br>')}</div>`;
       } else {
-        messageDiv.innerHTML = `<div>${text}</div>`;
+        messageDiv.innerHTML = `<div>${text.replace(/\n/g, '<br>')}</div>`;
       }
       
       aiMessages.appendChild(messageDiv);
@@ -692,9 +702,7 @@
       indicator.className = 'ai-message bot';
       indicator.innerHTML = `
         <i class="fas fa-robot"></i>
-        <div class="typing-indicator">
-          <span></span><span></span><span></span>
-        </div>
+        <div class="typing-indicator"><span></span><span></span><span></span></div>
       `;
       aiMessages.appendChild(indicator);
       aiMessages.scrollTop = aiMessages.scrollHeight;
@@ -708,7 +716,34 @@
       }
     }
 
-    function getAIResponse(query) {
+    async function getGeminiResponse(query) {
+      try {
+        const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{
+              parts: [{
+                text: `You are a helpful AI assistant for Free Lite Mods, a website offering free modded APKs and games. Keep responses friendly, helpful, and under 150 words. User question: ${query}`
+              }]
+            }]
+          })
+        });
+
+        const data = await response.json();
+        
+        if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+          return data.candidates[0].content.parts[0].text;
+        }
+        
+        return fallbackResponse(query);
+      } catch (error) {
+        console.log('Gemini API error, using fallback:', error);
+        return fallbackResponse(query);
+      }
+    }
+
+    function fallbackResponse(query) {
       const lower = query.toLowerCase();
       
       if (lower.includes('download')) return 'Click the "Download APK" button on any app card. Make sure to enable "Unknown Sources" in your Android settings.';
@@ -726,7 +761,7 @@
       return "I'm here to help! Ask me about downloading, installing, or finding specific modded apps.";
     }
 
-    function sendAIMessage() {
+    async function sendAIMessage() {
       if (!aiInput) return;
       const message = aiInput.value.trim();
       if (!message) return;
@@ -736,11 +771,14 @@
       
       const typingId = showTypingIndicator();
       
-      setTimeout(() => {
+      try {
+        const response = await getGeminiResponse(message);
         removeTypingIndicator(typingId);
-        const response = getAIResponse(message);
         addAIMessage(response, 'bot');
-      }, 1000);
+      } catch (error) {
+        removeTypingIndicator(typingId);
+        addAIMessage("Sorry, I encountered an error. Please try again.", 'bot');
+      }
     }
 
     if (aiSend) aiSend.addEventListener('click', sendAIMessage);
