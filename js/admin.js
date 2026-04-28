@@ -1,5 +1,6 @@
 // ============================================
-// Free Lite Mods - Admin Panel Application
+// Free Lite Mods - Admin Panel
+// Local Storage Version - No Firestore Needed
 // ============================================
 
 // State
@@ -7,73 +8,99 @@ let appsData = [];
 let currentUser = null;
 let currentPage = 1;
 const itemsPerPage = 15;
-let unsubscribeSnapshot = null;
 
 // ============================================
-// Initialization
+// Auth Check
 // ============================================
-auth.onAuthStateChanged(async (user) => {
-  if (user) {
-    // Check if user is admin
-    const isAdmin = window.ADMIN_EMAILS && window.ADMIN_EMAILS.includes(user.email);
-    
-    if (isAdmin) {
-      currentUser = user;
-      document.body.classList.add('authenticated');
-      
-      // Update user info in sidebar
-      updateUserInfo(user);
-      
-      // Initialize panel
-      initAdminPanel();
-    } else {
-      // Check Firestore admins collection
-      try {
-        const adminDoc = await db.collection('admins').doc(user.uid).get();
-        if (adminDoc.exists) {
-          currentUser = user;
-          document.body.classList.add('authenticated');
-          updateUserInfo(user);
-          initAdminPanel();
-        } else {
-          alert('⚠️ Access denied. You do not have admin privileges.');
-          auth.signOut();
-        }
-      } catch (error) {
-        console.error('Admin check failed:', error);
-        alert('⚠️ Error verifying admin status. Please try again.');
+if (typeof auth !== 'undefined') {
+  auth.onAuthStateChanged((user) => {
+    if (user) {
+      if (window.ADMIN_EMAILS && window.ADMIN_EMAILS.includes(user.email)) {
+        currentUser = user;
+        document.body.classList.add('authenticated');
+        updateUserInfo(user);
+        initAdminPanel();
+      } else {
+        alert('⚠️ Access denied. Admin only.');
         auth.signOut();
       }
+    } else {
+      showLoginPage();
     }
-  } else {
-    // No user, show login
-    showLoginPage();
-  }
-});
+  });
+} else {
+  showLoginPage();
+}
 
 function updateUserInfo(user) {
   const userName = document.querySelector('.user-name');
   const accountEmail = document.getElementById('accountEmail');
-  
-  if (userName) {
-    userName.textContent = user.email || 'Admin';
-  }
-  if (accountEmail) {
-    accountEmail.value = user.email || '';
-  }
+  if (userName) userName.textContent = user.email || 'Admin';
+  if (accountEmail) accountEmail.value = user.email || '';
 }
 
 // ============================================
-// Admin Panel Initialization
+// Init Panel
 // ============================================
 function initAdminPanel() {
+  loadLocalData();
   initTheme();
   initSidebar();
   initTabs();
-  setupRealtimeListener();
   setupForm();
   setupSearch();
   setupModal();
+  updateStats();
+  renderAppsTable();
+}
+
+// ============================================
+// Local Data CRUD
+// ============================================
+function loadLocalData() {
+  const stored = localStorage.getItem('apkData');
+  if (stored) {
+    try {
+      appsData = JSON.parse(stored);
+    } catch (e) {
+      appsData = [...window.DEFAULT_APPS];
+      saveLocalData();
+    }
+  } else {
+    appsData = [...window.DEFAULT_APPS];
+    saveLocalData();
+  }
+}
+
+function saveLocalData() {
+  localStorage.setItem('apkData', JSON.stringify(appsData));
+}
+
+function addApp(appData) {
+  const newApp = {
+    id: 'app_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+    ...appData,
+    downloads: 0,
+    dateAdded: new Date().toISOString()
+  };
+  appsData.unshift(newApp);
+  saveLocalData();
+  return newApp;
+}
+
+function updateApp(id, updates) {
+  const index = appsData.findIndex(a => a.id === id);
+  if (index !== -1) {
+    appsData[index] = { ...appsData[index], ...updates, updatedAt: new Date().toISOString() };
+    saveLocalData();
+    return true;
+  }
+  return false;
+}
+
+function deleteAppById(id) {
+  appsData = appsData.filter(a => a.id !== id);
+  saveLocalData();
 }
 
 // ============================================
@@ -82,23 +109,17 @@ function initAdminPanel() {
 function initTheme() {
   const toggle = document.getElementById('themeToggle');
   if (!toggle) return;
-  
   const icon = toggle.querySelector('i');
-  const savedTheme = localStorage.getItem('theme') || 'dark';
-  
-  document.documentElement.setAttribute('data-theme', savedTheme);
-  if (icon) {
-    icon.className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-  }
+  const saved = localStorage.getItem('theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  if (icon) icon.className = saved === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
   
   toggle.addEventListener('click', () => {
     const current = document.documentElement.getAttribute('data-theme');
     const next = current === 'dark' ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', next);
     localStorage.setItem('theme', next);
-    if (icon) {
-      icon.className = next === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-    }
+    if (icon) icon.className = next === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
   });
 }
 
@@ -108,18 +129,11 @@ function initTheme() {
 function initSidebar() {
   const toggle = document.getElementById('sidebarToggle');
   const sidebar = document.getElementById('sidebar');
-  
   if (toggle && sidebar) {
-    toggle.addEventListener('click', () => {
-      sidebar.classList.toggle('open');
-    });
-    
-    // Close sidebar when clicking outside
+    toggle.addEventListener('click', () => sidebar.classList.toggle('open'));
     document.addEventListener('click', (e) => {
-      if (window.innerWidth <= 768) {
-        if (!sidebar.contains(e.target) && !toggle.contains(e.target)) {
-          sidebar.classList.remove('open');
-        }
+      if (window.innerWidth <= 768 && !sidebar.contains(e.target) && !toggle.contains(e.target)) {
+        sidebar.classList.remove('open');
       }
     });
   }
@@ -132,89 +146,38 @@ function initTabs() {
   document.querySelectorAll('[data-tab]').forEach(tab => {
     tab.addEventListener('click', (e) => {
       e.preventDefault();
-      const tabId = tab.dataset.tab;
-      switchTab(tabId);
+      switchTab(tab.dataset.tab);
     });
   });
 }
 
 function switchTab(tabId) {
-  // Deactivate all tabs
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   
-  // Activate selected tab
   const targetTab = document.getElementById(tabId);
   const targetNav = document.querySelector(`[data-tab="${tabId}"]`);
   
   if (targetTab) targetTab.classList.add('active');
   if (targetNav) targetNav.classList.add('active');
   
-  // Refresh table if switching to apps tab
-  if (tabId === 'apps') {
-    renderAppsTable();
-  }
-  
-  // Close mobile sidebar
+  if (tabId === 'apps') renderAppsTable();
   document.getElementById('sidebar')?.classList.remove('open');
-}
-
-// ============================================
-// Realtime Data
-// ============================================
-function setupRealtimeListener() {
-  if (unsubscribeSnapshot) unsubscribeSnapshot();
-  
-  unsubscribeSnapshot = db.collection('apks')
-    .orderBy('dateAdded', 'desc')
-    .onSnapshot((snapshot) => {
-      appsData = [];
-      snapshot.forEach(doc => {
-        appsData.push({ id: doc.id, ...doc.data() });
-      });
-      
-      renderAppsTable();
-      updateStats();
-      
-      // Cache data
-      localStorage.setItem('apkData', JSON.stringify(appsData));
-    }, (error) => {
-      console.error('Realtime listener error:', error);
-      loadDataOnce();
-    });
-}
-
-async function loadDataOnce() {
-  try {
-    const snapshot = await db.collection('apks').orderBy('dateAdded', 'desc').get();
-    appsData = [];
-    snapshot.forEach(doc => {
-      appsData.push({ id: doc.id, ...doc.data() });
-    });
-    renderAppsTable();
-    updateStats();
-  } catch (error) {
-    console.error('Failed to load data:', error);
-    showFormMessage('⚠️ Failed to load data. Check your connection.', 'error');
-  }
 }
 
 // ============================================
 // Stats
 // ============================================
 function updateStats() {
-  const totalAppsEl = document.getElementById('totalApps');
-  const totalDownloadsEl = document.getElementById('totalDownloads');
-  const gamesCountEl = document.getElementById('gamesCount');
-  const appsCountEl = document.getElementById('appsCount');
+  const totalApps = document.getElementById('totalApps');
+  const totalDownloads = document.getElementById('totalDownloads');
+  const gamesCount = document.getElementById('gamesCount');
+  const appsCount = document.getElementById('appsCount');
   
-  if (totalAppsEl) totalAppsEl.textContent = appsData.length;
-  if (totalDownloadsEl) {
-    const total = appsData.reduce((sum, app) => sum + (app.downloads || 0), 0);
-    totalDownloadsEl.textContent = formatNumber(total);
-  }
-  if (gamesCountEl) gamesCountEl.textContent = appsData.filter(a => a.category === 'game').length;
-  if (appsCountEl) appsCountEl.textContent = appsData.filter(a => a.category === 'app').length;
+  if (totalApps) totalApps.textContent = appsData.length;
+  if (totalDownloads) totalDownloads.textContent = formatNumber(appsData.reduce((s, a) => s + (a.downloads || 0), 0));
+  if (gamesCount) gamesCount.textContent = appsData.filter(a => a.category === 'game').length;
+  if (appsCount) appsCount.textContent = appsData.filter(a => a.category === 'app').length;
 }
 
 function formatNumber(num) {
@@ -225,7 +188,7 @@ function formatNumber(num) {
 }
 
 // ============================================
-// Form
+// Form - Add New APK
 // ============================================
 function setupForm() {
   const form = document.getElementById('addApkForm');
@@ -235,7 +198,7 @@ function setupForm() {
     e.preventDefault();
     
     const submitBtn = form.querySelector('button[type="submit"]');
-    const originalHTML = submitBtn.innerHTML;
+    const origHTML = submitBtn.innerHTML;
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
     
@@ -249,63 +212,51 @@ function setupForm() {
         mod: document.getElementById('appMod').value.trim(),
         link: document.getElementById('appLink').value.trim(),
         category: document.getElementById('appCategory').value,
-        downloads: 0,
-        dateAdded: firebase.firestore.FieldValue.serverTimestamp(),
-        addedBy: currentUser ? currentUser.email : 'unknown'
+        addedBy: currentUser?.email || 'admin'
       };
       
-      // Validate required fields
-      if (!newApp.name || !newApp.version || !newApp.size || !newApp.mod || !newApp.link) {
-        throw new Error('Please fill in all required fields');
+      if (!newApp.name || !newApp.version || !newApp.mod || !newApp.link) {
+        throw new Error('Please fill all required fields');
       }
       
-      await db.collection('apks').add(newApp);
+      addApp(newApp);
       
-      showFormMessage('✅ APK added successfully!', 'success');
+      showMessage('✅ APK added successfully!', 'success');
       form.reset();
       document.getElementById('appIcon').value = 'fas fa-mobile-screen';
       
-      // Switch to apps tab after success
-      setTimeout(() => switchTab('apps'), 1500);
+      updateStats();
+      setTimeout(() => switchTab('apps'), 1000);
     } catch (error) {
-      showFormMessage('❌ Error: ' + error.message, 'error');
+      showMessage('❌ Error: ' + error.message, 'error');
     } finally {
       submitBtn.disabled = false;
-      submitBtn.innerHTML = originalHTML;
+      submitBtn.innerHTML = origHTML;
     }
   });
 }
 
-function showFormMessage(text, type) {
-  const msgDiv = document.getElementById('formMessage');
-  if (!msgDiv) return;
-  
-  msgDiv.textContent = text;
-  msgDiv.style.display = 'block';
-  msgDiv.className = 'form-message';
-  
-  if (type === 'success') {
-    msgDiv.style.background = 'rgba(16, 185, 129, 0.1)';
-    msgDiv.style.border = '1px solid rgba(16, 185, 129, 0.3)';
-    msgDiv.style.color = '#10b981';
-  } else {
-    msgDiv.style.background = 'rgba(239, 68, 68, 0.1)';
-    msgDiv.style.border = '1px solid rgba(239, 68, 68, 0.3)';
-    msgDiv.style.color = '#ef4444';
-  }
-  
-  setTimeout(() => {
-    msgDiv.style.display = 'none';
-  }, 5000);
+function showMessage(text, type) {
+  const msg = document.getElementById('formMessage');
+  if (!msg) return;
+  msg.textContent = text;
+  msg.style.display = 'block';
+  msg.className = 'form-message';
+  msg.style.background = type === 'success' ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)';
+  msg.style.border = `1px solid ${type === 'success' ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.3)'}`;
+  msg.style.color = type === 'success' ? '#10b981' : '#ef4444';
+  msg.style.padding = '12px';
+  msg.style.borderRadius = '12px';
+  setTimeout(() => msg.style.display = 'none', 5000);
 }
 
 // ============================================
 // Search
 // ============================================
 function setupSearch() {
-  const searchInput = document.getElementById('searchApps');
-  if (searchInput) {
-    searchInput.addEventListener('input', () => {
+  const search = document.getElementById('searchApps');
+  if (search) {
+    search.addEventListener('input', () => {
       currentPage = 1;
       renderAppsTable();
     });
@@ -321,10 +272,9 @@ function renderAppsTable() {
   
   const searchTerm = document.getElementById('searchApps')?.value.toLowerCase() || '';
   
-  let filtered = appsData.filter(app => 
+  let filtered = appsData.filter(app =>
     (app.name || '').toLowerCase().includes(searchTerm) ||
-    (app.mod || '').toLowerCase().includes(searchTerm) ||
-    (app.category || '').toLowerCase().includes(searchTerm)
+    (app.mod || '').toLowerCase().includes(searchTerm)
   );
   
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
@@ -332,43 +282,27 @@ function renderAppsTable() {
   const paginated = filtered.slice(start, start + itemsPerPage);
   
   if (!paginated.length) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="6">
-          <div class="empty-state">
-            <i class="fas fa-box-open"></i>
-            <p>No APKs found</p>
-          </div>
-        </td>
-      </tr>
-    `;
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><i class="fas fa-box-open"></i><p>No APKs found</p></div></td></tr>`;
     renderPagination(0);
     return;
   }
   
   tbody.innerHTML = paginated.map(app => {
-    const iconHtml = app.image 
+    const iconHtml = app.image
       ? `<img src="${app.image}" alt="${app.name}" onerror="this.style.display='none'"><i class="${app.icon || 'fas fa-mobile-screen'}"></i>`
       : `<i class="${app.icon || 'fas fa-mobile-screen'}"></i>`;
     
     return `
       <tr>
         <td><div class="app-icon-sm">${iconHtml}</div></td>
-        <td>
-          <strong>${app.name || 'Unknown'}</strong>
-          <br><small style="color: var(--text-secondary);">${app.category || 'app'}</small>
-        </td>
-        <td>${app.version || 'N/A'}</td>
-        <td>${app.size || 'N/A'}</td>
+        <td><strong>${app.name}</strong><br><small style="color:var(--text-secondary)">${app.category}</small></td>
+        <td>${app.version}</td>
+        <td>${app.size}</td>
         <td>${formatNumber(app.downloads || 0)}</td>
         <td>
           <div class="action-btns">
-            <button class="icon-btn" onclick="editApp('${app.id}')" title="Edit">
-              <i class="fas fa-edit"></i>
-            </button>
-            <button class="icon-btn delete" onclick="deleteApp('${app.id}')" title="Delete">
-              <i class="fas fa-trash"></i>
-            </button>
+            <button class="icon-btn" onclick="editApp('${app.id}')"><i class="fas fa-edit"></i></button>
+            <button class="icon-btn delete" onclick="deleteApp('${app.id}')"><i class="fas fa-trash"></i></button>
           </div>
         </td>
       </tr>
@@ -379,19 +313,15 @@ function renderAppsTable() {
 }
 
 function renderPagination(totalPages) {
-  const pagination = document.getElementById('pagination');
-  if (!pagination) return;
-  
-  if (totalPages <= 1) {
-    pagination.innerHTML = '';
-    return;
-  }
+  const pag = document.getElementById('pagination');
+  if (!pag) return;
+  if (totalPages <= 1) { pag.innerHTML = ''; return; }
   
   let html = '';
   for (let i = 1; i <= totalPages; i++) {
     html += `<button class="${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
   }
-  pagination.innerHTML = html;
+  pag.innerHTML = html;
 }
 
 function goToPage(page) {
@@ -400,22 +330,18 @@ function goToPage(page) {
 }
 
 // ============================================
-// Modal
+// Modal - Edit
 // ============================================
 function setupModal() {
   const modal = document.getElementById('editModal');
   if (!modal) return;
   
-  // Close on background click
   modal.addEventListener('click', (e) => {
     if (e.target === modal) closeModal();
   });
   
-  // Close on Escape key
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modal.classList.contains('open')) {
-      closeModal();
-    }
+    if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
   });
 }
 
@@ -440,17 +366,16 @@ function closeModal() {
   document.getElementById('editModal')?.classList.remove('open');
 }
 
-async function saveEdit() {
+function saveEdit() {
   const id = document.getElementById('editId').value;
   if (!id) return;
   
   const saveBtn = document.querySelector('#editModal .btn-primary');
-  const originalHTML = saveBtn.innerHTML;
   saveBtn.disabled = true;
   saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
   
   try {
-    const updatedData = {
+    const updates = {
       name: document.getElementById('editName').value.trim(),
       version: document.getElementById('editVersion').value.trim(),
       size: document.getElementById('editSize').value.trim(),
@@ -458,68 +383,76 @@ async function saveEdit() {
       image: document.getElementById('editImage').value.trim(),
       mod: document.getElementById('editMod').value.trim(),
       link: document.getElementById('editLink').value.trim(),
-      category: document.getElementById('editCategory').value,
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      category: document.getElementById('editCategory').value
     };
     
-    // Validate
-    if (!updatedData.name || !updatedData.version || !updatedData.mod || !updatedData.link) {
-      throw new Error('Please fill in all required fields');
+    if (!updates.name || !updates.version || !updates.mod || !updates.link) {
+      throw new Error('Required fields missing');
     }
     
-    await db.collection('apks').doc(id).update(updatedData);
-    
+    updateApp(id, updates);
     closeModal();
-    showFormMessage('✅ APK updated successfully!', 'success');
+    renderAppsTable();
+    updateStats();
+    showMessage('✅ APK updated successfully!', 'success');
   } catch (error) {
     alert('❌ Error: ' + error.message);
   } finally {
     saveBtn.disabled = false;
-    saveBtn.innerHTML = originalHTML;
+    saveBtn.innerHTML = 'Save Changes';
   }
 }
 
-async function deleteApp(id) {
-  if (!confirm('⚠️ Are you sure you want to permanently delete this APK? This action cannot be undone.')) return;
-  
-  try {
-    await db.collection('apks').doc(id).delete();
-    showFormMessage('✅ APK deleted successfully!', 'success');
-  } catch (error) {
-    alert('❌ Error: ' + error.message);
-  }
+function deleteApp(id) {
+  if (!confirm('⚠️ Delete this APK permanently?')) return;
+  deleteAppById(id);
+  renderAppsTable();
+  updateStats();
+  showMessage('✅ APK deleted!', 'success');
 }
 
 // ============================================
 // Export Data
 // ============================================
 function exportData() {
-  if (!appsData.length) {
-    alert('No data to export!');
-    return;
-  }
-  
-  const dataStr = JSON.stringify(appsData, null, 2);
-  const blob = new Blob([dataStr], { type: 'application/json' });
+  if (!appsData.length) { alert('No data!'); return; }
+  const blob = new Blob([JSON.stringify(appsData, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `flm-backup-${new Date().toISOString().split('T')[0]}.json`;
-  document.body.appendChild(a);
+  a.download = `flmods-backup-${new Date().toISOString().split('T')[0]}.json`;
   a.click();
-  document.body.removeChild(a);
   URL.revokeObjectURL(url);
-  
-  showFormMessage('✅ Data exported successfully!', 'success');
 }
 
 // ============================================
-// Cache Management
+// Import Data
+// ============================================
+function importData(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (Array.isArray(data)) {
+        appsData = data;
+        saveLocalData();
+        renderAppsTable();
+        updateStats();
+        showMessage('✅ Data imported!', 'success');
+      }
+    } catch (err) {
+      alert('Invalid JSON file');
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ============================================
+// Clear Cache
 // ============================================
 function clearAllCache() {
-  if (confirm('⚠️ This will clear all local data and reload the page. Continue?')) {
-    localStorage.clear();
-    sessionStorage.clear();
+  if (confirm('⚠️ Clear all data and reset?')) {
+    localStorage.removeItem('apkData');
     location.reload();
   }
 }
@@ -528,16 +461,12 @@ function clearAllCache() {
 // Logout
 // ============================================
 function handleLogout() {
-  if (confirm('Are you sure you want to logout?')) {
-    if (unsubscribeSnapshot) {
-      unsubscribeSnapshot();
+  if (confirm('Logout?')) {
+    if (typeof auth !== 'undefined') {
+      auth.signOut().then(() => location.reload());
+    } else {
+      location.reload();
     }
-    auth.signOut().then(() => {
-      window.location.reload();
-    }).catch((error) => {
-      console.error('Logout error:', error);
-      window.location.reload();
-    });
   }
 }
 
@@ -551,142 +480,55 @@ function showLoginPage() {
         <div class="login-header">
           <i class="fas fa-shield-halved shield-icon"></i>
           <h1>Admin Access</h1>
-          <p>Sign in to manage your APK repository</p>
+          <p>Free Lite Mods Admin Panel</p>
         </div>
-        
-        <div class="auth-tabs">
-          <button class="auth-tab active" data-tab="login">Login</button>
-          <button class="auth-tab" data-tab="signup">Create Admin</button>
-        </div>
-        
         <form id="authForm" class="login-form">
           <div class="form-group">
             <label><i class="fas fa-envelope"></i> Email</label>
             <input type="email" id="authEmail" placeholder="admin@example.com" required>
           </div>
-          <div class="form-group" id="passwordGroup">
+          <div class="form-group">
             <label><i class="fas fa-lock"></i> Password</label>
             <input type="password" id="authPassword" placeholder="••••••••" required>
           </div>
-          <div class="form-group" id="confirmGroup" style="display:none;">
-            <label><i class="fas fa-check"></i> Confirm Password</label>
-            <input type="password" id="authConfirm" placeholder="••••••••">
-          </div>
           <div id="authAlert" style="display:none;"></div>
-          <button type="submit" class="login-btn" id="authSubmitBtn">
-            <i class="fas fa-sign-in-alt"></i> <span>Login</span>
+          <button type="submit" class="login-btn">
+            <i class="fas fa-sign-in-alt"></i> Login
           </button>
         </form>
-        
         <div class="security-note">
-          <i class="fas fa-shield"></i>
-          <span>Authorized personnel only</span>
+          <i class="fas fa-shield"></i> Authorized personnel only
         </div>
-        <a href="index.html" class="back-link">
-          <i class="fas fa-arrow-left"></i> Back to Site
-        </a>
+        <a href="index.html" class="back-link">← Back to Site</a>
       </div>
     </div>
   `;
   
-  let mode = 'login';
-  const tabs = document.querySelectorAll('.auth-tab');
-  const form = document.getElementById('authForm');
-  const submitBtn = document.getElementById('authSubmitBtn');
-  const alertDiv = document.getElementById('authAlert');
-  const passwordGroup = document.getElementById('passwordGroup');
-  const confirmGroup = document.getElementById('confirmGroup');
-  
-  // Tab switching
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      tabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      mode = tab.dataset.tab;
-      
-      alertDiv.style.display = 'none';
-      
-      if (mode === 'signup') {
-        passwordGroup.style.display = 'block';
-        confirmGroup.style.display = 'block';
-        submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> <span>Create Account</span>';
-      } else {
-        passwordGroup.style.display = 'block';
-        confirmGroup.style.display = 'none';
-        submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> <span>Login</span>';
-      }
-    });
-  });
-  
-  // Form submission
-  form.addEventListener('submit', async (e) => {
+  document.getElementById('authForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    
     const email = document.getElementById('authEmail').value.trim();
     const password = document.getElementById('authPassword').value;
+    const btn = e.target.querySelector('button');
+    const alertDiv = document.getElementById('authAlert');
     
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
     alertDiv.style.display = 'none';
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Processing...</span>';
     
     try {
-      if (mode === 'signup') {
-        const confirm = document.getElementById('authConfirm').value;
-        
-        if (password !== confirm) throw new Error('Passwords do not match');
-        if (password.length < 6) throw new Error('Password must be at least 6 characters');
-        
-        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-        
-        // Add to admins collection
-        await db.collection('admins').doc(userCredential.user.uid).set({
-          email: email,
-          role: 'admin',
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        
-        showAlert('✅ Account created successfully! You can now login.', 'success');
-        
-        // Switch to login mode
-        setTimeout(() => {
-          document.querySelector('[data-tab="login"]')?.click();
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> <span>Login</span>';
-        }, 1500);
-      } else {
+      if (typeof auth !== 'undefined') {
         await auth.signInWithEmailAndPassword(email, password);
-        // Page will reload via auth state observer
+      } else {
+        throw new Error('Auth not available');
       }
     } catch (error) {
-      showAlert('⚠️ ' + getReadableError(error), 'error');
-      submitBtn.disabled = false;
-      
-      if (mode === 'signup') {
-        submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> <span>Create Account</span>';
-      } else {
-        submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> <span>Login</span>';
-      }
+      alertDiv.style.display = 'block';
+      alertDiv.className = 'alert alert-error';
+      alertDiv.textContent = '❌ ' + (error.code === 'auth/wrong-password' ? 'Wrong password' : error.code === 'auth/user-not-found' ? 'Account not found' : error.message);
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
     }
   });
-  
-  function showAlert(message, type) {
-    alertDiv.textContent = message;
-    alertDiv.style.display = 'block';
-    alertDiv.className = type === 'success' ? 'alert alert-success' : 'alert alert-error';
-  }
-}
-
-function getReadableError(error) {
-  const messages = {
-    'auth/invalid-email': 'Invalid email address format.',
-    'auth/user-not-found': 'No account found with this email.',
-    'auth/wrong-password': 'Incorrect password. Please try again.',
-    'auth/email-already-in-use': 'This email is already registered.',
-    'auth/weak-password': 'Password should be at least 6 characters.',
-    'auth/network-request-failed': 'Network error. Please check your connection.',
-    'auth/too-many-requests': 'Too many attempts. Please try again later.'
-  };
-  return messages[error.code] || error.message;
 }
 
 // ============================================
@@ -699,5 +541,6 @@ window.saveEdit = saveEdit;
 window.closeModal = closeModal;
 window.goToPage = goToPage;
 window.exportData = exportData;
+window.importData = importData;
 window.clearAllCache = clearAllCache;
 window.handleLogout = handleLogout;
