@@ -3,24 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Free Lite Mods — Premium modded APKs and games. Safe, fast, and verified.">
-    <title>Free Lite Mods • Premium Modded APKs</title>
-
+    <meta name="description" content="Freelightmods — Premium modded APKs and games">
+    <title>Freelightmods • Premium Modded APKs</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-    <link rel="preconnect" href="https://www.gstatic.com">
-
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
+    <style>
+        :root {
+            --bg-primary: #0b0e14;
+            --bg-secondary: #131823;
+            --bg-card: #1a2330;
+            --text-primary: #ffffff;
+            --text-secondary: #a0aec0;
+            --accent-cyan: #00f2fe;
+            --accent-purple: #4facfe;
+            --border-color: rgba(255, 255, 255, 0.06);
+            --shadow-card: 0 20px 30px -10px rgba(0, 0, 0, 0.5);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        .container { width: 92%; max-width: 1280px; margin: 0 auto; padding: 0 16px; }
+
+        /* ===== Header ===== */
+        .header {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(11, 14, 20, 0.85);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 14px 0;
+        }
+        .nav-container { display: flex; align-items: center; justify-content: space-between; }
+        .logo { display: flex; align-items: center; gap: 10px; font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px; }
+        .logo i { color: var(--accent-cyan); }
+        .logo-text span {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+        }
+
+        /* ===== Hero ===== */
+        .hero { position: relative; padding: 80px 0 60px; overflow: hidden; }
+        .hero-glow {
+            position: absolute; top: -30%; right: -15%; width: 700px; height: 700px;
+            background: radial-gradient(circle, rgba(0, 242, 254, 0.15) 0%, transparent 70%);
+            border-radius: 50%; z-index: -1; pointer-events: none;
+            animation: pulseGlow 4s infinite alternate;
+        }
+        @keyframes pulseGlow { 0% { opacity: 0.5; transform: scale(1); } 100% { opacity: 0.8; transform: scale(1.1); } }
+
+        .hero-content { max-width: 850px; text-align: center; margin: 0 auto; }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(0, 242, 254, 0.1); border: 1px solid rgba(0, 242, 254, 0.2);
+            padding: 6px 16px; border-radius: 40px; font-size: 0.85rem; font-weight: 600;
+            color: var(--accent-cyan); margin-bottom: 24px;
+        }
+        .hero-title { font-size: clamp(2.5rem, 7vw, 4.5rem); font-weight: 700; margin-bottom: 16px; }
+        .animated-gradient-text {
+            background: linear-gradient(-45deg, #00f2fe, #4facfe, #f093fb, #f5576c, #00f2fe);
+            background-size: 300% 300%; -webkit-background-clip: text; background-clip: text;
+            color: transparent; animation: gradientShift 6s ease infinite; display: inline-block;
+        }
+        @keyframes gradientShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        .hero-description { font-size: 1.15rem; color: var(--text-secondary); max-width: 650px; margin: 0 auto 32px; line-height: 1.7; }
+
+        /* ===== App Grid ===== */
+        .featured-section { padding: 40px 0 80px; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; flex-wrap: wrap; gap: 16px; }
+        .section-header h2 { font-size: clamp(2rem, 5vw, 2.8rem); margin-bottom: 4px; }
+        .section-subtitle { color: var(--text-secondary); font-size: 1rem; }
+
+        .app-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 28px; }
+        .app-card {
+            background: var(--bg-card); border-radius: 24px; padding: 24px 20px;
+            border: 1px solid var(--border-color); transition: var(--transition);
+            box-shadow: var(--shadow-card); display: flex; flex-direction: column;
+            position: relative; overflow: hidden; cursor: pointer;
+        }
+        .app-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
+            opacity: 0; transition: var(--transition);
+        }
+        .app-card:hover { transform: translateY(-8px); border-color: rgba(79, 172, 254, 0.3); }
+        .app-card:hover::before { opacity: 1; }
+
+        .app-icon {
+            width: 72px; height: 72px; background: linear-gradient(145deg, #1e2a3a, #141c28);
+            border-radius: 20px; display: flex; align-items: center; justify-content: center;
+            margin-bottom: 20px; font-size: 2rem; color: var(--accent-cyan);
+            transition: var(--transition); overflow: hidden; flex-shrink: 0;
+            pointer-events: none; user-select: none;
+        }
+        .app-card:hover .app-icon { transform: scale(1.05); }
+        .app-icon img { width: 100%; height: 100%; object-fit: cover; border-radius: 20px; pointer-events: none; }
+        .app-icon i { pointer-events: none; }
+
+        .app-info h3 { font-size: 1.25rem; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .app-meta { display: flex; gap: 16px; color: var(--text-secondary); font-size: 0.85rem; margin: 8px 0; flex-wrap: wrap; }
+        .app-meta i { margin-right: 4px; color: var(--accent-purple); }
+        .app-meta .mod-tag i { color: #fbbf24; }
+
+        .download-tag {
+            margin-top: auto; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color);
+            padding: 12px; border-radius: 14px; font-weight: 600; text-align: center;
+            transition: var(--transition); display: flex; align-items: center; justify-content: center; gap: 8px;
+            color: var(--text-primary); margin-top: 16px; font-size: 0.95rem;
+        }
+        .download-tag i { color: var(--accent-cyan); transition: var(--transition); }
+        .app-card:hover .download-tag { background: var(--accent-cyan); color: #0b0e14; border-color: var(--accent-cyan); }
+        .app-card:hover .download-tag i { color: #0b0e14; }
+
+        /* ===== Footer ===== */
+        .footer { background: var(--bg-secondary); border-top: 1px solid var(--border-color); padding: 48px 0; text-align: center; color: var(--text-secondary); font-size: 0.9rem; }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 768px) {
+            .hero { padding: 60px 0; }
+            .app-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+<base target="_blank">
 </head>
 <body>
-
-    <!-- Theme Toggle -->
-    <button class="theme-toggle" id="themeToggle" aria-label="Toggle Theme">
-        <i class="fas fa-moon"></i>
-    </button>
 
     <!-- Header -->
     <header class="header">
@@ -29,39 +146,8 @@
                 <i class="fas fa-bolt"></i>
                 <span class="logo-text">Free Lite <span class="logo-highlight">Mods</span></span>
             </a>
-
-            <nav class="nav-links" id="navLinks">
-                <a href="#" class="active">Home</a>
-                <a href="#apps">Apps</a>
-                <a href="#games">Games</a>
-                <a href="#how">How it Works</a>
-                <a href="admin.html" id="adminLink" class="admin-nav-link" style="display:none"><i class="fas fa-lock"></i> Admin</a>
-            </nav>
-
-            <button class="mobile-menu-toggle" id="mobileToggle" aria-label="Open Menu">
-                <i class="fas fa-bars"></i>
-            </button>
         </div>
     </header>
-
-    <!-- Mobile Menu -->
-    <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
-    <div class="mobile-menu-sidebar" id="mobileMenuSidebar">
-        <div class="mobile-menu-header">
-            <span class="logo-text">Menu</span>
-            <button id="closeMobileMenu" aria-label="Close menu"><i class="fas fa-times"></i></button>
-        </div>
-        <nav class="mobile-nav-links">
-            <a href="#" class="active"><i class="fas fa-home"></i> Home</a>
-            <a href="#apps"><i class="fas fa-th-large"></i> Apps</a>
-            <a href="#games"><i class="fas fa-gamepad"></i> Games</a>
-            <a href="#how"><i class="fas fa-info-circle"></i> How it Works</a>
-            <a href="admin.html" id="mobileAdminLink" class="admin-nav-link" style="display:none"><i class="fas fa-lock"></i> Admin Panel</a>
-        </nav>
-        <div class="mobile-menu-footer">
-            <p>© <span id="currentYear">2026</span> Free Lite Mods</p>
-        </div>
-    </div>
 
     <!-- Hero -->
     <section class="hero">
@@ -73,161 +159,126 @@
                 <span class="animated-gradient-text">Zero Compromise</span>
             </h1>
             <p class="hero-description">
-                Discover a curated collection of modded APKs and games. 
+                Discover a curated collection of modded APKs and games.
                 Fast downloads, no bloatware, just pure performance.
             </p>
-            <div class="hero-actions">
-                <a href="#apps" class="btn btn-primary"><i class="fas fa-rocket"></i> Explore Mods</a>
-                <a href="#how" class="btn btn-outline"><i class="fas fa-question-circle"></i> How it works</a>
-            </div>
-            <div class="hero-stats">
-                <div class="stat-item">
-                    <span class="stat-number" id="totalModsCount">0+</span>
-                    <span class="stat-label">Mods Available</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">Daily</span>
-                    <span class="stat-label">Updates</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">100%</span>
-                    <span class="stat-label">Safe Scanned</span>
-                </div>
-            </div>
         </div>
     </section>
 
-    <!-- Search & Filter -->
-    <section class="search-section" id="apps">
-        <div class="container">
-            <div class="search-bar-container">
-                <i class="fas fa-search"></i>
-                <input type="text" id="searchInput" placeholder="Search mods by name or feature..." autocomplete="off">
-                <button id="clearSearch" class="clear-search" aria-label="Clear search"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="filter-tags" id="filterTags">
-                <button class="filter-tag active" data-filter="all">All</button>
-                <button class="filter-tag" data-filter="app">Apps</button>
-                <button class="filter-tag" data-filter="game">Games</button>
-            </div>
-        </div>
-    </section>
-
-    <!-- Featured Apps -->
+    <!-- Apps Grid -->
     <section class="featured-section">
         <div class="container">
             <div class="section-header">
                 <div>
                     <h2>Trending Mods</h2>
-                    <p class="section-subtitle">Most popular this week</p>
+                    <p class="section-subtitle">Click any app to download</p>
                 </div>
-                <a href="#" class="view-all">View all <i class="fas fa-arrow-right"></i></a>
             </div>
             <div class="app-grid" id="appGrid">
-                <div class="loading-state">
-                    <i class="fas fa-spinner fa-spin"></i>
-                    <p>Loading mods...</p>
-                </div>
-            </div>
-            <div class="load-more-wrap" id="loadMoreWrap" style="display:none">
-                <button class="btn btn-outline" id="loadMoreBtn"><i class="fas fa-chevron-down"></i> Load More</button>
-            </div>
-        </div>
-    </section>
-
-    <!-- How It Works -->
-    <section class="how-section" id="how">
-        <div class="container">
-            <div class="section-header center">
-                <h2>Simple & Secure</h2>
-                <p class="section-subtitle">Three steps to premium experience</p>
-            </div>
-            <div class="steps-grid">
-                <div class="step-card">
-                    <div class="step-icon"><i class="fas fa-search"></i></div>
-                    <h3>1. Browse</h3>
-                    <p class="text-secondary">Find your favorite app or game from our growing library.</p>
-                </div>
-                <div class="step-card">
-                    <div class="step-icon"><i class="fas fa-download"></i></div>
-                    <h3>2. Download</h3>
-                    <p class="text-secondary">Click download and get the APK file instantly. No wait timers.</p>
-                </div>
-                <div class="step-card">
-                    <div class="step-icon"><i class="fas fa-play"></i></div>
-                    <h3>3. Install & Enjoy</h3>
-                    <p class="text-secondary">Enable "Unknown Sources" in Android settings and dive into premium features.</p>
-                </div>
+                <!-- Apps injected by JS -->
             </div>
         </div>
     </section>
 
     <!-- Footer -->
     <footer class="footer">
-        <div class="container footer-container">
-            <div class="footer-brand">
-                <a href="#" class="logo">
-                    <i class="fas fa-bolt"></i>
-                    <span class="logo-text">Free Lite <span class="logo-highlight">Mods</span></span>
-                </a>
-                <p>Premium modded APKs, crafted for performance and safety.</p>
-                <div class="social-links">
-                    <a href="#" aria-label="Telegram"><i class="fab fa-telegram"></i></a>
-                    <a href="#" aria-label="Discord"><i class="fab fa-discord"></i></a>
-                    <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
-                </div>
-            </div>
-            <div class="footer-links">
-                <div class="link-group">
-                    <h4>Quick Links</h4>
-                    <a href="#">Home</a>
-                    <a href="#apps">Apps</a>
-                    <a href="#games">Games</a>
-                    <a href="#request">Request Mod</a>
-                </div>
-                <div class="link-group">
-                    <h4>Support</h4>
-                    <a href="#">FAQ</a>
-                    <a href="#">Contact</a>
-                    <a href="#">DMCA</a>
-                    <a href="#">Privacy Policy</a>
-                </div>
-            </div>
-        </div>
-        <div class="container footer-bottom">
-            <p>&copy; <span id="footerYear">2026</span> Free Lite Mods. All rights reserved.</p>
+        <div class="container">
+            <p>&copy; 2026 Freelightmods. All rights reserved.</p>
         </div>
     </footer>
 
-    <!-- AI Assistant -->
-    <div class="ai-assistant" id="aiAssistant">
-        <button class="ai-toggle" id="aiToggle" aria-label="Open AI Chat">
-            <i class="fas fa-robot"></i>
-        </button>
-        <div class="ai-chat-window" id="aiChatWindow" style="display:none;">
-            <div class="ai-header">
-                <span><i class="fas fa-robot"></i> AI Assistant</span>
-                <button class="ai-close" id="aiClose" aria-label="Close chat">&times;</button>
-            </div>
-            <div class="ai-messages" id="aiMessages">
-                <div class="ai-message bot">
-                    <i class="fas fa-robot"></i>
-                    <div>Hello! I am here to help you find the best mods. Ask me anything!</div>
-                </div>
-            </div>
-            <div class="ai-input-area">
-                <input type="text" id="aiInput" placeholder="Type a message..." autocomplete="off">
-                <button id="aiSend" aria-label="Send message"><i class="fas fa-paper-plane"></i></button>
-            </div>
-        </div>
-    </div>
+    <!-- Scripts -->
+    <script src="apps-data.js"></script>
+    <script>
+    (function() {
+        'use strict';
 
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
-    <script src="firebase.js"></script>
-    <script src="public.js"></script>
+        function renderApps() {
+            const grid = document.getElementById('appGrid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            if (!appsData || appsData.length === 0) {
+                grid.innerHTML = '<div style="text-align:center;padding:60px;color:var(--text-secondary);grid-column:1/-1;"><i class="fas fa-box-open" style="font-size:40px;margin-bottom:16px;display:block;"></i>No apps available</div>';
+                return;
+            }
+
+            const fragment = document.createDocumentFragment();
+
+            appsData.forEach(app => {
+                const card = document.createElement('div');
+                card.className = 'app-card';
+                card.setAttribute('data-id', app.id);
+
+                // Icon
+                let iconHtml = '';
+                if (app.image && app.image.trim()) {
+                    iconHtml = '<img src="' + escapeHtml(app.image) + '" alt="' + escapeHtml(app.name) + '" loading="lazy">';
+                } else {
+                    iconHtml = '<i class="' + escapeHtml(app.icon || 'fas fa-mobile-alt') + '"></i>';
+                }
+
+                const modBadge = app.mod ? '<span class="mod-tag"><i class="fas fa-crown"></i> ' + escapeHtml(app.mod) + '</span>' : '';
+                const downloadCount = app.downloads ? '<span><i class="fas fa-download"></i> ' + formatNum(app.downloads) + '</span>' : '';
+
+                card.innerHTML = `
+                    <div class="app-icon">${iconHtml}</div>
+                    <div class="app-info">
+                        <h3>${escapeHtml(app.name)}</h3>
+                        <div class="app-meta">
+                            <span><i class="fas fa-code-branch"></i> ${escapeHtml(app.version || 'v1.0')}</span>
+                            <span><i class="fas fa-weight-hanging"></i> ${escapeHtml(app.size || 'N/A')}</span>
+                        </div>
+                        <div class="app-meta" style="margin-top:4px">${modBadge}</div>
+                        <div class="app-meta">${downloadCount}</div>
+                    </div>
+                    <div class="download-tag"><i class="fas fa-download"></i> Click to Download</div>
+                `;
+
+                // Click handler — opens download page in NEW TAB
+                card.addEventListener('click', () => {
+                    const url = 'download.html?app=' + encodeURIComponent(app.id);
+                    window.open(url, '_blank');
+                });
+
+                fragment.appendChild(card);
+            });
+
+            grid.appendChild(fragment);
+
+            // Attach image error handlers
+            grid.querySelectorAll('.app-icon img').forEach(img => {
+                img.addEventListener('error', function() {
+                    this.style.display = 'none';
+                    this.parentElement.innerHTML = '<i class="fas fa-mobile-alt"></i>';
+                });
+            });
+        }
+
+        function escapeHtml(str) {
+            if (str == null) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function formatNum(n) {
+            if (!n) return '0';
+            if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+            if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+            return n.toString();
+        }
+
+        // Render on load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', renderApps);
+        } else {
+            renderApps();
+        }
+    })();
+    </script>
 </body>
 </html>
