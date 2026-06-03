@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Downloading... • Freelightmods</title>
+    <title>Download YouTube Premium • Freelightmods</title>
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -16,12 +16,11 @@
             --accent-cyan: #00f2fe;
             --accent-purple: #4facfe;
             --accent-danger: #f5576c;
+            --accent-success: #10b981;
             --border-color: rgba(255, 255, 255, 0.06);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        html { scroll-behavior: smooth; }
 
         body {
             font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
@@ -82,14 +81,9 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-bottom: 4px;
             text-shadow: 0 0 20px rgba(0, 242, 254, 0.2);
         }
-
-        .site-header i {
-            color: var(--accent-cyan);
-            font-size: 1.6rem;
-        }
+        .site-header i { color: var(--accent-cyan); font-size: 1.6rem; }
 
         /* App Card */
         .app-card {
@@ -107,7 +101,6 @@
             position: relative;
             overflow: hidden;
         }
-
         .app-card::before {
             content: '';
             position: absolute;
@@ -117,37 +110,22 @@
         }
 
         .app-icon-large {
-            width: 100px;
-            height: 100px;
+            width: 100px; height: 100px;
             border-radius: 24px;
             background: linear-gradient(145deg, #1e2a3a, #141c28);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3rem;
-            color: var(--accent-cyan);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 3rem; color: #ff0000;
             overflow: hidden;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             transition: transform 0.3s ease;
         }
-
         .app-icon-large:hover { transform: scale(1.05); }
-        .app-icon-large img { width: 100%; height: 100%; object-fit: cover; border-radius: 24px; }
 
-        .app-name {
-            font-size: 1.9rem;
-            font-weight: 700;
-            line-height: 1.2;
-            word-break: break-word;
-        }
+        .app-name { font-size: 1.9rem; font-weight: 700; line-height: 1.2; }
 
         .app-meta {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: center;
+            display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
         }
-
         .meta-chip {
             background: rgba(255,255,255,0.03);
             border: 1px solid var(--border-color);
@@ -155,12 +133,9 @@
             border-radius: 20px;
             font-size: 0.85rem;
             color: var(--text-secondary);
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            display: flex; align-items: center; gap: 6px;
             font-weight: 500;
         }
-
         .meta-chip i { font-size: 0.75rem; color: var(--accent-purple); }
         .meta-chip.mod-chip i { color: #fbbf24; }
 
@@ -179,9 +154,14 @@
             width: 100%;
             justify-content: center;
             text-align: center;
+            transition: all 0.3s ease;
         }
-
         .note-box i { font-size: 1.1rem; }
+        .note-box.ready {
+            background: rgba(16, 185, 129, 0.06);
+            border-color: rgba(16, 185, 129, 0.2);
+            color: var(--accent-success);
+        }
 
         /* ===== RGB PROGRESS BAR ===== */
         .progress-area {
@@ -202,7 +182,6 @@
             animation: rgbRotate 2s linear infinite;
             box-shadow: 0 0 20px rgba(0,0,0,0.4);
         }
-
         .rgb-border::before {
             content: '';
             position: absolute;
@@ -226,7 +205,6 @@
             border-radius: 12px;
             padding: 6px;
         }
-
         .progress-track {
             height: 22px;
             background: rgba(255,255,255,0.04);
@@ -234,7 +212,6 @@
             overflow: hidden;
             position: relative;
         }
-
         .progress-fill {
             height: 100%;
             width: 0%;
@@ -244,7 +221,6 @@
             box-shadow: 0 0 20px rgba(0, 242, 254, 0.3);
             position: relative;
         }
-
         .progress-fill::after {
             content: '';
             position: absolute;
@@ -252,7 +228,6 @@
             background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
             animation: shimmer 0.8s infinite;
         }
-
         @keyframes shimmer {
             0% { transform: translateX(-100%); }
             100% { transform: translateX(100%); }
@@ -266,12 +241,10 @@
             align-items: center;
             gap: 16px;
         }
-
         .download-area.visible {
             display: flex;
             animation: fadeInUp 0.6s ease;
         }
-
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -296,12 +269,10 @@
             position: relative;
             overflow: hidden;
         }
-
         .download-btn-glow:hover {
             transform: translateY(-3px);
             box-shadow: 0 12px 35px rgba(0, 242, 254, 0.5);
         }
-
         .download-btn-glow:active { transform: translateY(-1px); }
         .download-btn-glow i { font-size: 1.3rem; }
 
@@ -312,7 +283,6 @@
             gap: 8px;
             align-items: center;
         }
-
         .file-details i { color: var(--accent-purple); font-size: 0.8rem; }
 
         /* Back Link */
@@ -327,20 +297,7 @@
             margin-top: 8px;
             font-weight: 500;
         }
-
         .back-link:hover { color: var(--accent-cyan); gap: 12px; }
-
-        /* Error State */
-        .error-state {
-            color: var(--accent-danger);
-            text-align: center;
-            padding: 20px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            justify-content: center;
-        }
 
         /* Responsive */
         @media (max-width: 480px) {
@@ -362,12 +319,16 @@
         </div>
 
         <!-- App Info Card -->
-        <div class="app-card" id="appCard">
-            <div class="app-icon-large" id="appIcon">
-                <i class="fas fa-mobile-alt"></i>
+        <div class="app-card">
+            <div class="app-icon-large">
+                <i class="fab fa-youtube"></i>
             </div>
-            <h1 class="app-name" id="appName">Loading...</h1>
-            <div class="app-meta" id="appMeta"></div>
+            <h1 class="app-name">YouTube Premium</h1>
+            <div class="app-meta">
+                <span class="meta-chip"><i class="fas fa-code-branch"></i> v18.45.41</span>
+                <span class="meta-chip"><i class="fas fa-weight-hanging"></i> 134 MB</span>
+                <span class="meta-chip mod-chip"><i class="fas fa-crown"></i> No Ads</span>
+            </div>
         </div>
 
         <!-- Note -->
@@ -391,9 +352,13 @@
         <div class="download-area" id="downloadArea">
             <button class="download-btn-glow" id="downloadBtn">
                 <i class="fas fa-download"></i>
-                <span>Download <span id="btnAppName">APK</span></span>
+                <span>Download Now</span>
             </button>
-            <div class="file-details" id="fileDetails"></div>
+            <div class="file-details">
+                <span><i class="fas fa-weight-hanging"></i> 134 MB</span>
+                <span style="color:var(--border-color)">|</span>
+                <span><i class="fas fa-code-branch"></i> v18.45.41</span>
+            </div>
         </div>
 
         <!-- Back Link -->
@@ -402,153 +367,26 @@
         </a>
     </div>
 
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script src="firebase.js"></script>
-
     <script>
     (function() {
         'use strict';
 
-        /* ===== MOD DOWNLOAD LINK OVERRIDES (Edit if needed) ===== */
-        const MOD_LINK_OVERRIDES = {
-            // 'spotify-premium': 'https://your-cdn.com/spotify.apk',
-            // 'youtube-premium': 'https://your-cdn.com/youtube.apk',
-        };
-        /* ======================================================== */
-
-        const params = new URLSearchParams(location.search);
-        const appId = params.get('app');
+        /* ===== EDIT THIS: Your actual APK download link ===== */
+        const APK_DOWNLOAD_LINK = 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf';
+        /* ==================================================== */
+        /*
+         * Replace the link above with your real YouTube Premium APK URL.
+         * Example: 'https://cdn.example.com/youtube-premium-v18.45.41.apk'
+         * For testing, any direct file link works (PDF, ZIP, MP4, etc.).
+         */
 
         const els = {
-            appName: document.getElementById('appName'),
-            btnAppName: document.getElementById('btnAppName'),
-            appIcon: document.getElementById('appIcon'),
-            appMeta: document.getElementById('appMeta'),
-            fileDetails: document.getElementById('fileDetails'),
-            progressArea: document.getElementById('progressArea'),
             progressFill: document.getElementById('progressFill'),
+            progressArea: document.getElementById('progressArea'),
             downloadArea: document.getElementById('downloadArea'),
             downloadBtn: document.getElementById('downloadBtn'),
-            noteBox: document.getElementById('noteBox'),
-            appCard: document.getElementById('appCard')
+            noteBox: document.getElementById('noteBox')
         };
-
-        let appData = null;
-
-        /* ==========================================
-           FIREBASE LOADING
-           ========================================== */
-        function waitForFirebase(callback, retries) {
-            retries = retries || 40;
-            if (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length > 0) {
-                callback();
-            } else if (retries > 0) {
-                setTimeout(() => waitForFirebase(callback, retries - 1), 150);
-            } else {
-                // Fallback: try URL params only
-                tryUrlFallback();
-            }
-        }
-
-        /* ==========================================
-           LOAD APP DATA
-           ========================================== */
-        function loadAppData() {
-            if (!appId) {
-                showError('No app specified. Please select an app from the main page.');
-                return;
-            }
-
-            waitForFirebase(() => {
-                if (typeof db === 'undefined') {
-                    tryUrlFallback();
-                    return;
-                }
-
-                db.collection('apks').doc(appId).get().then(doc => {
-                    if (doc.exists) {
-                        appData = { id: doc.id, ...doc.data() };
-                        // Apply manual overrides if set
-                        if (MOD_LINK_OVERRIDES[appId]) {
-                            appData.link = MOD_LINK_OVERRIDES[appId];
-                        }
-                        renderApp();
-                        startLoading();
-                    } else {
-                        tryUrlFallback();
-                    }
-                }).catch(err => {
-                    console.error('[Download] Firestore error:', err);
-                    tryUrlFallback();
-                });
-            });
-        }
-
-        /* ==========================================
-           URL FALLBACK (works without Firebase)
-           ========================================== */
-        function tryUrlFallback() {
-            const name = params.get('name');
-            if (!name) {
-                showError('App not found. It may have been removed or the link is invalid.');
-                return;
-            }
-
-            appData = {
-                id: appId,
-                name: name,
-                version: params.get('version') || '',
-                size: params.get('size') || '',
-                mod: params.get('mod') || '',
-                link: params.get('link') || '',
-                icon: params.get('icon') || 'fas fa-mobile-alt',
-                image: params.get('image') || ''
-            };
-            renderApp();
-            startLoading();
-        }
-
-        /* ==========================================
-           RENDER APP INFO
-           ========================================== */
-        function renderApp() {
-            if (!appData) return;
-
-            const name = appData.name || 'Unknown App';
-            els.appName.textContent = name;
-            els.btnAppName.textContent = name;
-
-            // Icon
-            if (appData.image && appData.image.trim()) {
-                els.appIcon.innerHTML = '<img src="' + escapeHtml(appData.image) + '" alt="' + escapeHtml(name) + '" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\'fas fa-mobile-alt\'></i>';">';
-            } else {
-                els.appIcon.innerHTML = '<i class="' + escapeHtml(appData.icon || 'fas fa-mobile-alt') + '"></i>';
-            }
-
-            // Meta chips
-            let metaHTML = '';
-            if (appData.version) {
-                metaHTML += '<span class="meta-chip"><i class="fas fa-code-branch"></i> ' + escapeHtml(appData.version) + '</span>';
-            }
-            if (appData.size) {
-                metaHTML += '<span class="meta-chip"><i class="fas fa-weight-hanging"></i> ' + escapeHtml(appData.size) + '</span>';
-            }
-            if (appData.mod) {
-                metaHTML += '<span class="meta-chip mod-chip"><i class="fas fa-crown"></i> ' + escapeHtml(appData.mod) + '</span>';
-            }
-            els.appMeta.innerHTML = metaHTML;
-
-            // File details under button
-            let details = '';
-            if (appData.size) details += '<span><i class="fas fa-weight-hanging"></i> ' + escapeHtml(appData.size) + '</span>';
-            if (appData.version) {
-                if (details) details += ' <span style="color:var(--border-color)">|</span> ';
-                details += '<span><i class="fas fa-code-branch"></i> ' + escapeHtml(appData.version) + '</span>';
-            }
-            els.fileDetails.innerHTML = details;
-        }
 
         /* ==========================================
            3-SECOND LOADING ANIMATION
@@ -556,7 +394,7 @@
         function startLoading() {
             const fill = els.progressFill;
 
-            // Force reflow to ensure transition plays
+            // Force reflow so transition plays
             fill.offsetHeight;
 
             requestAnimationFrame(() => {
@@ -568,70 +406,52 @@
                 els.progressArea.style.display = 'none';
                 els.downloadArea.classList.add('visible');
 
-                // Update note
-                els.noteBox.innerHTML = '<i class="fas fa-check-circle" style="color:var(--accent-success,#10b981)"></i> Ready to download!';
-                els.noteBox.style.borderColor = 'rgba(16,185,129,0.2)';
-                els.noteBox.style.background = 'rgba(16,185,129,0.06)';
-                els.noteBox.style.color = '#10b981';
+                // Update note to ready state
+                els.noteBox.classList.add('ready');
+                els.noteBox.innerHTML = '<i class="fas fa-check-circle"></i> Ready to download!';
             }, 3000);
         }
 
         /* ==========================================
            DOWNLOAD BUTTON CLICK
            ========================================== */
-        els.downloadBtn.addEventListener('click', () => {
-            if (!appData || !appData.link || appData.link === '#') {
-                alert('Download link is not available for this app yet. Please check back later.');
-                return;
-            }
-
-            // Increment download count in Firestore (silent)
-            if (appId && typeof db !== 'undefined') {
-                db.collection('apks').doc(appId).update({
-                    downloads: firebase.firestore.FieldValue.increment(1)
-                }).catch(() => {});
-            }
-
-            // Trigger download in new tab
+        els.downloadBtn.addEventListener('click', function() {
+            // Create a hidden anchor to force download
             const a = document.createElement('a');
-            a.href = appData.link;
+            a.href = APK_DOWNLOAD_LINK;
+            a.download = 'YouTube_Premium_v18.45.41.apk'; // Suggested filename
             a.target = '_blank';
             a.rel = 'noopener noreferrer';
             a.style.display = 'none';
             document.body.appendChild(a);
             a.click();
+
+            // Cleanup
             setTimeout(() => {
                 if (a.parentElement) document.body.removeChild(a);
-            }, 100);
+            }, 200);
+
+            // Button feedback
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Starting download...';
+            this.style.opacity = '0.8';
+            this.style.cursor = 'wait';
+
+            setTimeout(() => {
+                this.innerHTML = '<i class="fas fa-check"></i> Download Started';
+                this.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                this.style.cursor = 'pointer';
+                this.style.opacity = '1';
+            }, 1500);
         });
 
         /* ==========================================
-           UTILITIES
+           BOOT — Start loading immediately
            ========================================== */
-        function showError(msg) {
-            els.appName.textContent = 'Error';
-            els.appIcon.innerHTML = '<i class="fas fa-exclamation-triangle" style="color:var(--accent-danger)"></i>';
-            els.appMeta.innerHTML = '';
-            els.progressArea.style.display = 'none';
-            els.downloadArea.style.display = 'none';
-            els.noteBox.className = 'error-state';
-            els.noteBox.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + escapeHtml(msg);
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', startLoading);
+        } else {
+            startLoading();
         }
-
-        function escapeHtml(str) {
-            if (str == null) return '';
-            return String(str)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;');
-        }
-
-        /* ==========================================
-           BOOT
-           ========================================== */
-        loadAppData();
     })();
     </script>
 </body>
