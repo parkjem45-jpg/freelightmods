@@ -20,7 +20,7 @@ let currentFilter = 'all';
 let searchQuery = '';
 
 /* ==========================================
-   THEME TOGGLE — FIXED
+   THEME TOGGLE
    ========================================== */
 function initTheme() {
     const toggle = document.getElementById('themeToggle');
@@ -36,7 +36,6 @@ function initTheme() {
         const newTheme = isDark ? 'light' : 'dark';
         html.setAttribute('data-theme', newTheme);
         localStorage.setItem('theme', newTheme);
-        // After switching, show the icon for the NEXT switch
         updateThemeIcon(newTheme);
     });
 }
@@ -44,8 +43,6 @@ function initTheme() {
 function updateThemeIcon(currentTheme) {
     const toggle = document.getElementById('themeToggle');
     if (!toggle) return;
-    // If current is dark, show sun (click to switch to light)
-    // If current is light, show moon (click to switch to dark)
     toggle.innerHTML = currentTheme === 'dark'
         ? '<i class="fas fa-sun"></i>'
         : '<i class="fas fa-moon"></i>';
@@ -147,7 +144,7 @@ function loadSampleData() {
 }
 
 /* ==========================================
-   GRID RENDERING (No inline onerror!)
+   GRID RENDERING
    ========================================== */
 function renderGrid() {
     const grid = document.getElementById('appGrid');
@@ -197,8 +194,9 @@ function buildAppCard(app) {
     card.className = 'app-card';
     card.setAttribute('data-id', app.id);
     card.setAttribute('data-category', app.category || 'app');
+    card.style.cursor = 'pointer';
 
-    // Build icon div separately (no inline onerror!)
+    // Icon
     const iconDiv = document.createElement('div');
     iconDiv.className = 'app-icon';
     if (app.image && app.image.trim()) {
@@ -215,6 +213,7 @@ function buildAppCard(app) {
     const downloadCount = app.downloads ? `<span><i class="fas fa-download"></i> ${formatNum(app.downloads)}</span>` : '';
     const modBadge = app.mod ? `<span><i class="fas fa-crown" style="color:#fbbf24"></i> ${escapeHtml(app.mod)}</span>` : '';
 
+    // Info
     const infoDiv = document.createElement('div');
     infoDiv.className = 'app-info';
     infoDiv.innerHTML = `
@@ -227,22 +226,52 @@ function buildAppCard(app) {
         <div class="app-meta">${downloadCount}</div>
     `;
 
+    // Download button
     const btn = document.createElement('div');
     btn.className = 'download-btn';
-    btn.setAttribute('data-id', app.id);
-    btn.setAttribute('data-name', app.name || '');
-    btn.setAttribute('data-link', app.link || '#');
     btn.innerHTML = '<i class="fas fa-download"></i> Download APK';
 
     card.appendChild(iconDiv);
     card.appendChild(infoDiv);
     card.appendChild(btn);
 
+    // Click card (icon, name, etc.) → go to download page
+    card.addEventListener('click', () => handleDownload(app));
+
+    // Click download button → same action, stop propagation so card handler doesn't double-fire
+    btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        handleDownload(app);
+    });
+
     return card;
 }
 
 /* ==========================================
-   IMAGE ERROR HANDLING (Safe, no inline JS)
+   DOWNLOAD HANDLER — Auto opens download.html
+   ========================================== */
+function handleDownload(app) {
+    const link = app.link || '';
+    if (!link || link === '#' || !link.startsWith('http')) {
+        alert(`Download link for "${escapeHtml(app.name)}" is not set yet.\n\nPlease add the download URL in the admin panel.`);
+        return;
+    }
+
+    const url = new URL('download.html', window.location.href);
+    url.searchParams.set('id', app.id);
+    url.searchParams.set('name', app.name || '');
+    url.searchParams.set('version', app.version || '');
+    url.searchParams.set('size', app.size || '');
+    url.searchParams.set('mod', app.mod || '');
+    url.searchParams.set('icon', app.icon || 'fas fa-mobile-alt');
+    url.searchParams.set('image', app.image || '');
+    url.searchParams.set('link', link);
+
+    window.open(url.toString(), '_blank');
+}
+
+/* ==========================================
+   IMAGE ERROR HANDLING
    ========================================== */
 function attachImageErrorHandlers(container) {
     if (!container) return;
@@ -252,32 +281,6 @@ function attachImageErrorHandlers(container) {
             const parent = this.parentElement;
             if (parent) parent.innerHTML = '<i class="fas fa-mobile-alt"></i>';
         });
-    });
-}
-
-/* ==========================================
-   EVENT DELEGATION (Download buttons → redirect to download page)
-   ========================================== */
-function initEventDelegation() {
-    const grid = document.getElementById('appGrid');
-    if (!grid) return;
-
-    grid.addEventListener('click', (e) => {
-        const btn = e.target.closest('.download-btn');
-        if (!btn) return;
-
-        const id = btn.getAttribute('data-id');
-        if (!id) return;
-
-        // Increment download count (silent background update)
-        if (typeof db !== 'undefined') {
-            db.collection('apks').doc(id).update({
-                downloads: firebase.firestore.FieldValue.increment(1)
-            }).catch(() => {});
-        }
-
-        // Redirect to the themed download page with app ID
-        window.location.href = 'download.html?app=' + encodeURIComponent(id);
     });
 }
 
@@ -346,7 +349,7 @@ function updateStats(count) {
 }
 
 /* ==========================================
-   AI ASSISTANT — FIXED
+   AI ASSISTANT
    ========================================== */
 function initAI() {
     const aiToggle = document.getElementById('aiToggle');
@@ -489,7 +492,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initAuth();
     initSearch();
     initLoadMore();
-    initEventDelegation();
     initAI();
     loadAppsData();
 });

@@ -9,6 +9,8 @@
     --accent-purple: #4facfe;
     --accent-pink: #f093fb;
     --accent-orange: #f5576c;
+    --accent-success: #10b981;
+    --accent-danger: #f5576c;
     --border-color: rgba(255, 255, 255, 0.06);
     --shadow-card: 0 20px 30px -10px rgba(0, 0, 0, 0.5);
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -71,7 +73,7 @@ a { text-decoration: none; color: inherit; transition: var(--transition); }
 }
 .nav-links a:hover::after { width: 100%; }
 
-/* Admin link styling - NO !important on display */
+/* Admin link styling */
 .admin-nav-link {
     background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
     padding: 8px 16px;
@@ -225,6 +227,7 @@ a { text-decoration: none; color: inherit; transition: var(--transition); }
     border: 1px solid var(--border-color); transition: var(--transition);
     box-shadow: var(--shadow-card); display: flex; flex-direction: column;
     position: relative; overflow: hidden;
+    cursor: pointer; /* FIXED: whole card is clickable */
 }
 .app-card::before {
     content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px;
@@ -239,7 +242,7 @@ a { text-decoration: none; color: inherit; transition: var(--transition); }
     border-radius: 20px; display: flex; align-items: center; justify-content: center;
     margin-bottom: 20px; font-size: 2rem; color: var(--accent-cyan);
     transition: var(--transition); overflow: hidden; flex-shrink: 0;
-    pointer-events: none; /* Icon is NOT clickable */
+    pointer-events: none;
     user-select: none;
 }
 [data-theme="light"] .app-icon { background: linear-gradient(145deg, #e2e8f0, #cbd5e1); }
