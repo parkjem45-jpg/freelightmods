@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Firebase Storage & Hosting Inspector | Free Tier Checker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <!-- Firebase SDKs (Compat for stability) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0b2b26 0%, #12372f 100%);
+            min-height: 100vh;
+            padding: 2rem 1.5rem;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        /* header */
+        .hero {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .hero h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(120deg, #fff, #a7f3d0);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .hero p {
+            color: #cbd5e6;
+            margin-top: 0.6rem;
+            font-size: 0.9rem;
+        }
+
+        .badge-free {
+            background: #05966933;
+            backdrop-filter: blur(4px);
+            padding: 4px 12px;
+            border-radius: 60px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #6ee7b7;
+            border: 1px solid #2dd4bf33;
+        }
+
+        /* grid layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+            gap: 1.8rem;
+        }
+
+        .card {
+            background: rgba(20, 30, 35, 0.75);
+            backdrop-filter: blur(12px);
+            border-radius: 2rem;
+            border: 1px solid rgba(80, 120, 100, 0.4);
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            border-color: #34d39966;
+            box-shadow: 0 25px 40px -12px rgba(0,0,0,0.5);
+        }
+
+        .card-header {
+            padding: 1.2rem 1.5rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid rgba(100, 140, 120, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: #ecfdf5;
+        }
+
+        .card-header span:first-child {
+            font-size: 1.7rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        /* storage styling */
+        .storage-status {
+            background: #0f1e1b;
+            border-radius: 1.2rem;
+            padding: 1rem;
+            margin-bottom: 1.4rem;
+        }
+
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.6rem 0;
+            border-bottom: 1px dashed #2c4b42;
+            font-size: 0.85rem;
+        }
+
+        .metric-label {
+            color: #94a3b8;
+            font-weight: 500;
+        }
+
+        .metric-value {
+            color: #ccf0e6;
+            font-family: monospace;
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            background: #1e3a32;
+            border-radius: 20px;
+            height: 8px;
+            margin: 12px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #10b981, #34d399);
+            width: 0%;
+            height: 100%;
+            border-radius: 20px;
+            transition: width 0.5s ease;
+        }
+
+        .file-upload-area {
+            border: 2px dashed #2d6a4f;
+            border-radius: 1.2rem;
+            padding: 1.2rem;
+            text-align: center;
+            margin: 1.2rem 0;
+            background: #082c2533;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .file-upload-area:hover {
+            background: #0e3f35;
+            border-color: #34d399;
+        }
+
+        .upload-btn {
+            background: #2c7a5e;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 2rem;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            width: 100%;
+            transition: 0.2s;
+        }
+
+        .upload-btn:hover {
+            background: #389e7a;
+        }
+
+        .file-list {
+            max-height: 240px;
+            overflow-y: auto;
+            margin-top: 1rem;
+            font-size: 0.75rem;
+        }
+
+        .file-item {
+            background: #0f2a24;
+            padding: 8px 12px;
+            border-radius: 40px;
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            word-break: break-all;
+        }
+
+        .delete-file {
+            background: none;
+            border: none;
+            color: #f87171;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .hosting-card {
+            background: #0b211d;
+        }
+
+        .hosting-info {
+            background: #0a2a24;
+            padding: 1rem;
+            border-radius: 1rem;
+            margin-top: 0.8rem;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #2b5e4c;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+
+        .status-ok {
+            color: #6ee7b7;
+        }
+
+        .status-warning {
+            color: #fbbf24;
+        }
+
+        .action-icon {
+            background: #1f423b;
+            padding: 6px 12px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+        }
+
+        button {
+            background: #2c7a5e;
+            border: none;
+            font-family: inherit;
+        }
+
+        hr {
+            border-color: #2d5a4e;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="hero">
+        <h1>☁️ Firebase Free Tier Inspector <span class="badge-free">STORAGE + HOSTING</span></h1>
+        <p>Check Google Firebase Cloud Storage (free 5GB) & Hosting availability • upload / download test • deployment readiness</p>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- LEFT CARD: Firebase Storage Check & Upload demo -->
+        <div class="card">
+            <div class="card-header">
+                <span>🗄️</span> Firebase Storage (Free 5GB)
+            </div>
+            <div class="card-body">
+                <div class="storage-status">
+                    <div class="metric">
+                        <span class="metric-label">📦 Storage Bucket</span>
+                        <span class="metric-value" id="bucketName">checking...</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">💾 Estimated Usage (test file)</span>
+                        <span class="metric-value" id="storageUsage">0 KB / 5 GB</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="storageProgressFill" style="width:0%"></div>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">🔐 Auth status</span>
+                        <span class="metric-value" id="storageAuthState">⏳ waiting</span>
+                    </div>
+                </div>
+
+                <!-- Anonymous sign-in (to allow storage uploads if rules allow) -->
+                <div style="display: flex; gap: 10px; margin-bottom: 1rem;">
+                    <button id="anonSignInBtn" style="background:#2b5e4c; padding: 8px; border-radius: 40px; width: 50%;">🔓 Guest Login (test upload)</button>
+                    <button id="clearStorageBtn" style="background:#5a2d2d; padding: 8px; border-radius: 40px; width: 50%;">🧹 Clear test file</button>
+                </div>
+
+                <!-- Upload area -->
+                <div class="file-upload-area" id="fileUploadZone">
+                    📂 Click or drag file to upload (max 2MB demo)
+                    <input type="file" id="fileInput" style="display: none;">
+                </div>
+                <button id="uploadFileBtn" class="upload-btn">⬆️ Upload to Firebase Storage</button>
+
+                <!-- List of uploaded test files -->
+                <div style="margin-top: 1.2rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="font-size:0.7rem; font-weight:600;">📁 Test files in 'free_check/' folder</span>
+                        <span id="fileCountBadge" class="badge">0 items</span>
+                    </div>
+                    <div id="fileListContainer" class="file-list">
+                        <div style="color:#6b8f82; text-align:center;">No files uploaded yet</div>
+                    </div>
+                </div>
+                <div id="storageMessage" style="font-size:0.7rem; margin-top: 12px; color:#b0c7bd;"></div>
+            </div>
+        </div>
+
+        <!-- RIGHT CARD: Firebase Hosting Check + Free Hosting Status -->
+        <div class="card">
+            <div class="card-header">
+                <span>🌍</span> Firebase Hosting (10GB / month free)
+            </div>
+            <div class="card-body">
+                <div class="hosting-info">
+                    <div class="metric">
+                        <span class="metric-label">🌐 Current domain / host</span>
+                        <span class="metric-value" id="hostingDomain">-</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">🔒 SSL / HTTPS</span>
+                        <span class="metric-value" id="sslStatus">-</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">🚀 Firebase Hosting detected</span>
+                        <span class="metric-value" id="firebaseHostingDetect">scanning...</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">📊 Free tier eligibility</span>
+                        <span class="metric-value" id="freeTierStatus">✔️ Spark plan: 10GB transfer, 10GB storage (hosting)</span>
+                    </div>
+                </div>
+
+                <!-- Hosting quick diagnostic -->
+                <button id="runHostingDiagnostic" style="width:100%; background: #2b5e4c; margin: 12px 0; padding: 10px; border-radius: 2rem;">🔍 Run Full Hosting Check</button>
+                
+                <div id="hostingDetailedReport" style="background: #0f1e1b; border-radius: 1rem; padding: 1rem; margin-top: 0.8rem; font-size: 0.75rem;">
+                    <div>✨ <strong>Hosting insights:</strong></div>
+                    <div id="hostingDetailsText">Click 'Run Full Hosting Check' to verify Firebase Hosting configuration, custom domains, and CDN status.</div>
+                </div>
+                
+                <!-- additional: hosting deployment tips -->
+                <hr>
+                <div style="font-size:0.7rem; color:#87b8aa;">
+                    💡 <strong>Free hosting tip:</strong> Firebase Hosting provides 10GB storage + 10GB/month bandwidth on Spark plan. Deploy with `firebase deploy`.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ----------------------------------------------
+    // Firebase config from user (same as earlier)
+    const firebaseConfig = {
+        apiKey: "AIzaSyC04-Bo_9r4BSqNzUOwZqwCFiOXQpXf8xI",
+        authDomain: "modyes99.firebaseapp.com",
+        databaseURL: "https://modyes99-default-rtdb.firebaseio.com",
+        projectId: "modyes99",
+        storageBucket: "modyes99.firebasestorage.app",
+        messagingSenderId: "848401642956",
+        appId: "1:848401642956:web:59e662df5976668f5d9969",
+        measurementId: "G-EZS3CZ8FTC"
+    };
+
+    // Initialize Firebase
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    const auth = firebase.auth();
+    const storage = firebase.storage();
+    const storageRef = storage.ref();
+
+    // DOM elements
+    const bucketNameSpan = document.getElementById('bucketName');
+    const storageUsageSpan = document.getElementById('storageUsage');
+    const storageProgressFill = document.getElementById('storageProgressFill');
+    const storageAuthStateSpan = document.getElementById('storageAuthState');
+    const fileInput = document.getElementById('fileInput');
+    const uploadBtn = document.getElementById('uploadFileBtn');
+    const fileListContainer = document.getElementById('fileListContainer');
+    const fileCountBadge = document.getElementById('fileCountBadge');
+    const storageMessageDiv = document.getElementById('storageMessage');
+    const anonSignInBtn = document.getElementById('anonSignInBtn');
+    const clearStorageBtn = document.getElementById('clearStorageBtn');
+    const runHostingDiagBtn = document.getElementById('runHostingDiagnostic');
+    const hostingDomainSpan = document.getElementById('hostingDomain');
+    const sslStatusSpan = document.getElementById('sslStatus');
+    const firebaseHostingDetectSpan = document.getElementById('firebaseHostingDetect');
+    const hostingDetailsTextDiv = document.getElementById('hostingDetailsText');
+
+    let currentUser = null;
+    const TEST_FOLDER = "free_check/";
+    let uploadedFilesMeta = [];
+
+    // Helper: update storage UI / free quota simulation
+    function updateStorageQuotaDisplay(totalBytes) {
+        const maxFreeBytes = 5 * 1024 * 1024 * 1024; // 5GB
+        let usedMB = (totalBytes / (1024 * 1024)).toFixed(2);
+        let percent = (totalBytes / maxFreeBytes) * 100;
+        if (percent > 100) percent = 100;
+        storageUsageSpan.innerText = `${usedMB} MB / 5 GB`;
+        storageProgressFill.style.width = `${percent}%`;
+    }
+
+    // Simulate total usage by listing all files and summing size (demo)
+    async function refreshStorageUsage() {
+        if (!currentUser && !auth.currentUser) {
+            storageUsageSpan.innerText = "0 KB / 5 GB (login to see)";
+            storageProgressFill.style.width = "0%";
+            return;
+        }
+        try {
+            const listRef = storageRef.child(TEST_FOLDER);
+            const result = await listRef.listAll();
+            let totalSize = 0;
+            const filesMeta = [];
+            for (const itemRef of result.items) {
+                const metadata = await itemRef.getMetadata();
+                totalSize += metadata.size;
+                filesMeta.push({ name: itemRef.name, size: metadata.size, fullRef: itemRef });
+            }
+            uploadedFilesMeta = filesMeta;
+            updateStorageQuotaDisplay(totalSize);
+            renderFileList(filesMeta);
+        } catch (err) {
+            console.warn("usage refresh error", err);
+            storageMessageDiv.innerText = "⚠️ Can't fetch usage (rules maybe restrictive)";
+        }
+    }
+
+    function renderFileList(files) {
+        if (!files.length) {
+            fileListContainer.innerHTML = '<div style="color:#6b8f82; text-align:center;">✨ No files in "free_check/" folder</div>';
+            fileCountBadge.innerText = "0 items";
+            return;
+        }
+        fileCountBadge.innerText = `${files.length} item${files.length > 1 ? 's' : ''}`;
+        let html = '';
+        files.forEach(file => {
+            const sizeKb = (file.size / 1024).toFixed(1);
+            html += `
+                <div class="file-item">
+                    <span>📄 ${file.name} (${sizeKb} KB)</span>
+                    <button class="delete-file" data-filename="${file.name}">🗑️</button>
+                </div>
+            `;
+        });
+        fileListContainer.innerHTML = html;
+        // attach delete events
+        document.querySelectorAll('.delete-file').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const fileName = btn.getAttribute('data-filename');
+                await deleteTestFile(fileName);
+            });
+        });
+    }
+
+    async function deleteTestFile(fileName) {
+        if (!auth.currentUser && !currentUser) {
+            storageMessageDiv.innerText = "❌ Please sign in anonymously first";
+            return;
+        }
+        try {
+            const fileRef = storageRef.child(`${TEST_FOLDER}${fileName}`);
+            await fileRef.delete();
+            storageMessageDiv.innerText = `✅ Deleted ${fileName}`;
+            await refreshStorageUsage();
+        } catch (err) {
+            storageMessageDiv.innerText = `Delete error: ${err.message}`;
+        }
+    }
+
+    async function uploadFile(file) {
+        if (!auth.currentUser && !currentUser) {
+            storageMessageDiv.innerText = "⚠️ You must sign in anonymously first (click Guest Login)";
+            return;
+        }
+        if (!file) return;
+        if (file.size > 2 * 1024 * 1024) {
+            storageMessageDiv.innerText = "⚠️ File too large (max 2MB for demo)";
+            return;
+        }
+        const timestamp = Date.now();
+        const safeName = `${timestamp}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+        const uploadRef = storageRef.child(`${TEST_FOLDER}${safeName}`);
+        storageMessageDiv.innerText = "Uploading...";
+        try {
+            const snapshot = await uploadRef.put(file);
+            const url = await snapshot.ref.getDownloadURL();
+            storageMessageDiv.innerHTML = `✅ Uploaded! <a href="${url}" target="_blank" style="color:#6ee7b7;">preview</a>`;
+            await refreshStorageUsage();
+        } catch (err) {
+            storageMessageDiv.innerText = `❌ Upload failed: ${err.message}. Check Storage Rules (allow read/write if authenticated)`;
+        }
+    }
+
+    async function clearAllTestFiles() {
+        if (!auth.currentUser && !currentUser) return;
+        try {
+            const listRef = storageRef.child(TEST_FOLDER);
+            const result = await listRef.listAll();
+            for (const itemRef of result.items) {
+                await itemRef.delete();
+            }
+            storageMessageDiv.innerText = "🧹 Cleared all test files in folder.";
+            await refreshStorageUsage();
+        } catch (err) {
+            storageMessageDiv.innerText = `Clear error: ${err.message}`;
+        }
+    }
+
+    // Auth state & anonymous sign in
+    anonSignInBtn.addEventListener('click', async () => {
+        try {
+            await auth.signInAnonymously();
+            storageMessageDiv.innerText = "🔓 Signed in anonymously. You can test uploads now.";
+        } catch (err) {
+            storageMessageDiv.innerText = `Anonymous auth error: ${err.message}. Check if Anonymous auth is enabled in Firebase Console.`;
+        }
+    });
+
+    auth.onAuthStateChanged(async (user) => {
+        currentUser = user;
+        if (user) {
+            storageAuthStateSpan.innerHTML = `✅ Authenticated (UID: ${user.uid.substring(0, 8)}...)`;
+            await refreshStorageUsage();
+        } else {
+            storageAuthStateSpan.innerHTML = `⚠️ Not authenticated (enable Anonymous or email/pass)`;
+            storageUsageSpan.innerText = "0 KB / 5 GB";
+            storageProgressFill.style.width = "0%";
+            fileListContainer.innerHTML = '<div style="color:#6b8f82;">Login to test storage</div>';
+        }
+    });
+
+    // Upload zone events
+    fileUploadZone.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length) uploadFile(e.target.files[0]);
+        fileInput.value = '';
+    });
+    uploadBtn.addEventListener('click', () => fileInput.click());
+    clearStorageBtn.addEventListener('click', clearAllTestFiles);
+
+    // Bucket name display
+    bucketNameSpan.innerText = firebaseConfig.storageBucket || "modyes99.firebasestorage.app";
+
+    // -------------------- HOSTING DIAGNOSTIC --------------------
+    function hostingDiagnostic() {
+        const url = window.location.href;
+        const hostname = window.location.hostname;
+        const protocol = window.location.protocol;
+        hostingDomainSpan.innerText = `${hostname}`;
+        sslStatusSpan.innerHTML = protocol === 'https:' ? '✅ Active SSL (Secure)' : '⚠️ Not HTTPS (limited hosting features)';
+        
+        let isFirebaseHosting = false;
+        if (hostname.includes('web.app') || hostname.includes('firebaseapp.com')) {
+            isFirebaseHosting = true;
+            firebaseHostingDetectSpan.innerHTML = '✅ Yes! Deployed on Firebase Hosting (web.app/firebaseapp.com)';
+        } else if (hostname === 'localhost' || hostname === '127.0.0.1') {
+            firebaseHostingDetectSpan.innerHTML = '🖥️ Local development — deploy to Firebase Hosting for global CDN';
+        } else {
+            firebaseHostingDetectSpan.innerHTML = '🌐 Custom domain — you can link to Firebase Hosting';
+        }
+        
+        let detailedReport = `
+            <strong>📡 Hosting details:</strong><br>
+            • Full URL: ${url}<br>
+            • Firebase project: ${firebaseConfig.projectId}<br>
+            • Hosting free tier: 10GB storage + 10GB/month egress (Spark plan).<br>
+            • Recommended: run \`firebase init hosting\` then \`firebase deploy\`.<br>
+        `;
+        if (isFirebaseHosting) {
+            detailedReport += `✅ Current site already using Firebase Hosting CDN — free quota applies!`;
+        } else {
+            detailedReport += `💡 To enable free hosting: connect your project to Firebase Hosting via CLI.`;
+        }
+        // extra test: Firebase Hosting header check
+        fetch(window.location.origin + '/__/firebase/init.json', { method: 'HEAD', cache: 'no-cache' })
+            .then(res => {
+                if (res.ok) detailedReport += `<br>✨ Firebase Hosting SDK endpoints reachable (good).`;
+                else detailedReport += `<br>⚠️ Firebase hosting meta endpoint not found (maybe not deployed via hosting).`;
+                hostingDetailsTextDiv.innerHTML = detailedReport;
+            })
+            .catch(() => {
+                detailedReport += `<br>⚠️ Could not validate hosting endpoint, but manual deploy works.`;
+                hostingDetailsTextDiv.innerHTML = detailedReport;
+            });
+        hostingDetailsTextDiv.innerHTML = detailedReport;
+    }
+    
+    runHostingDiagBtn.addEventListener('click', () => {
+        hostingDiagnostic();
+    });
+    
+    // initial checks
+    setTimeout(() => {
+        hostingDiagnostic();
+        bucketNameSpan.innerText = firebaseConfig.storageBucket || "bucket ready";
+        if (auth.currentUser) refreshStorageUsage();
+    }, 300);
+    
+    // Storage message default
+    storageMessageDiv.innerText = "👉 Click 'Guest Login' to test uploads (ensure Storage rules allow read/write)";
+</script>
+</body>
+</html>
