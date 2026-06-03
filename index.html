@@ -3,9 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Free Lite Mods — Premium modded APKs and games. Safe, fast, and verified.">
     <title>Free Lite Mods • Premium Modded APKs</title>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://www.gstatic.com">
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
@@ -24,49 +29,45 @@
                 <i class="fas fa-bolt"></i>
                 <span class="logo-text">Free Lite <span class="logo-highlight">Mods</span></span>
             </a>
-            
-            <!-- Desktop Nav -->
+
             <nav class="nav-links" id="navLinks">
                 <a href="#" class="active">Home</a>
                 <a href="#apps">Apps</a>
                 <a href="#games">Games</a>
                 <a href="#how">How it Works</a>
-                <a href="admin.html" id="adminLink" style="display:none"><i class="fas fa-lock"></i> Admin</a>
+                <a href="admin.html" id="adminLink" class="admin-nav-link" style="display:none"><i class="fas fa-lock"></i> Admin</a>
             </nav>
 
-            <!-- Mobile Menu Button -->
             <button class="mobile-menu-toggle" id="mobileToggle" aria-label="Open Menu">
                 <i class="fas fa-bars"></i>
             </button>
         </div>
     </header>
 
-    <!-- Mobile Menu Overlay & Sidebar -->
+    <!-- Mobile Menu -->
     <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
     <div class="mobile-menu-sidebar" id="mobileMenuSidebar">
         <div class="mobile-menu-header">
             <span class="logo-text">Menu</span>
-            <button id="closeMobileMenu"><i class="fas fa-times"></i></button>
+            <button id="closeMobileMenu" aria-label="Close menu"><i class="fas fa-times"></i></button>
         </div>
         <nav class="mobile-nav-links">
             <a href="#" class="active"><i class="fas fa-home"></i> Home</a>
             <a href="#apps"><i class="fas fa-th-large"></i> Apps</a>
             <a href="#games"><i class="fas fa-gamepad"></i> Games</a>
             <a href="#how"><i class="fas fa-info-circle"></i> How it Works</a>
-            <a href="admin.html" id="mobileAdminLink" style="display:none"><i class="fas fa-lock"></i> Admin Panel</a>
+            <a href="admin.html" id="mobileAdminLink" class="admin-nav-link" style="display:none"><i class="fas fa-lock"></i> Admin Panel</a>
         </nav>
         <div class="mobile-menu-footer">
             <p>© <span id="currentYear">2026</span> Free Lite Mods</p>
         </div>
     </div>
 
-    <!-- Hero Section -->
+    <!-- Hero -->
     <section class="hero">
         <div class="hero-glow"></div>
         <div class="container hero-content">
-            <div class="hero-badge">
-                <i class="fas fa-check-circle"></i> Verified & Safe
-            </div>
+            <div class="hero-badge"><i class="fas fa-check-circle"></i> Verified & Safe</div>
             <h1 class="hero-title">
                 Premium Mods,<br>
                 <span class="animated-gradient-text">Zero Compromise</span>
@@ -76,12 +77,8 @@
                 Fast downloads, no bloatware, just pure performance.
             </p>
             <div class="hero-actions">
-                <a href="#apps" class="btn btn-primary">
-                    <i class="fas fa-rocket"></i> Explore Mods
-                </a>
-                <a href="#how" class="btn btn-outline">
-                    <i class="fas fa-question-circle"></i> How it works
-                </a>
+                <a href="#apps" class="btn btn-primary"><i class="fas fa-rocket"></i> Explore Mods</a>
+                <a href="#how" class="btn btn-outline"><i class="fas fa-question-circle"></i> How it works</a>
             </div>
             <div class="hero-stats">
                 <div class="stat-item">
@@ -100,8 +97,24 @@
         </div>
     </section>
 
+    <!-- Search & Filter -->
+    <section class="search-section" id="apps">
+        <div class="container">
+            <div class="search-bar-container">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Search mods by name or feature..." autocomplete="off">
+                <button id="clearSearch" class="clear-search" aria-label="Clear search"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="filter-tags" id="filterTags">
+                <button class="filter-tag active" data-filter="all">All</button>
+                <button class="filter-tag" data-filter="app">Apps</button>
+                <button class="filter-tag" data-filter="game">Games</button>
+            </div>
+        </div>
+    </section>
+
     <!-- Featured Apps -->
-    <section class="featured-section" id="apps">
+    <section class="featured-section">
         <div class="container">
             <div class="section-header">
                 <div>
@@ -110,13 +123,14 @@
                 </div>
                 <a href="#" class="view-all">View all <i class="fas fa-arrow-right"></i></a>
             </div>
-            
-            <!-- App Grid Container -->
             <div class="app-grid" id="appGrid">
                 <div class="loading-state">
                     <i class="fas fa-spinner fa-spin"></i>
                     <p>Loading mods...</p>
                 </div>
+            </div>
+            <div class="load-more-wrap" id="loadMoreWrap" style="display:none">
+                <button class="btn btn-outline" id="loadMoreBtn"><i class="fas fa-chevron-down"></i> Load More</button>
             </div>
         </div>
     </section>
@@ -142,7 +156,7 @@
                 <div class="step-card">
                     <div class="step-icon"><i class="fas fa-play"></i></div>
                     <h3>3. Install & Enjoy</h3>
-                    <p class="text-secondary">Enable "Unknown Sources" and dive into premium features.</p>
+                    <p class="text-secondary">Enable "Unknown Sources" in Android settings and dive into premium features.</p>
                 </div>
             </div>
         </div>
@@ -181,41 +195,39 @@
             </div>
         </div>
         <div class="container footer-bottom">
-            <p>&copy; <span id="currentYear">2026</span> Free Lite Mods. All rights reserved.</p>
+            <p>&copy; <span id="footerYear">2026</span> Free Lite Mods. All rights reserved.</p>
         </div>
     </footer>
 
     <!-- AI Assistant -->
-    <div class="ai-assistant">
+    <div class="ai-assistant" id="aiAssistant">
         <button class="ai-toggle" id="aiToggle" aria-label="Open AI Chat">
             <i class="fas fa-robot"></i>
         </button>
         <div class="ai-chat-window" id="aiChatWindow" style="display:none;">
             <div class="ai-header">
                 <span><i class="fas fa-robot"></i> AI Assistant</span>
-                <button class="ai-close" id="aiClose">&times;</button>
+                <button class="ai-close" id="aiClose" aria-label="Close chat">&times;</button>
             </div>
             <div class="ai-messages" id="aiMessages">
                 <div class="ai-message bot">
                     <i class="fas fa-robot"></i>
-                    <div>Hello! I'm here to help you find the best mods. Ask me anything!</div>
+                    <div>Hello! I am here to help you find the best mods. Ask me anything!</div>
                 </div>
             </div>
             <div class="ai-input-area">
-                <input type="text" id="aiInput" placeholder="Type a message...">
-                <button id="aiSend"><i class="fas fa-paper-plane"></i></button>
+                <input type="text" id="aiInput" placeholder="Type a message..." autocomplete="off">
+                <button id="aiSend" aria-label="Send message"><i class="fas fa-paper-plane"></i></button>
             </div>
         </div>
     </div>
 
-    <!-- Firebase Compat SDKs -->
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
-    
-    <!-- Custom Scripts -->
-    <script src="firebase-config.js"></script>
+    <script src="firebase.js"></script>
     <script src="public.js"></script>
 </body>
 </html>

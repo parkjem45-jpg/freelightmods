@@ -1,4 +1,7 @@
-// firebase-config.js
+// firebase.js — Firebase Configuration & Initialization
+// ⚠️ SECURITY NOTE: Replace these keys with your own Firebase project settings.
+// These are hardcoded for your project: freelightmods
+
 const firebaseConfig = {
   apiKey: "AIzaSyB0LrQcsXD-prcam7s3O1iEJbIvcPthlgo",
   authDomain: "freelightmods.firebaseapp.com",
@@ -10,17 +13,27 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase (Compat mode)
-firebase.initializeApp(firebaseConfig);
+try {
+  firebase.initializeApp(firebaseConfig);
+} catch (e) {
+  if (!/already exists/.test(e.message)) console.error("Firebase init failed:", e);
+}
+
 const db = firebase.firestore();
 const auth = firebase.auth();
 const analytics = firebase.analytics();
 
-// Enable offline persistence safely
+// Enable offline persistence for better performance
 try {
   db.enablePersistence({ synchronizeTabs: true }).catch((err) => {
-    if (err.code === 'failed-precondition') console.warn('Persistence blocked by multiple tabs.');
-    else if (err.code === 'unimplemented') console.warn('Persistence not supported.');
+    if (err.code === 'failed-precondition') {
+      console.warn('[Firebase] Persistence blocked: multiple tabs open.');
+    } else if (err.code === 'unimplemented') {
+      console.warn('[Firebase] Persistence not supported in this browser.');
+    }
   });
-} catch (e) {}
+} catch (e) {
+  console.warn('[Firebase] Persistence enablement failed:', e);
+}
 
-console.log('🔥 Firebase Initialized');
+console.log('[Firebase] Initialized successfully');

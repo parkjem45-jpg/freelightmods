@@ -1,231 +1,716 @@
-// admin.js
+// admin.js — Admin Panel Logic (Bug-Free Version)
+// ================================================
+
+/* ===== MOD DOWNLOAD URL CONFIGURATION =====
+ * EDIT HERE: Pre-define download URLs for specific apps.
+ * These are used as fallbacks or defaults.
+ * Format: 'app-id': 'https://your-cdn.com/file.apk'
+ * ========================================== */
+const MOD_URL_TEMPLATES = {
+    // 'spotify-premium': 'https://example.com/spotify.apk',
+};
+/* ===== END MOD URL CONFIGURATION ===== */
+
 let appsData = [];
 let currentUser = null;
 let currentPage = 1;
-const itemsPerPage = 20;
+const itemsPerPage = 15;
 let unsubscribe = null;
+let searchDebounce = null;
+let adminInitialized = false;
 
-// Theme Toggle
-const themeToggle = document.getElementById('themeToggle');
-if (themeToggle) {
-    const html = document.documentElement;
-    const saved = localStorage.getItem('theme') || 'dark';
-    html.setAttribute('data-theme', saved);
-    themeToggle.innerHTML = saved === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-    themeToggle.addEventListener('click', () => {
-        const isDark = html.getAttribute('data-theme') === 'dark';
-        html.setAttribute('data-theme', isDark ? 'light' : 'dark');
-        localStorage.setItem('theme', isDark ? 'light' : 'dark');
-        themeToggle.innerHTML = isDark ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
+/* ==========================================
+   DOM HELPERS
+   ========================================== */
+function getEl(id) { return document.getElementById(id); }
+
+/* ==========================================
+   AUTHENTICATION FLOW
+   ========================================== */
+function initAuth() {
+    if (typeof auth === 'undefined') {
+        console.warn('[Admin] Firebase Auth not loaded');
+        showLoginError('Firebase not loaded. Please check your connection.');
+        return;
+    }
+
+    auth.onAuthStateChanged(async (user) => {
+        if (user) {
+            try {
+                const isAdmin = await checkAdminStatus(user);
+                if (isAdmin) {
+                    currentUser = user;
+                    showDashboard();
+                    updateUserInfo(user);
+                    if (!adminInitialized) {
+                        adminInitialized = true;
+                        initAdmin();
+                    }
+                } else {
+                    await auth.signOut();
+                    showLoginError('Access denied. You are not an admin.');
+                }
+            } catch (e) {
+                console.error('[Admin] Auth check error:', e);
+                if (user.email === 'jack1122@freelightmods.com') {
+                    currentUser = user;
+                    showDashboard();
+                    updateUserInfo(user);
+                    if (!adminInitialized) {
+                        adminInitialized = true;
+                        initAdmin();
+                    }
+                } else {
+                    await auth.signOut();
+                    showLoginError('Authentication error. Please try again.');
+                }
+            }
+        } else {
+            showLogin();
+        }
     });
 }
 
-// Mobile Sidebar
-const sidebar = document.querySelector('.sidebar');
-document.querySelector('.mobile-toggle')?.addEventListener('click', () => sidebar?.classList.toggle('open'));
-
-// Auth State
-auth.onAuthStateChanged(async (user) => {
-    if (user) {
-        try {
-            const doc = await db.collection('admins').doc(user.uid).get();
-            if (doc.exists || user.email === 'jack1122@freelightmods.com') {
-                currentUser = user;
-                document.body.classList.add('authenticated');
-                const emailEl = document.querySelector('.user-email');
-                if (emailEl) emailEl.textContent = user.email;
-                initAdmin();
-            } else {
-                alert('Access denied.'); auth.signOut();
-            }
-        } catch (e) {
-            if (user.email === 'jack1122@freelightmods.com') { currentUser = user; initAdmin(); }
-            else { alert('Error checking admin status.'); auth.signOut(); }
-        }
-    } else {
-        showLogin();
+async function checkAdminStatus(user) {
+    if (user.email === 'jack1122@freelightmods.com') return true;
+    try {
+        const doc = await db.collection('admins').doc(user.uid).get();
+        return doc.exists;
+    } catch (e) {
+        return false;
     }
-});
+}
 
+function showLogin() {
+    const overlay = getEl('loginOverlay');
+    const dash = getEl('adminDashboard');
+    if (overlay) {
+        overlay.classList.remove('hidden');
+        overlay.style.display = 'flex';
+    }
+    if (dash) dash.style.display = 'none';
+}
+
+function showDashboard() {
+    const overlay = getEl('loginOverlay');
+    const dash = getEl('adminDashboard');
+    if (overlay) {
+        overlay.classList.add('hidden');
+        setTimeout(() => { overlay.style.display = 'none'; }, 300);
+    }
+    if (dash) {
+        dash.style.display = 'flex'; // FIXED: was 'block', must be 'flex'
+    }
+}
+
+function updateUserInfo(user) {
+    const emailDisplay = getEl('userEmailDisplay');
+    const accountEmail = getEl('accountEmail');
+    if (emailDisplay) emailDisplay.textContent = user.email || 'Admin';
+    if (accountEmail) accountEmail.value = user.email || '';
+}
+
+/* ==========================================
+   LOGIN FORM
+   ========================================== */
+function initLoginForm() {
+    const form = getEl('authForm');
+    if (!form) return;
+
+    let mode = 'login';
+    const tabs = document.querySelectorAll('.auth-tab');
+    const errorDiv = getEl('authError');
+    const btn = getEl('authBtn');
+    const passwordGroup = getEl('passwordGroup');
+    const confirmGroup = getEl('confirmPasswordGroup');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            mode = tab.getAttribute('data-tab');
+            if (errorDiv) errorDiv.style.display = 'none';
+
+            if (mode === 'signup') {
+                passwordGroup.style.display = 'block';
+                confirmGroup.style.display = 'block';
+                btn.innerHTML = '<i class="fas fa-user-plus"></i> <span>Create Account</span>';
+            } else {
+                passwordGroup.style.display = 'block';
+                confirmGroup.style.display = 'none';
+                btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> <span>Login</span>';
+            }
+        });
+    });
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = getEl('email').value.trim();
+        const password = getEl('password').value;
+        if (errorDiv) errorDiv.style.display = 'none';
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Processing...</span>';
+
+        try {
+            if (mode === 'signup') {
+                const confirm = getEl('confirmPassword').value;
+                if (password !== confirm) throw new Error('Passwords do not match');
+                if (password.length < 6) throw new Error('Password must be at least 6 characters');
+
+                const cred = await auth.createUserWithEmailAndPassword(email, password);
+                await db.collection('admins').doc(cred.user.uid).set({
+                    email: email,
+                    role: 'admin',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                showToast('Account created! Logging in...', 'success');
+                await auth.signInWithEmailAndPassword(email, password);
+            } else {
+                await auth.signInWithEmailAndPassword(email, password);
+            }
+        } catch (err) {
+            if (errorDiv) {
+                errorDiv.textContent = getReadableError(err);
+                errorDiv.style.display = 'block';
+            }
+            btn.disabled = false;
+            btn.innerHTML = mode === 'signup'
+                ? '<i class="fas fa-user-plus"></i> <span>Create Account</span>'
+                : '<i class="fas fa-sign-in-alt"></i> <span>Login</span>';
+        }
+    });
+}
+
+function getReadableError(error) {
+    const messages = {
+        'auth/invalid-email': 'Invalid email address.',
+        'auth/user-disabled': 'This account has been disabled.',
+        'auth/user-not-found': 'No account found with this email.',
+        'auth/wrong-password': 'Incorrect password.',
+        'auth/email-already-in-use': 'Email is already registered.',
+        'auth/weak-password': 'Password should be at least 6 characters.',
+        'auth/network-request-failed': 'Network error. Check your connection.',
+        'auth/too-many-requests': 'Too many attempts. Try again later.',
+        'auth/invalid-credential': 'Invalid email or password.'
+    };
+    return messages[error.code] || error.message;
+}
+
+function showLoginError(msg) {
+    const errorDiv = getEl('authError');
+    if (errorDiv) {
+        errorDiv.textContent = msg;
+        errorDiv.style.display = 'block';
+    }
+}
+
+/* ==========================================
+   ADMIN INITIALIZATION (Guarded)
+   ========================================== */
 function initAdmin() {
     setupRealtime();
     setupTabs();
     setupForm();
     setupSearch();
-    window.saveEdit = saveEdit;
-    window.closeModal = () => document.getElementById('editModal').classList.remove('active');
-    window.deleteApp = deleteApp;
-    window.goToPage = p => { currentPage = p; renderTable(); };
-    window.exportData = () => {
-        const blob = new Blob([JSON.stringify(appsData, null, 2)], { type: 'application/json' });
-        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `flm-backup-${Date.now()}.json`; a.click();
-    };
-    window.logout = () => { if(confirm('Logout?')) auth.signOut().then(() => location.reload()); };
+    setupMobileSidebar();
+    setupLogout();
+    setupTableActions(); // Event delegation for edit/delete
 }
 
-function showLogin() {
-    document.body.innerHTML = `
-    <div class="login-container"><div class="login-box">
-      <div class="login-header"><i class="fas fa-shield-alt"></i><h1>Admin Access</h1><p>Sign in to manage mods</p></div>
-      <div class="auth-tabs">
-        <button class="auth-tab active" data-tab="login">Login</button>
-        <button class="auth-tab" data-tab="signup">Create</button>
-      </div>
-      <form id="authForm">
-        <div class="form-group"><label><i class="fas fa-envelope"></i> Email</label><input type="email" id="email" required></div>
-        <div class="form-group"><label><i class="fas fa-lock"></i> Password</label><input type="password" id="password" required></div>
-        <div id="authError" class="login-error"></div>
-        <button type="submit" class="login-btn" id="authBtn"><i class="fas fa-sign-in-alt"></i> Login</button>
-      </form>
-      <div style="margin-top:16px;text-align:center"><a href="index.html"><i class="fas fa-arrow-left"></i> Back to Site</a></div>
-    </div></div>`;
-  
-    let mode = 'login';
-    document.querySelectorAll('.auth-tab').forEach(t => t.addEventListener('click', e => {
-        document.querySelectorAll('.auth-tab').forEach(x => x.classList.remove('active'));
-        e.target.classList.add('active'); mode = e.target.dataset.tab;
-        document.getElementById('authBtn').innerHTML = mode === 'signup' ? '<i class="fas fa-user-plus"></i> Create Account' : '<i class="fas fa-sign-in-alt"></i> Login';
-    }));
-    
-    document.getElementById('authForm').addEventListener('submit', async e => {
-        e.preventDefault();
-        const em = document.getElementById('email').value.trim(), pw = document.getElementById('password').value;
-        const err = document.getElementById('authError'); const btn = document.getElementById('authBtn');
-        btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...'; err.style.display = 'none';
-        
-        try {
-            if (mode === 'signup') {
-                if (pw.length < 6) throw new Error('Password must be 6+ chars');
-                const u = await auth.createUserWithEmailAndPassword(em, pw);
-                await db.collection('admins').doc(u.user.uid).set({ email: em, role: 'admin', createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-                alert('Account created. Please login.');
-                document.querySelector('[data-tab="login"]').click();
-            } else {
-                await auth.signInWithEmailAndPassword(em, pw);
-            }
-        } catch (e) {
-            err.textContent = e.message; err.style.display = 'block';
-        } finally {
-            btn.disabled = false; btn.innerHTML = mode === 'signup' ? '<i class="fas fa-user-plus"></i> Create Account' : '<i class="fas fa-sign-in-alt"></i> Login';
+function setupRealtime() {
+    if (unsubscribe && typeof unsubscribe === 'function') {
+        try { unsubscribe(); } catch (e) {}
+    }
+
+    try {
+        unsubscribe = db.collection('apks')
+            .orderBy('dateAdded', 'desc')
+            .onSnapshot((snapshot) => {
+                appsData = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (MOD_URL_TEMPLATES[doc.id]) {
+                        data.link = MOD_URL_TEMPLATES[doc.id];
+                    }
+                    appsData.push({ id: doc.id, ...data });
+                });
+                currentPage = 1;
+                renderTable();
+                updateStats();
+            }, (error) => {
+                console.error('[Admin] Realtime error:', error);
+                showToast('Failed to load apps. Check connection.', 'error');
+            });
+    } catch (e) {
+        console.error('[Admin] Setup realtime error:', e);
+        showToast('Database connection failed.', 'error');
+    }
+}
+
+/* ==========================================
+   TABS & NAVIGATION
+   ========================================== */
+function setupTabs() {
+    document.querySelectorAll('[data-tab]').forEach(tab => {
+        tab.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetId = tab.getAttribute('data-tab');
+            if (!targetId) return;
+            switchTab(targetId);
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            const navItem = tab.closest('.nav-item');
+            if (navItem) navItem.classList.add('active');
+        });
+    });
+}
+
+function switchTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active'));
+    const target = getEl(tabId);
+    if (target) target.classList.add('active');
+
+    const sidebar = getEl('sidebar');
+    if (sidebar) sidebar.classList.remove('open');
+
+    if (tabId === 'apps') {
+        currentPage = 1;
+        renderTable();
+    }
+}
+
+function setupMobileSidebar() {
+    const toggle = getEl('mobileToggle');
+    const sidebar = getEl('sidebar');
+    if (toggle && sidebar) {
+        toggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+    }
+}
+
+function setupLogout() {
+    const logoutNav = getEl('logoutNavItem');
+    if (logoutNav) {
+        logoutNav.addEventListener('click', (e) => {
+            e.preventDefault();
+            logout();
+        });
+    }
+}
+
+/* ==========================================
+   TABLE RENDERING (No inline onclick!)
+   ========================================== */
+function renderTable() {
+    const tb = getEl('appsTableBody');
+    if (!tb) return;
+
+    const q = (getEl('searchApps')?.value || '').toLowerCase().trim();
+    let filtered = appsData;
+
+    if (q) {
+        filtered = appsData.filter(a =>
+            (a.name || '').toLowerCase().includes(q) ||
+            (a.mod || '').toLowerCase().includes(q)
+        );
+    }
+
+    tb.innerHTML = '';
+
+    if (filtered.length === 0) {
+        tb.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-secondary)">No apps found</td></tr>';
+        renderPagination(0);
+        return;
+    }
+
+    const totalPages = Math.ceil(filtered.length / itemsPerPage);
+    if (currentPage > totalPages) currentPage = totalPages || 1;
+
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    const pageItems = filtered.slice(start, end);
+
+    const fragment = document.createDocumentFragment();
+    pageItems.forEach(app => {
+        const tr = buildTableRow(app);
+        fragment.appendChild(tr);
+    });
+
+    tb.appendChild(fragment);
+    attachTableImageHandlers(tb);
+    renderPagination(filtered.length);
+}
+
+function buildTableRow(app) {
+    const tr = document.createElement('tr');
+    tr.setAttribute('data-app-id', app.id);
+
+    // Build icon cell (no inline onerror!)
+    const iconCell = document.createElement('td');
+    const iconDiv = document.createElement('div');
+    iconDiv.className = 'app-icon-small';
+    if (app.image && app.image.trim()) {
+        const img = document.createElement('img');
+        img.src = app.image;
+        img.alt = app.name || 'App';
+        img.loading = 'lazy';
+        img.dataset.fallback = 'true';
+        iconDiv.appendChild(img);
+    } else {
+        iconDiv.innerHTML = '<i class="' + escapeHtml(app.icon || 'fas fa-mobile-alt') + '"></i>';
+    }
+    iconCell.appendChild(iconDiv);
+
+    // Name cell
+    const nameCell = document.createElement('td');
+    nameCell.innerHTML = '<strong>' + escapeHtml(app.name) + '</strong><br><small class="text-secondary">' + escapeHtml(app.category || 'app') + '</small>';
+
+    // Other cells
+    const versionCell = document.createElement('td');
+    versionCell.textContent = app.version || 'N/A';
+
+    const sizeCell = document.createElement('td');
+    sizeCell.textContent = app.size || 'N/A';
+
+    const downloadsCell = document.createElement('td');
+    downloadsCell.textContent = formatNum(app.downloads || 0);
+
+    // Actions cell (no inline onclick!)
+    const actionsCell = document.createElement('td');
+    const actionsDiv = document.createElement('div');
+    actionsDiv.className = 'action-buttons';
+    actionsDiv.innerHTML = `
+        <button class="action-btn" data-action="edit" data-id="${escapeHtml(app.id)}" title="Edit"><i class="fas fa-edit"></i></button>
+        <button class="action-btn delete" data-action="delete" data-id="${escapeHtml(app.id)}" title="Delete"><i class="fas fa-trash"></i></button>
+    `;
+    actionsCell.appendChild(actionsDiv);
+
+    tr.appendChild(iconCell);
+    tr.appendChild(nameCell);
+    tr.appendChild(versionCell);
+    tr.appendChild(sizeCell);
+    tr.appendChild(downloadsCell);
+    tr.appendChild(actionsCell);
+
+    return tr;
+}
+
+/* ==========================================
+   TABLE EVENT DELEGATION (Edit/Delete)
+   ========================================== */
+function setupTableActions() {
+    const tbody = getEl('appsTableBody');
+    if (!tbody) return;
+
+    tbody.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-action]');
+        if (!btn) return;
+
+        const action = btn.getAttribute('data-action');
+        const id = btn.getAttribute('data-id');
+
+        if (action === 'edit') {
+            editApp(id);
+        } else if (action === 'delete') {
+            deleteApp(id);
         }
     });
 }
 
-function setupRealtime() {
-    if (unsubscribe) unsubscribe();
-    unsubscribe = db.collection('apks').orderBy('dateAdded', 'desc').onSnapshot(s => {
-        appsData = []; s.forEach(d => appsData.push({ id: d.id, ...d.data() }));
-        renderTable(); updateStats();
-    }, e => console.error('Realtime error', e));
-}
-
-function setupTabs() {
-    document.querySelectorAll('[data-tab]').forEach(t => t.addEventListener('click', e => {
-        e.preventDefault();
-        document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
-        document.getElementById(e.target.dataset.tab)?.classList.add('active');
-        e.target.closest('.nav-item')?.classList.add('active');
-    }));
-}
-
-function renderTable() {
-    const tb = document.getElementById('appsTableBody'); if (!tb) return;
-    const q = (document.getElementById('searchApps')?.value || '').toLowerCase();
-    let f = appsData.filter(a => (a.name||'').toLowerCase().includes(q) || (a.mod||'').toLowerCase().includes(q));
-    tb.innerHTML = '';
-    if (f.length === 0) { tb.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px">No apps found</td></tr>'; return; }
-    
-    f.slice(0, 20).forEach(a => {
-        const icon = a.image ? `<img src="${a.image}" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-mobile-alt\\'></i>'">` : `<i class="${a.icon||'fas fa-mobile-alt'}"></i>`;
-        tb.innerHTML += `
-        <tr>
-            <td><div class="app-icon-small">${icon}</div></td>
-            <td><strong>${a.name}</strong><br><small class="text-secondary">${a.category||'app'}</small></td>
-            <td>${a.version||'N/A'}</td><td>${a.size||'N/A'}</td>
-            <td>${a.downloads||0}</td>
-            <td>
-            <div class="action-buttons">
-                <button class="action-btn" onclick="editApp('${a.id}')"><i class="fas fa-edit"></i></button>
-                <button class="action-btn delete" onclick="deleteApp('${a.id}')"><i class="fas fa-trash"></i></button>
-            </div>
-            </td>
-        </tr>`;
+/* ==========================================
+   IMAGE ERROR HANDLING (Safe, no inline JS)
+   ========================================== */
+function attachTableImageHandlers(container) {
+    if (!container) return;
+    container.querySelectorAll('img[data-fallback]').forEach(img => {
+        img.addEventListener('error', function handleImgError() {
+            this.removeEventListener('error', handleImgError);
+            const parent = this.parentElement;
+            if (parent) parent.innerHTML = '<i class="fas fa-mobile-alt"></i>';
+        });
     });
 }
 
+/* ==========================================
+   PAGINATION
+   ========================================== */
+function renderPagination(totalItems) {
+    const container = getEl('pagination');
+    if (!container) return;
+    container.innerHTML = '';
+
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    if (totalPages <= 1) return;
+
+    const fragment = document.createDocumentFragment();
+
+    // Prev
+    const prevBtn = document.createElement('button');
+    prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+    prevBtn.disabled = currentPage === 1;
+    prevBtn.addEventListener('click', () => {
+        if (currentPage > 1) { currentPage--; renderTable(); }
+    });
+    fragment.appendChild(prevBtn);
+
+    // Pages
+    let startPage = Math.max(1, currentPage - 2);
+    let endPage = Math.min(totalPages, startPage + 4);
+    if (endPage - startPage < 4) startPage = Math.max(1, endPage - 4);
+
+    for (let i = startPage; i <= endPage; i++) {
+        const btn = document.createElement('button');
+        btn.textContent = i;
+        if (i === currentPage) btn.classList.add('active');
+        btn.addEventListener('click', () => { currentPage = i; renderTable(); });
+        fragment.appendChild(btn);
+    }
+
+    // Next
+    const nextBtn = document.createElement('button');
+    nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+    nextBtn.disabled = currentPage === totalPages;
+    nextBtn.addEventListener('click', () => {
+        if (currentPage < totalPages) { currentPage++; renderTable(); }
+    });
+    fragment.appendChild(nextBtn);
+
+    // Info
+    const info = document.createElement('span');
+    info.className = 'page-info';
+    info.textContent = currentPage + ' / ' + totalPages;
+    fragment.appendChild(info);
+
+    container.appendChild(fragment);
+}
+
+/* ==========================================
+   SEARCH (Debounced)
+   ========================================== */
 function setupSearch() {
-    document.getElementById('searchApps')?.addEventListener('input', renderTable);
+    const input = getEl('searchApps');
+    if (!input) return;
+
+    input.addEventListener('input', () => {
+        clearTimeout(searchDebounce);
+        searchDebounce = setTimeout(() => {
+            currentPage = 1;
+            renderTable();
+        }, 150);
+    });
 }
 
+/* ==========================================
+   ADD APK FORM
+   ========================================== */
 function setupForm() {
-    const f = document.getElementById('addApkForm'); if (!f) return;
-    f.addEventListener('submit', async e => {
-        e.preventDefault(); const btn = f.querySelector('button[type="submit"]');
-        btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+    const f = getEl('addApkForm');
+    if (!f) return;
+
+    f.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = f.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+
         try {
-            await db.collection('apks').add({
-                name: f.appName.value.trim(), version: f.appVersion.value.trim(), size: f.appSize.value.trim(),
-                icon: f.appIcon.value.trim() || 'fas fa-mobile-alt', image: f.appImage.value.trim(),
-                mod: f.appMod.value.trim(), link: f.appLink.value.trim(), category: f.appCategory.value,
-                downloads: 0, dateAdded: firebase.firestore.FieldValue.serverTimestamp()
-            });
-            f.reset(); showMessage('✅ Added successfully!', 'success');
-            setTimeout(() => document.querySelector('[data-tab="apps"]').click(), 500);
-        } catch (err) { showMessage('❌ ' + err.message, 'error'); }
-        finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-plus"></i> Add APK'; }
+            const newApp = {
+                name: getEl('appName').value.trim(),
+                version: getEl('appVersion').value.trim(),
+                size: getEl('appSize').value.trim(),
+                icon: getEl('appIcon').value.trim() || 'fas fa-mobile-alt',
+                image: getEl('appImage').value.trim(),
+                mod: getEl('appMod').value.trim(),
+                link: getEl('appLink').value.trim(),
+                category: getEl('appCategory').value,
+                downloads: 0,
+                dateAdded: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            await db.collection('apks').add(newApp);
+            f.reset();
+            showToast('APK added successfully!', 'success');
+            setTimeout(() => switchTab('apps'), 600);
+        } catch (err) {
+            console.error('[Admin] Add error:', err);
+            showToast('Failed to add APK: ' + err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-plus"></i> Add APK';
+        }
     });
 }
 
-function showMessage(t, type) {
-    const d = document.getElementById('formMessage'); if (!d) return;
-    d.textContent = t; d.style.display = 'block';
-    d.style.background = type === 'success' ? 'rgba(16,185,129,0.15)' : 'rgba(245,87,108,0.15)';
-    d.style.color = type === 'success' ? '#10b981' : '#f5576c';
-    d.style.border = `1px solid ${type === 'success' ? '#10b981' : '#f5576c'}`;
-    setTimeout(() => d.style.display = 'none', 4000);
-}
-
+/* ==========================================
+   EDIT & DELETE
+   ========================================== */
 function editApp(id) {
-    const a = appsData.find(x => x.id === id); if (!a) return;
-    document.getElementById('editId').value = id;
-    ['Name','Version','Size','Icon','Image','Mod','Link','Category'].forEach(k => {
-        document.getElementById('edit'+k).value = a[k.toLowerCase()] || '';
-    });
-    document.getElementById('editModal').classList.add('active');
+    const app = appsData.find(x => x.id === id);
+    if (!app) return;
+
+    getEl('editId').value = id;
+    getEl('editName').value = app.name || '';
+    getEl('editVersion').value = app.version || '';
+    getEl('editSize').value = app.size || '';
+    getEl('editIcon').value = app.icon || '';
+    getEl('editImage').value = app.image || '';
+    getEl('editMod').value = app.mod || '';
+    getEl('editLink').value = app.link || '';
+    getEl('editCategory').value = app.category || 'app';
+
+    const modal = getEl('editModal');
+    if (modal) modal.classList.add('active');
 }
 
 async function saveEdit() {
-    const id = document.getElementById('editId').value; if (!id) return;
-    const btn = document.querySelector('#editModal .btn-primary');
-    btn.disabled = true; btn.innerHTML = 'Saving...';
+    const id = getEl('editId').value;
+    if (!id) return;
+
+    const btn = getEl('saveEditBtn');
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+
     try {
         await db.collection('apks').doc(id).update({
-            name: document.getElementById('editName').value.trim(),
-            version: document.getElementById('editVersion').value.trim(),
-            size: document.getElementById('editSize').value.trim(),
-            icon: document.getElementById('editIcon').value.trim(),
-            image: document.getElementById('editImage').value.trim(),
-            mod: document.getElementById('editMod').value.trim(),
-            link: document.getElementById('editLink').value.trim(),
-            category: document.getElementById('editCategory').value
+            name: getEl('editName').value.trim(),
+            version: getEl('editVersion').value.trim(),
+            size: getEl('editSize').value.trim(),
+            icon: getEl('editIcon').value.trim(),
+            image: getEl('editImage').value.trim(),
+            mod: getEl('editMod').value.trim(),
+            link: getEl('editLink').value.trim(),
+            category: getEl('editCategory').value
         });
-        document.getElementById('editModal').classList.remove('active');
-        showMessage('✅ Updated!', 'success');
-    } catch (e) { alert(e.message); }
-    finally { btn.disabled = false; btn.innerHTML = 'Save Changes'; }
+        closeModal();
+        showToast('APK updated successfully!', 'success');
+    } catch (e) {
+        console.error('[Admin] Edit error:', e);
+        showToast('Update failed: ' + e.message, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Save Changes';
+    }
+}
+
+function closeModal() {
+    const modal = getEl('editModal');
+    if (modal) modal.classList.remove('active');
 }
 
 async function deleteApp(id) {
-    if (!confirm('Delete permanently?')) return;
-    try { await db.collection('apks').doc(id).delete(); showMessage('✅ Deleted', 'success'); }
-    catch (e) { alert(e.message); }
+    if (!confirm('Are you sure you want to delete this APK permanently?')) return;
+    try {
+        await db.collection('apks').doc(id).delete();
+        showToast('APK deleted', 'success');
+    } catch (e) {
+        console.error('[Admin] Delete error:', e);
+        showToast('Delete failed: ' + e.message, 'error');
+    }
 }
 
+/* ==========================================
+   STATS & UTILITIES
+   ========================================== */
 function updateStats() {
-    const el = id => document.getElementById(id);
-    if (el('totalApps')) el('totalApps').textContent = appsData.length;
-    if (el('totalDownloads')) el('totalDownloads').textContent = appsData.reduce((s,a)=>s+(a.downloads||0),0);
-    if (el('gamesCount')) el('gamesCount').textContent = appsData.filter(a=>a.category==='game').length;
-    if (el('appsCount')) el('appsCount').textContent = appsData.filter(a=>a.category==='app').length;
+    const total = appsData.length;
+    const downloads = appsData.reduce((s, a) => s + (a.downloads || 0), 0);
+    const games = appsData.filter(a => a.category === 'game').length;
+    const apps = appsData.filter(a => a.category === 'app').length;
+
+    const setText = (id, val) => {
+        const el = getEl(id);
+        if (el) el.textContent = val;
+    };
+
+    setText('totalApps', total);
+    setText('totalDownloads', formatNum(downloads));
+    setText('gamesCount', games);
+    setText('appsCount', apps);
 }
+
+function exportData() {
+    if (appsData.length === 0) {
+        showToast('No data to export', 'warning');
+        return;
+    }
+    const dataStr = JSON.stringify(appsData, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'flm-backup-' + Date.now() + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('Data exported!', 'success');
+}
+
+function logout() {
+    if (!confirm('Are you sure you want to logout?')) return;
+    auth.signOut().then(() => {
+        location.reload();
+    }).catch(err => {
+        console.error('[Admin] Logout error:', err);
+        showToast('Logout failed', 'error');
+    });
+}
+
+/* ==========================================
+   TOAST NOTIFICATIONS
+   ========================================== */
+function showToast(message, type) {
+    type = type || 'success';
+    const container = getEl('toastContainer');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = 'toast ' + type;
+
+    const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-exclamation-triangle';
+    toast.innerHTML = '<i class="fas ' + icon + '"></i> <span>' + escapeHtml(message) + '</span>';
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.add('fade-out');
+        setTimeout(() => { if (toast.parentElement) toast.remove(); }, 300);
+    }, 4000);
+}
+
+/* ==========================================
+   UTILITIES
+   ========================================== */
+function escapeHtml(str) {
+    if (str == null) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+function formatNum(n) {
+    if (!n) return '0';
+    if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+    if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+    return n.toString();
+}
+
+/* ==========================================
+   GLOBAL WINDOW EXPOSURES
+   ========================================== */
+window.switchTab = switchTab;
+window.editApp = editApp;
+window.deleteApp = deleteApp;
+window.saveEdit = saveEdit;
+window.closeModal = closeModal;
+window.logout = logout;
+window.exportData = exportData;
+
+/* ==========================================
+   BOOT
+   ========================================== */
+document.addEventListener('DOMContentLoaded', () => {
+    initLoginForm();
+    initAuth();
+});
