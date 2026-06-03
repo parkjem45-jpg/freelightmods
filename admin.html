@@ -173,11 +173,12 @@
                                         <th>Version</th>
                                         <th>Size</th>
                                         <th>Downloads</th>
+                                        <th>Link</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody id="appsTableBody">
-                                    <tr><td colspan="6" style="text-align:center;padding:40px">Loading...</td></tr>
+                                    <tr><td colspan="7" style="text-align:center;padding:40px">Loading...</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -225,7 +226,7 @@
                             <div class="form-group">
                                 <label>Download Link *</label>
                                 <input type="url" id="appLink" required placeholder="https://your-cdn.com/file.apk">
-                                <small class="form-hint">Paste the direct APK download URL here. You can update this later.</small>
+                                <small class="form-hint">Paste the direct APK download URL here. Must start with http:// or https://</small>
                             </div>
                             <!-- ===== END MOD DOWNLOAD LINK FIELD ===== -->
 
@@ -310,8 +311,8 @@
                 <!-- ===== MOD DOWNLOAD LINK EDIT FIELD ===== -->
                 <div class="form-group">
                     <label>Download Link</label>
-                    <input type="text" id="editLink">
-                    <small class="form-hint">Update the direct APK download URL here.</small>
+                    <input type="url" id="editLink" placeholder="https://your-cdn.com/file.apk">
+                    <small class="form-hint">Update the direct APK download URL here. Must start with http:// or https://</small>
                 </div>
                 <!-- ===== END MOD DOWNLOAD LINK EDIT FIELD ===== -->
 

@@ -1,16 +1,11 @@
-// public.js — Public Site Logic (Bug-Free Version)
+// public.js — Public Site Logic (Fixed Version)
 // ================================================
+// BUG FIX: Download now passes only app ID; download.html fetches from Firestore.
+// This prevents download link corruption from URL parameter encoding issues.
 
-/* ===== MOD DOWNLOAD LINK CONFIGURATION =====
- * EDIT HERE: Add your direct APK download URLs.
- * These OVERRIDE Firestore links when the app ID matches.
- * Format: 'app-id': 'https://your-cdn.com/file.apk'
- * ========================================== */
 const MOD_LINK_OVERRIDES = {
     // Example: 'spotify-premium': 'https://example.com/spotify-mod.apk',
-    // Add your links below:
 };
-/* ===== END MOD DOWNLOAD LINK CONFIGURATION ===== */
 
 let appsData = [];
 let currentUser = null;
@@ -115,6 +110,8 @@ function loadAppsData() {
                     if (MOD_LINK_OVERRIDES[doc.id]) {
                         data.link = MOD_LINK_OVERRIDES[doc.id];
                     }
+                    // Ensure link field exists (even if empty)
+                    if (!data.link) data.link = '';
                     appsData.push({ id: doc.id, ...data });
                 });
                 displayedCount = ITEMS_PER_LOAD;
@@ -235,10 +232,8 @@ function buildAppCard(app) {
     card.appendChild(infoDiv);
     card.appendChild(btn);
 
-    // Click card (icon, name, etc.) → go to download page
+    // Click handler — passes only app ID, download.html fetches from Firestore
     card.addEventListener('click', () => handleDownload(app));
-
-    // Click download button → same action, stop propagation so card handler doesn't double-fire
     btn.addEventListener('click', (e) => {
         e.stopPropagation();
         handleDownload(app);
@@ -248,25 +243,13 @@ function buildAppCard(app) {
 }
 
 /* ==========================================
-   DOWNLOAD HANDLER — Auto opens download.html
+   DOWNLOAD HANDLER — Passes only App ID
    ========================================== */
 function handleDownload(app) {
-    const link = app.link || '';
-    if (!link || link === '#' || !link.startsWith('http')) {
-        alert(`Download link for "${escapeHtml(app.name)}" is not set yet.\n\nPlease add the download URL in the admin panel.`);
-        return;
-    }
-
+    // Only pass the app ID — download.html will fetch full data from Firestore
+    // This avoids download link corruption from URL parameter encoding
     const url = new URL('download.html', window.location.href);
     url.searchParams.set('id', app.id);
-    url.searchParams.set('name', app.name || '');
-    url.searchParams.set('version', app.version || '');
-    url.searchParams.set('size', app.size || '');
-    url.searchParams.set('mod', app.mod || '');
-    url.searchParams.set('icon', app.icon || 'fas fa-mobile-alt');
-    url.searchParams.set('image', app.image || '');
-    url.searchParams.set('link', link);
-
     window.open(url.toString(), '_blank');
 }
 

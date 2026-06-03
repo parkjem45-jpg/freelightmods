@@ -25,7 +25,7 @@
             animation: fadeInUp 0.5s ease;
         }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        
+
         .app-icon-large {
             width: 100px; height: 100px;
             background: linear-gradient(145deg, #1e2a3a, #141c28);
@@ -39,7 +39,7 @@
         }
         .app-icon-large img { width: 100%; height: 100%; object-fit: cover; border-radius: 28px; }
         [data-theme="light"] .app-icon-large { background: linear-gradient(145deg, #e2e8f0, #cbd5e1); }
-        
+
         .download-card h1 { font-size: 1.6rem; margin-bottom: 12px; word-break: break-word; }
         .download-meta {
             display: flex; justify-content: center; gap: 20px;
@@ -52,7 +52,7 @@
             color: #fbbf24; padding: 6px 14px; border-radius: 20px;
             font-size: 0.85rem; font-weight: 600; margin-bottom: 28px;
         }
-        
+
         .download-action { margin-bottom: 24px; }
         .download-btn-large {
             position: relative;
@@ -70,7 +70,7 @@
         .download-btn-large:disabled {
             opacity: 0.8; cursor: wait; filter: grayscale(0.3);
         }
-        
+
         @keyframes rgbBorder {
             0% { border-color: #ff0000; box-shadow: 0 0 15px rgba(255,0,0,0.4); }
             25% { border-color: #00ff00; box-shadow: 0 0 15px rgba(0,255,0,0.4); }
@@ -78,7 +78,7 @@
             75% { border-color: #ff00ff; box-shadow: 0 0 15px rgba(255,0,255,0.4); }
             100% { border-color: #ff0000; box-shadow: 0 0 15px rgba(255,0,0,0.4); }
         }
-        
+
         .health-bar-container {
             width: 100%; max-width: 320px; height: 8px;
             background: var(--bg-primary); border-radius: 4px;
@@ -86,24 +86,36 @@
             border: 1px solid var(--border-color);
         }
         .health-bar {
-            height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
+            height: 100%; width: 0%;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
             border-radius: 4px;
+            transition: width 0.1s linear;
+        }
+        .health-bar.animate {
+            animation: fillHealthBar 3s linear forwards;
         }
         @keyframes fillHealthBar { from { width: 0%; } to { width: 100%; } }
-        
+
         .download-hint { color: var(--text-secondary); font-size: 0.9rem; min-height: 22px; }
         .download-hint.ready { color: var(--accent-success); font-weight: 600; }
-        
+        .download-hint.error { color: var(--accent-danger); font-weight: 600; }
+
         .back-link {
             display: inline-flex; align-items: center; gap: 8px;
             color: var(--text-secondary); font-size: 0.9rem;
             transition: var(--transition); margin-top: 8px;
         }
         .back-link:hover { color: var(--accent-cyan); gap: 12px; }
-        
+
         .error-box { padding: 40px 20px; text-align: center; }
         .error-box h2 { margin-bottom: 12px; color: var(--accent-danger); }
         .error-box p { color: var(--text-secondary); margin-bottom: 24px; }
+
+        /* Loading State */
+        .loading-box { padding: 60px 20px; text-align: center; }
+        .loading-box i { font-size: 2.5rem; color: var(--accent-cyan); margin-bottom: 16px; display: inline-block; animation: spin 1s linear infinite; }
+        .loading-box p { color: var(--text-secondary); font-size: 1rem; }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -129,22 +141,31 @@
     <main class="download-page">
         <div class="container" style="display:flex;justify-content:center">
             <div class="download-card" id="downloadCard">
-                <div class="app-icon-large" id="appIconLarge">
-                    <i class="fas fa-mobile-alt"></i>
+                <!-- Loading State (shown initially) -->
+                <div class="loading-box" id="loadingState">
+                    <i class="fas fa-spinner"></i>
+                    <p>Loading app details...</p>
                 </div>
-                <h1 id="appName">Loading...</h1>
-                <div class="download-meta" id="appMeta"></div>
-                <div class="download-mod" id="appMod" style="display:none"></div>
 
-                <div class="download-action">
-                    <button class="download-btn-large" id="downloadBtn" disabled>
-                        <i class="fas fa-download"></i>
-                        <span id="btnText">Starting in 3s...</span>
-                    </button>
-                    <div class="health-bar-container">
-                        <div class="health-bar" id="healthBar"></div>
+                <!-- App Content (hidden until loaded) -->
+                <div id="appContent" style="display:none;">
+                    <div class="app-icon-large" id="appIconLarge">
+                        <i class="fas fa-mobile-alt"></i>
                     </div>
-                    <p class="download-hint" id="countdownText">Preparing your secure download...</p>
+                    <h1 id="appName">Loading...</h1>
+                    <div class="download-meta" id="appMeta"></div>
+                    <div class="download-mod" id="appMod" style="display:none"></div>
+
+                    <div class="download-action">
+                        <button class="download-btn-large" id="downloadBtn" disabled>
+                            <i class="fas fa-download"></i>
+                            <span id="btnText">Starting in 3s...</span>
+                        </button>
+                        <div class="health-bar-container">
+                            <div class="health-bar" id="healthBar"></div>
+                        </div>
+                        <p class="download-hint" id="countdownText">Preparing your secure download...</p>
+                    </div>
                 </div>
 
                 <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Home</a>
@@ -176,109 +197,224 @@
             });
         })();
 
-        /* ===== PARSE APP DATA FROM URL ===== */
-        const params = new URLSearchParams(window.location.search);
-        const appData = {
-            id: params.get('id') || '',
-            name: params.get('name') || 'Unknown App',
-            version: params.get('version') || '',
-            size: params.get('size') || '',
-            mod: params.get('mod') || '',
-            icon: params.get('icon') || 'fas fa-mobile-alt',
-            image: params.get('image') || '',
-            link: params.get('link') || ''
-        };
+        /* ===== GET APP ID FROM URL ===== */
+        const urlParams = new URLSearchParams(window.location.search);
+        const appId = urlParams.get('id') || '';
 
-        /* ===== VALIDATE LINK ===== */
-        if (!appData.link || appData.link === '#' || !appData.link.startsWith('http')) {
-            document.querySelector('.download-page .container').innerHTML = `
-                <div class="download-card error-box">
-                    <i class="fas fa-exclamation-circle" style="font-size:3rem;color:var(--accent-danger);margin-bottom:16px"></i>
-                    <h2>Download Link Missing</h2>
-                    <p>The download link for this app has not been configured yet.<br>Please add it in the Admin Panel.</p>
-                    <a href="index.html" class="btn btn-primary"><i class="fas fa-home"></i> Back to Home</a>
-                </div>
-            `;
-            throw new Error('No valid download link');
-        }
-
-        /* ===== RENDER APP INFO ===== */
-        document.getElementById('appName').textContent = appData.name;
-        document.getElementById('appMeta').innerHTML = `
-            <span><i class="fas fa-code-branch"></i> ${appData.version}</span>
-            <span><i class="fas fa-weight-hanging"></i> ${appData.size}</span>
-        `;
-        if (appData.mod) {
-            const modEl = document.getElementById('appMod');
-            modEl.style.display = 'inline-flex';
-            modEl.innerHTML = `<i class="fas fa-crown"></i> ${appData.mod}`;
-        }
-
-        /* ===== RENDER ICON ===== */
-        const iconDiv = document.getElementById('appIconLarge');
-        if (appData.image && appData.image.trim() && appData.image !== 'null') {
-            const img = document.createElement('img');
-            img.src = appData.image;
-            img.alt = appData.name;
-            img.addEventListener('error', function handleError() {
-                this.removeEventListener('error', handleError);
-                this.remove();
-                iconDiv.innerHTML = `<i class="${appData.icon}"></i>`;
-            });
-            iconDiv.innerHTML = '';
-            iconDiv.appendChild(img);
-        } else {
-            iconDiv.innerHTML = `<i class="${appData.icon}"></i>`;
-        }
-
-        /* ===== 3-SECOND COUNTDOWN + HEALTH BAR ===== */
-        let seconds = 3;
-        const btn = document.getElementById('downloadBtn');
+        // Elements
+        const loadingState = document.getElementById('loadingState');
+        const appContent = document.getElementById('appContent');
+        const appNameEl = document.getElementById('appName');
+        const appMetaEl = document.getElementById('appMeta');
+        const appModEl = document.getElementById('appMod');
+        const appIconLarge = document.getElementById('appIconLarge');
+        const downloadBtn = document.getElementById('downloadBtn');
         const btnText = document.getElementById('btnText');
         const healthBar = document.getElementById('healthBar');
         const countdownText = document.getElementById('countdownText');
+        const downloadCard = document.getElementById('downloadCard');
 
-        // Start health bar animation (fills 0% → 100% over 3s)
-        healthBar.style.animation = 'fillHealthBar 3s linear forwards';
+        let downloadLink = '';
+        let countdownTimer = null;
+        let currentAppData = null;
 
-        const timer = setInterval(() => {
-            seconds--;
-            if (seconds > 0) {
-                btnText.textContent = `Starting in ${seconds}s...`;
-            } else {
-                clearInterval(timer);
-                btnText.textContent = 'Download Now';
-                btn.disabled = false;
-                countdownText.textContent = 'Your download is starting automatically...';
-                countdownText.classList.add('ready');
-                startDownload();
+        /* ===== SHOW ERROR STATE ===== */
+        function showError(title, message) {
+            if (loadingState) loadingState.style.display = 'none';
+            if (appContent) appContent.style.display = 'none';
+
+            const existingError = downloadCard.querySelector('.error-box');
+            if (existingError) existingError.remove();
+
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-box';
+            errorDiv.innerHTML = `
+                <i class="fas fa-exclamation-circle" style="font-size:3rem;color:var(--accent-danger);margin-bottom:16px;display:block"></i>
+                <h2>${escapeHtml(title)}</h2>
+                <p>${escapeHtml(message)}</p>
+                <a href="index.html" class="btn btn-primary"><i class="fas fa-home"></i> Back to Home</a>
+            `;
+            downloadCard.insertBefore(errorDiv, downloadCard.querySelector('.back-link'));
+        }
+
+        /* ===== LOAD APP DATA FROM FIRESTORE ===== */
+        async function loadAppData() {
+            // Validate ID
+            if (!appId) {
+                showError('Invalid App ID', 'No app ID was provided in the URL.');
+                return;
             }
-        }, 1000);
 
-        /* ===== START DOWNLOAD ===== */
-        function startDownload() {
-            // Increment download count in Firebase
-            if (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length > 0 && appData.id) {
+            // Wait for Firebase to be ready
+            let retries = 30;
+            while ((typeof firebase === 'undefined' || !firebase.apps || firebase.apps.length === 0) && retries > 0) {
+                await new Promise(r => setTimeout(r, 200));
+                retries--;
+            }
+
+            if (typeof firebase === 'undefined' || !firebase.apps || firebase.apps.length === 0) {
+                showError('Connection Error', 'Firebase is not available. Please check your internet connection and try again.');
+                return;
+            }
+
+            try {
                 const db = firebase.firestore();
-                db.collection('apks').doc(appData.id).update({
-                    downloads: firebase.firestore.FieldValue.increment(1)
-                }).catch(() => {});
+                const doc = await db.collection('apks').doc(appId).get();
+
+                if (!doc.exists) {
+                    showError('App Not Found', 'This app does not exist in our database. It may have been removed.');
+                    return;
+                }
+
+                const data = doc.data();
+                currentAppData = { id: doc.id, ...data };
+                downloadLink = data.link || '';
+
+                // Validate download link
+                if (!downloadLink || downloadLink === '#' || !downloadLink.startsWith('http')) {
+                    showError('Download Link Missing',
+                        `The download link for "${escapeHtml(data.name || 'this app')}" has not been configured yet.<br><br>Please add it in the Admin Panel.`);
+                    return;
+                }
+
+                // Hide loading, show content
+                loadingState.style.display = 'none';
+                appContent.style.display = 'block';
+
+                // Render app info
+                renderAppInfo(currentAppData);
+
+                // Start countdown
+                startCountdown();
+
+            } catch (err) {
+                console.error('[Download] Error loading app:', err);
+                showError('Failed to Load', 'Could not load app details from the server. Please try again later.');
+            }
+        }
+
+        /* ===== RENDER APP INFO ===== */
+        function renderAppInfo(app) {
+            appNameEl.textContent = app.name || 'Unknown App';
+            appMetaEl.innerHTML = `
+                <span><i class="fas fa-code-branch"></i> ${escapeHtml(app.version || 'N/A')}</span>
+                <span><i class="fas fa-weight-hanging"></i> ${escapeHtml(app.size || 'N/A')}</span>
+            `;
+
+            if (app.mod) {
+                appModEl.style.display = 'inline-flex';
+                appModEl.innerHTML = `<i class="fas fa-crown"></i> ${escapeHtml(app.mod)}`;
+            } else {
+                appModEl.style.display = 'none';
             }
 
-            // Trigger download in new tab
+            // Render icon
+            if (app.image && app.image.trim() && app.image !== 'null') {
+                const img = document.createElement('img');
+                img.src = app.image;
+                img.alt = app.name || 'App icon';
+                img.addEventListener('error', function handleError() {
+                    this.removeEventListener('error', handleError);
+                    this.remove();
+                    appIconLarge.innerHTML = `<i class="${escapeHtml(app.icon || 'fas fa-mobile-alt')}"></i>`;
+                });
+                appIconLarge.innerHTML = '';
+                appIconLarge.appendChild(img);
+            } else {
+                appIconLarge.innerHTML = `<i class="${escapeHtml(app.icon || 'fas fa-mobile-alt')}"></i>`;
+            }
+        }
+
+        /* ===== 3-SECOND COUNTDOWN + HEALTH BAR ===== */
+        function startCountdown() {
+            let seconds = 3;
+
+            // Start health bar animation
+            healthBar.classList.add('animate');
+
+            // Update button text immediately
+            btnText.textContent = `Starting in ${seconds}s...`;
+
+            countdownTimer = setInterval(() => {
+                seconds--;
+
+                if (seconds > 0) {
+                    btnText.textContent = `Starting in ${seconds}s...`;
+                } else {
+                    // Countdown complete
+                    clearInterval(countdownTimer);
+                    countdownTimer = null;
+
+                    btnText.textContent = 'Download Now';
+                    downloadBtn.disabled = false;
+                    countdownText.textContent = 'Click the button above to start your download';
+                    countdownText.classList.add('ready');
+
+                    // Try to trigger download (may be blocked by popup blocker)
+                    // The button is now enabled as reliable fallback
+                    tryAutoDownload();
+                }
+            }, 1000);
+        }
+
+        /* ===== TRY AUTO DOWNLOAD (best effort) ===== */
+        function tryAutoDownload() {
+            // Small delay to let UI update
+            setTimeout(() => {
+                triggerDownload();
+                countdownText.textContent = 'If download did not start, click the button above';
+            }, 300);
+        }
+
+        /* ===== TRIGGER DOWNLOAD ===== */
+        function triggerDownload() {
+            if (!downloadLink) return;
+
+            // Increment download count in Firestore (fire and forget)
+            if (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length > 0 && appId) {
+                try {
+                    const db = firebase.firestore();
+                    db.collection('apks').doc(appId).update({
+                        downloads: firebase.firestore.FieldValue.increment(1)
+                    }).catch(() => {});
+                } catch (e) {}
+            }
+
+            // Method 1: Create anchor and click (works for direct links)
             const a = document.createElement('a');
-            a.href = appData.link;
-            a.target = '_blank';
-            a.rel = 'noopener noreferrer';
+            a.href = downloadLink;
             a.style.display = 'none';
             document.body.appendChild(a);
             a.click();
+
             setTimeout(() => {
                 if (a.parentElement) document.body.removeChild(a);
-            }, 100);
+            }, 2000);
         }
 
-        btn.addEventListener('click', startDownload);
+        /* ===== MANUAL DOWNLOAD BUTTON CLICK ===== */
+        downloadBtn.addEventListener('click', () => {
+            if (!downloadLink) {
+                countdownText.textContent = 'Download link is not available';
+                countdownText.classList.add('error');
+                return;
+            }
+            triggerDownload();
+        });
+
+        /* ===== ESCAPE HTML UTILITY ===== */
+        function escapeHtml(str) {
+            if (str == null) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        /* ===== START ===== */
+        loadAppData();
     </script>
 </body>
 </html>

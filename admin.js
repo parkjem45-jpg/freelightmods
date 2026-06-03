@@ -1,15 +1,11 @@
-// admin.js — Admin Panel Logic (Bug-Free Version)
+// admin.js — Admin Panel Logic (Fixed Version)
 // ================================================
+// Fixed: Link field properly handled in edit/save operations.
+// Added: Better error handling, validation, and data integrity.
 
-/* ===== MOD DOWNLOAD URL CONFIGURATION =====
- * EDIT HERE: Pre-define download URLs for specific apps.
- * These are used as fallbacks or defaults.
- * Format: 'app-id': 'https://your-cdn.com/file.apk'
- * ========================================== */
 const MOD_URL_TEMPLATES = {
     // 'spotify-premium': 'https://example.com/spotify.apk',
 };
-/* ===== END MOD URL CONFIGURATION ===== */
 
 let appsData = [];
 let currentUser = null;
@@ -99,7 +95,7 @@ function showDashboard() {
         setTimeout(() => { overlay.style.display = 'none'; }, 300);
     }
     if (dash) {
-        dash.style.display = 'flex'; // FIXED: was 'block', must be 'flex'
+        dash.style.display = 'flex';
     }
 }
 
@@ -214,7 +210,7 @@ function initAdmin() {
     setupSearch();
     setupMobileSidebar();
     setupLogout();
-    setupTableActions(); // Event delegation for edit/delete
+    setupTableActions();
 }
 
 function setupRealtime() {
@@ -232,6 +228,8 @@ function setupRealtime() {
                     if (MOD_URL_TEMPLATES[doc.id]) {
                         data.link = MOD_URL_TEMPLATES[doc.id];
                     }
+                    // Ensure link field always exists
+                    if (!data.link) data.link = '';
                     appsData.push({ id: doc.id, ...data });
                 });
                 currentPage = 1;
@@ -297,7 +295,7 @@ function setupLogout() {
 }
 
 /* ==========================================
-   TABLE RENDERING (No inline onclick!)
+   TABLE RENDERING
    ========================================== */
 function renderTable() {
     const tb = getEl('appsTableBody');
@@ -316,7 +314,7 @@ function renderTable() {
     tb.innerHTML = '';
 
     if (filtered.length === 0) {
-        tb.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-secondary)">No apps found</td></tr>';
+        tb.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-secondary)">No apps found</td></tr>';
         renderPagination(0);
         return;
     }
@@ -343,7 +341,7 @@ function buildTableRow(app) {
     const tr = document.createElement('tr');
     tr.setAttribute('data-app-id', app.id);
 
-    // Build icon cell (no inline onerror!)
+    // Build icon cell
     const iconCell = document.createElement('td');
     const iconDiv = document.createElement('div');
     iconDiv.className = 'app-icon-small';
@@ -373,7 +371,14 @@ function buildTableRow(app) {
     const downloadsCell = document.createElement('td');
     downloadsCell.textContent = formatNum(app.downloads || 0);
 
-    // Actions cell (no inline onclick!)
+    // Link indicator cell
+    const linkCell = document.createElement('td');
+    const hasLink = app.link && app.link.startsWith('http');
+    linkCell.innerHTML = hasLink
+        ? '<span style="color:var(--accent-success);font-size:0.8rem"><i class="fas fa-check-circle"></i> Set</span>'
+        : '<span style="color:var(--accent-danger);font-size:0.8rem"><i class="fas fa-times-circle"></i> Missing</span>';
+
+    // Actions cell
     const actionsCell = document.createElement('td');
     const actionsDiv = document.createElement('div');
     actionsDiv.className = 'action-buttons';
@@ -388,6 +393,7 @@ function buildTableRow(app) {
     tr.appendChild(versionCell);
     tr.appendChild(sizeCell);
     tr.appendChild(downloadsCell);
+    tr.appendChild(linkCell);
     tr.appendChild(actionsCell);
 
     return tr;
@@ -416,7 +422,7 @@ function setupTableActions() {
 }
 
 /* ==========================================
-   IMAGE ERROR HANDLING (Safe, no inline JS)
+   IMAGE ERROR HANDLING
    ========================================== */
 function attachTableImageHandlers(container) {
     if (!container) return;
@@ -512,6 +518,13 @@ function setupForm() {
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
 
         try {
+            const linkValue = getEl('appLink').value.trim();
+
+            // Validate download link
+            if (!linkValue || !linkValue.startsWith('http')) {
+                throw new Error('Please enter a valid download link starting with http:// or https://');
+            }
+
             const newApp = {
                 name: getEl('appName').value.trim(),
                 version: getEl('appVersion').value.trim(),
@@ -519,7 +532,7 @@ function setupForm() {
                 icon: getEl('appIcon').value.trim() || 'fas fa-mobile-alt',
                 image: getEl('appImage').value.trim(),
                 mod: getEl('appMod').value.trim(),
-                link: getEl('appLink').value.trim(),
+                link: linkValue,
                 category: getEl('appCategory').value,
                 downloads: 0,
                 dateAdded: firebase.firestore.FieldValue.serverTimestamp()
@@ -569,6 +582,8 @@ async function saveEdit() {
     btn.textContent = 'Saving...';
 
     try {
+        const linkValue = getEl('editLink').value.trim();
+
         await db.collection('apks').doc(id).update({
             name: getEl('editName').value.trim(),
             version: getEl('editVersion').value.trim(),
@@ -576,7 +591,7 @@ async function saveEdit() {
             icon: getEl('editIcon').value.trim(),
             image: getEl('editImage').value.trim(),
             mod: getEl('editMod').value.trim(),
-            link: getEl('editLink').value.trim(),
+            link: linkValue,
             category: getEl('editCategory').value
         });
         closeModal();

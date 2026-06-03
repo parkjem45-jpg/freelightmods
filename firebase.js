@@ -22,7 +22,13 @@ try {
 
 const db = firebase.firestore();
 const auth = firebase.auth();
-const analytics = firebase.analytics();
+
+// Analytics with error handling
+try {
+  const analytics = firebase.analytics();
+} catch (e) {
+  console.warn('[Firebase] Analytics not available:', e);
+}
 
 // Enable offline persistence for better performance
 try {
