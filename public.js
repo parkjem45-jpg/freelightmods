@@ -256,7 +256,7 @@ function attachImageErrorHandlers(container) {
 }
 
 /* ==========================================
-   EVENT DELEGATION (Download buttons only)
+   EVENT DELEGATION (Download buttons → redirect to download page)
    ========================================== */
 function initEventDelegation() {
     const grid = document.getElementById('appGrid');
@@ -267,29 +267,17 @@ function initEventDelegation() {
         if (!btn) return;
 
         const id = btn.getAttribute('data-id');
-        const link = btn.getAttribute('data-link');
-        const name = btn.getAttribute('data-name');
+        if (!id) return;
 
-        // Increment download count
-        if (id && typeof db !== 'undefined') {
+        // Increment download count (silent background update)
+        if (typeof db !== 'undefined') {
             db.collection('apks').doc(id).update({
                 downloads: firebase.firestore.FieldValue.increment(1)
             }).catch(() => {});
         }
 
-        // Open link in new tab (ONLY the download button does this)
-        if (link && link !== '#' && link.startsWith('http')) {
-            const a = document.createElement('a');
-            a.href = link;
-            a.target = '_blank';
-            a.rel = 'noopener noreferrer';
-            a.style.display = 'none';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        } else {
-            alert(`Download link for "${escapeHtml(name)}" is not set yet.\n\nEdit MOD_LINK_OVERRIDES in public.js to add the URL.`);
-        }
+        // Redirect to the themed download page with app ID
+        window.location.href = 'download.html?app=' + encodeURIComponent(id);
     });
 }
 
