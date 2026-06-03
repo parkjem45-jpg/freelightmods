@@ -2,14 +2,15 @@
 // ⚠️ SECURITY NOTE: Replace these keys with your own Firebase project settings.
 // These are hardcoded for your project: freelightmods
 
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyB0LrQcsXD-prcam7s3O1iEJbIvcPthlgo",
-  authDomain: "freelightmods.firebaseapp.com",
-  projectId: "freelightmods",
-  storageBucket: "freelightmods.firebasestorage.app",
-  messagingSenderId: "515712275200",
-  appId: "1:515712275200:web:bd76d1badb0f158fa699e5",
-  measurementId: "G-MT7QJW5YF7"
+  apiKey: "AIzaSyD4Gr3EoTEzgLVY9OC2iEiG5iRptBgZaZc",
+  authDomain: "flmods.firebaseapp.com",
+  projectId: "flmods",
+  storageBucket: "flmods.firebasestorage.app",
+  messagingSenderId: "831938140949",
+  appId: "1:831938140949:web:dfc732cf77acf3a68a671c",
+  measurementId: "G-VBMTJE38LM"
 };
 
 // Initialize Firebase (Compat mode)
