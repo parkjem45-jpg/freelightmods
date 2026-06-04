@@ -1,17 +1,12 @@
-// admin.js — Admin Panel Logic (Fixed & Stable Version)
-// =====================================================
-// Fixes:
-// 1. Firestore permission errors now show helpful messages
-// 2. Signup race condition fixed (reloads after admin doc is created)
-// 3. Storage crash no longer breaks Firebase
-// 4. All Firestore writes show permission-denied errors clearly
+// admin.js — Admin Panel Logic (Supabase Version)
+// ================================================
+// Fixed: Full Supabase Auth + Database + Realtime
 
 const MOD_URL_TEMPLATES = {};
 let appsData = [];
 let currentUser = null;
 let currentPage = 1;
 const itemsPerPage = 15;
-let unsubscribe = null;
 let searchDebounce = null;
 let adminInitialized = false;
 
@@ -20,61 +15,73 @@ function getEl(id) { return document.getElementById(id); }
 /* ==========================================
    AUTHENTICATION FLOW
    ========================================== */
-function initAuth() {
-    if (typeof firebase === 'undefined' || typeof auth === 'undefined' || typeof db === 'undefined') {
-        console.error('[Admin] Firebase not loaded. Check script tags and internet connection.');
-        showLoginError('Firebase failed to load. Please check your connection and refresh the page.');
+async function initAuth() {
+    if (typeof supabase === 'undefined') {
+        showLoginError('Supabase not loaded. Please check your connection and refresh.');
         return;
     }
 
-    auth.onAuthStateChanged(async (user) => {
-        if (user) {
-            try {
-                const isAdmin = await checkAdminStatus(user);
-                if (isAdmin) {
-                    currentUser = user;
-                    showDashboard();
-                    updateUserInfo(user);
-                    if (!adminInitialized) {
-                        adminInitialized = true;
-                        initAdmin();
-                    }
-                } else {
-                    await auth.signOut();
-                    showLoginError('Access denied. You are not an admin. If you just signed up, wait a moment and try logging in again.');
-                }
-            } catch (e) {
-                console.error('[Admin] Auth check error:', e);
-                if (e.code === 'permission-denied' || (e.message && e.message.includes('permission'))) {
-                    showLoginError('Firestore permission denied. Please paste the security rules provided into your Firebase Console.');
-                } else if (user.email === 'jack1122@freelightmods.com') {
-                    currentUser = user;
-                    showDashboard();
-                    updateUserInfo(user);
-                    if (!adminInitialized) {
-                        adminInitialized = true;
-                        initAdmin();
-                    }
-                } else {
-                    await auth.signOut();
-                    showLoginError('Authentication error: ' + (e.message || 'Unknown error'));
-                }
+    // Check existing session immediately
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user) {
+        await handleUser(session.user);
+    } else {
+        showLogin();
+    }
+
+    // Listen for changes
+    supabase.auth.onAuthStateChange(async (event, session) => {
+        if (event === 'SIGNED_OUT') {
+            showLogin();
+            return;
+        }
+        const user = session?.user ?? null;
+        if (user) await handleUser(user);
+        else showLogin();
+    });
+}
+
+async function handleUser(user) {
+    try {
+        const isAdmin = await checkAdminStatus(user);
+        if (isAdmin) {
+            currentUser = user;
+            showDashboard();
+            updateUserInfo(user);
+            if (!adminInitialized) {
+                adminInitialized = true;
+                initAdmin();
             }
         } else {
-            showLogin();
+            await supabase.auth.signOut();
+            showLoginError('Access denied. You are not an admin.');
         }
-    });
+    } catch (e) {
+        console.error('[Admin] Auth check error:', e);
+        if (user.email === 'jack1122@freelightmods.com') {
+            currentUser = user;
+            showDashboard();
+            updateUserInfo(user);
+            if (!adminInitialized) {
+                adminInitialized = true;
+                initAdmin();
+            }
+        } else {
+            await supabase.auth.signOut();
+            showLoginError('Authentication error: ' + (e.message || 'Unknown'));
+        }
+    }
 }
 
 async function checkAdminStatus(user) {
     if (user.email === 'jack1122@freelightmods.com') return true;
-    try {
-        const doc = await db.collection('admins').doc(user.uid).get();
-        return doc.exists;
-    } catch (e) {
-        console.error('[Admin] checkAdminStatus error:', e);
-        throw e;
-    }
+    const { data, error } = await supabase
+        .from('admins')
+        .select('id')
+        .eq('id', user.id)
+        .maybeSingle();
+    if (error) throw error;
+    return !!data;
 }
 
 function showLogin() {
@@ -82,7 +89,7 @@ function showLogin() {
     const dash = getEl('adminDashboard');
     if (overlay) {
         overlay.style.display = 'flex';
-        void overlay.offsetWidth; // force reflow
+        void overlay.offsetWidth;
         overlay.classList.remove('hidden');
     }
     if (dash) dash.style.display = 'none';
@@ -97,9 +104,7 @@ function showDashboard() {
         overlay.classList.add('hidden');
         setTimeout(() => { overlay.style.display = 'none'; }, 300);
     }
-    if (dash) {
-        dash.style.display = 'flex';
-    }
+    if (dash) dash.style.display = 'flex';
 }
 
 function updateUserInfo(user) {
@@ -156,24 +161,28 @@ function initLoginForm() {
                 if (password !== confirm) throw new Error('Passwords do not match');
                 if (password.length < 6) throw new Error('Password must be at least 6 characters');
 
-                const cred = await auth.createUserWithEmailAndPassword(email, password);
-                await db.collection('admins').doc(cred.user.uid).set({
-                    email: email,
-                    role: 'admin',
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                showToast('Account created! Reloading...', 'success');
-                // Reload so onAuthStateChanged picks up the new admin doc cleanly
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1500);
-                return;
+                const { data, error } = await supabase.auth.signUp({ email, password });
+                if (error) throw error;
+
+                if (data.user) {
+                    await supabase.from('admins').insert([{ id: data.user.id, email, role: 'admin' }]);
+                }
+
+                if (data.session) {
+                    showToast('Account created! Reloading...', 'success');
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    showToast('Account created! Confirm your email if required, then log in.', 'success');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-user-plus"></i> <span>Create Account</span>';
+                }
             } else {
-                await auth.signInWithEmailAndPassword(email, password);
+                const { error } = await supabase.auth.signInWithPassword({ email, password });
+                if (error) throw error;
             }
         } catch (err) {
             if (errorDiv) {
-                errorDiv.textContent = getReadableError(err);
+                errorDiv.textContent = err.message || 'An error occurred';
                 errorDiv.style.display = 'block';
             }
             btn.disabled = false;
@@ -182,21 +191,6 @@ function initLoginForm() {
                 : '<i class="fas fa-sign-in-alt"></i> <span>Login</span>';
         }
     });
-}
-
-function getReadableError(error) {
-    const messages = {
-        'auth/invalid-email': 'Invalid email address.',
-        'auth/user-disabled': 'This account has been disabled.',
-        'auth/user-not-found': 'No account found with this email.',
-        'auth/wrong-password': 'Incorrect password.',
-        'auth/email-already-in-use': 'Email is already registered.',
-        'auth/weak-password': 'Password should be at least 6 characters.',
-        'auth/network-request-failed': 'Network error. Check your connection.',
-        'auth/too-many-requests': 'Too many attempts. Try again later.',
-        'auth/invalid-credential': 'Invalid email or password.'
-    };
-    return messages[error.code] || error.message;
 }
 
 function showLoginError(msg) {
@@ -211,8 +205,8 @@ function showLoginError(msg) {
    ADMIN INITIALIZATION
    ========================================== */
 function initAdmin() {
-    if (typeof db === 'undefined') {
-        showToast('Firestore not available. Check that firebase.js loaded correctly.', 'error');
+    if (typeof supabase === 'undefined') {
+        showToast('Supabase not available. Check that supabase.js loaded.', 'error');
         return;
     }
     setupRealtime();
@@ -222,41 +216,54 @@ function initAdmin() {
     setupMobileSidebar();
     setupLogout();
     setupTableActions();
+    fetchApps();
 }
 
+/* ==========================================
+   REALTIME & DATA FETCHING
+   ========================================== */
 function setupRealtime() {
-    if (unsubscribe && typeof unsubscribe === 'function') {
-        try { unsubscribe(); } catch (e) {}
+    if (window.apksChannel) {
+        supabase.removeChannel(window.apksChannel);
     }
+    window.apksChannel = supabase
+        .channel('public:apks')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'apks' }, () => {
+            fetchApps();
+        })
+        .subscribe((status) => {
+            if (status !== 'SUBSCRIBED') {
+                console.warn('[Realtime] Status:', status);
+            }
+        });
+}
 
-    try {
-        unsubscribe = db.collection('apks')
-            .orderBy('dateAdded', 'desc')
-            .onSnapshot((snapshot) => {
-                appsData = [];
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    if (MOD_URL_TEMPLATES[doc.id]) {
-                        data.link = MOD_URL_TEMPLATES[doc.id];
-                    }
-                    if (!data.link) data.link = '';
-                    appsData.push({ id: doc.id, ...data });
-                });
-                currentPage = 1;
-                renderTable();
-                updateStats();
-            }, (error) => {
-                console.error('[Admin] Realtime error:', error);
-                let msg = 'Failed to load apps. Check connection.';
-                if (error.code === 'permission-denied') {
-                    msg = 'Permission denied reading APKs. Paste the Firestore rules provided into Firebase Console.';
-                }
-                showToast(msg, 'error');
-            });
-    } catch (e) {
-        console.error('[Admin] Setup realtime error:', e);
-        showToast('Database connection failed: ' + e.message, 'error');
+async function fetchApps() {
+    const { data, error } = await supabase
+        .from('apks')
+        .select('*')
+        .order('date_added', { ascending: false });
+    if (error) {
+        console.error('[Admin] Fetch error:', error);
+        showToast('Failed to load apps: ' + error.message, 'error');
+        return;
     }
+    appsData = (data || []).map(row => ({
+        id: row.id,
+        name: row.name,
+        version: row.version,
+        size: row.size,
+        icon: row.icon,
+        image: row.image,
+        mod: row.mod,
+        link: row.link || '',
+        category: row.category || 'app',
+        downloads: row.downloads || 0,
+        dateAdded: row.date_added
+    }));
+    currentPage = 1;
+    renderTable();
+    updateStats();
 }
 
 /* ==========================================
@@ -280,32 +287,20 @@ function switchTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active'));
     const target = getEl(tabId);
     if (target) target.classList.add('active');
-
     const sidebar = getEl('sidebar');
     if (sidebar) sidebar.classList.remove('open');
-
-    if (tabId === 'apps') {
-        currentPage = 1;
-        renderTable();
-    }
+    if (tabId === 'apps') { currentPage = 1; renderTable(); }
 }
 
 function setupMobileSidebar() {
     const toggle = getEl('mobileToggle');
     const sidebar = getEl('sidebar');
-    if (toggle && sidebar) {
-        toggle.addEventListener('click', () => sidebar.classList.toggle('open'));
-    }
+    if (toggle && sidebar) toggle.addEventListener('click', () => sidebar.classList.toggle('open'));
 }
 
 function setupLogout() {
     const logoutNav = getEl('logoutNavItem');
-    if (logoutNav) {
-        logoutNav.addEventListener('click', (e) => {
-            e.preventDefault();
-            logout();
-        });
-    }
+    if (logoutNav) logoutNav.addEventListener('click', (e) => { e.preventDefault(); logout(); });
 }
 
 /* ==========================================
@@ -314,38 +309,27 @@ function setupLogout() {
 function renderTable() {
     const tb = getEl('appsTableBody');
     if (!tb) return;
-
     const q = (getEl('searchApps')?.value || '').toLowerCase().trim();
     let filtered = appsData;
-
     if (q) {
         filtered = appsData.filter(a =>
             (a.name || '').toLowerCase().includes(q) ||
             (a.mod || '').toLowerCase().includes(q)
         );
     }
-
     tb.innerHTML = '';
-
     if (filtered.length === 0) {
         tb.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-secondary)">No apps found</td></tr>';
         renderPagination(0);
         return;
     }
-
     const totalPages = Math.ceil(filtered.length / itemsPerPage);
     if (currentPage > totalPages) currentPage = totalPages || 1;
-
     const start = (currentPage - 1) * itemsPerPage;
     const end = start + itemsPerPage;
     const pageItems = filtered.slice(start, end);
-
     const fragment = document.createDocumentFragment();
-    pageItems.forEach(app => {
-        const tr = buildTableRow(app);
-        fragment.appendChild(tr);
-    });
-
+    pageItems.forEach(app => fragment.appendChild(buildTableRow(app)));
     tb.appendChild(fragment);
     attachTableImageHandlers(tb);
     renderPagination(filtered.length);
@@ -360,10 +344,7 @@ function buildTableRow(app) {
     iconDiv.className = 'app-icon-small';
     if (app.image && app.image.trim()) {
         const img = document.createElement('img');
-        img.src = app.image;
-        img.alt = app.name || 'App';
-        img.loading = 'lazy';
-        img.dataset.fallback = 'true';
+        img.src = app.image; img.alt = app.name || 'App'; img.loading = 'lazy'; img.dataset.fallback = 'true';
         iconDiv.appendChild(img);
     } else {
         iconDiv.innerHTML = '<i class="' + escapeHtml(app.icon || 'fas fa-mobile-alt') + '"></i>';
@@ -373,14 +354,9 @@ function buildTableRow(app) {
     const nameCell = document.createElement('td');
     nameCell.innerHTML = '<strong>' + escapeHtml(app.name) + '</strong><br><small class="text-secondary">' + escapeHtml(app.category || 'app') + '</small>';
 
-    const versionCell = document.createElement('td');
-    versionCell.textContent = app.version || 'N/A';
-
-    const sizeCell = document.createElement('td');
-    sizeCell.textContent = app.size || 'N/A';
-
-    const downloadsCell = document.createElement('td');
-    downloadsCell.textContent = formatNum(app.downloads || 0);
+    const versionCell = document.createElement('td'); versionCell.textContent = app.version || 'N/A';
+    const sizeCell = document.createElement('td'); sizeCell.textContent = app.size || 'N/A';
+    const downloadsCell = document.createElement('td'); downloadsCell.textContent = formatNum(app.downloads || 0);
 
     const linkCell = document.createElement('td');
     const hasLink = app.link && app.link.startsWith('http');
@@ -397,14 +373,8 @@ function buildTableRow(app) {
     `;
     actionsCell.appendChild(actionsDiv);
 
-    tr.appendChild(iconCell);
-    tr.appendChild(nameCell);
-    tr.appendChild(versionCell);
-    tr.appendChild(sizeCell);
-    tr.appendChild(downloadsCell);
-    tr.appendChild(linkCell);
-    tr.appendChild(actionsCell);
-
+    tr.appendChild(iconCell); tr.appendChild(nameCell); tr.appendChild(versionCell);
+    tr.appendChild(sizeCell); tr.appendChild(downloadsCell); tr.appendChild(linkCell); tr.appendChild(actionsCell);
     return tr;
 }
 
@@ -414,25 +384,16 @@ function buildTableRow(app) {
 function setupTableActions() {
     const tbody = getEl('appsTableBody');
     if (!tbody) return;
-
     tbody.addEventListener('click', (e) => {
         const btn = e.target.closest('[data-action]');
         if (!btn) return;
-
         const action = btn.getAttribute('data-action');
         const id = btn.getAttribute('data-id');
-
-        if (action === 'edit') {
-            editApp(id);
-        } else if (action === 'delete') {
-            deleteApp(id);
-        }
+        if (action === 'edit') editApp(id);
+        else if (action === 'delete') deleteApp(id);
     });
 }
 
-/* ==========================================
-   IMAGE ERROR HANDLING
-   ========================================== */
 function attachTableImageHandlers(container) {
     if (!container) return;
     container.querySelectorAll('img[data-fallback]').forEach(img => {
@@ -451,24 +412,19 @@ function renderPagination(totalItems) {
     const container = getEl('pagination');
     if (!container) return;
     container.innerHTML = '';
-
     const totalPages = Math.ceil(totalItems / itemsPerPage);
     if (totalPages <= 1) return;
-
     const fragment = document.createDocumentFragment();
 
     const prevBtn = document.createElement('button');
     prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
     prevBtn.disabled = currentPage === 1;
-    prevBtn.addEventListener('click', () => {
-        if (currentPage > 1) { currentPage--; renderTable(); }
-    });
+    prevBtn.addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderTable(); } });
     fragment.appendChild(prevBtn);
 
     let startPage = Math.max(1, currentPage - 2);
     let endPage = Math.min(totalPages, startPage + 4);
     if (endPage - startPage < 4) startPage = Math.max(1, endPage - 4);
-
     for (let i = startPage; i <= endPage; i++) {
         const btn = document.createElement('button');
         btn.textContent = i;
@@ -480,9 +436,7 @@ function renderPagination(totalItems) {
     const nextBtn = document.createElement('button');
     nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
     nextBtn.disabled = currentPage === totalPages;
-    nextBtn.addEventListener('click', () => {
-        if (currentPage < totalPages) { currentPage++; renderTable(); }
-    });
+    nextBtn.addEventListener('click', () => { if (currentPage < totalPages) { currentPage++; renderTable(); } });
     fragment.appendChild(nextBtn);
 
     const info = document.createElement('span');
@@ -494,18 +448,14 @@ function renderPagination(totalItems) {
 }
 
 /* ==========================================
-   SEARCH (Debounced)
+   SEARCH
    ========================================== */
 function setupSearch() {
     const input = getEl('searchApps');
     if (!input) return;
-
     input.addEventListener('input', () => {
         clearTimeout(searchDebounce);
-        searchDebounce = setTimeout(() => {
-            currentPage = 1;
-            renderTable();
-        }, 150);
+        searchDebounce = setTimeout(() => { currentPage = 1; renderTable(); }, 150);
     });
 }
 
@@ -537,19 +487,20 @@ function setupForm() {
                 mod: getEl('appMod').value.trim(),
                 link: linkValue,
                 category: getEl('appCategory').value,
-                downloads: 0,
-                dateAdded: firebase.firestore.FieldValue.serverTimestamp()
+                downloads: 0
             };
 
-            await db.collection('apks').add(newApp);
+            const { error } = await supabase.from('apks').insert([newApp]);
+            if (error) throw error;
+
             f.reset();
             showToast('APK added successfully!', 'success');
             setTimeout(() => switchTab('apps'), 600);
         } catch (err) {
             console.error('[Admin] Add error:', err);
             let msg = 'Failed to add APK: ' + err.message;
-            if (err.code === 'permission-denied') {
-                msg = 'Permission denied. Make sure Firestore rules are set correctly.';
+            if (err.code === '42501' || err.message?.includes('row-level security')) {
+                msg = 'Permission denied. Make sure you ran the SQL setup in Supabase.';
             }
             showToast(msg, 'error');
         } finally {
@@ -565,7 +516,6 @@ function setupForm() {
 function editApp(id) {
     const app = appsData.find(x => x.id === id);
     if (!app) return;
-
     getEl('editId').value = id;
     getEl('editName').value = app.name || '';
     getEl('editVersion').value = app.version || '';
@@ -575,7 +525,6 @@ function editApp(id) {
     getEl('editMod').value = app.mod || '';
     getEl('editLink').value = app.link || '';
     getEl('editCategory').value = app.category || 'app';
-
     const modal = getEl('editModal');
     if (modal) modal.classList.add('active');
 }
@@ -583,15 +532,13 @@ function editApp(id) {
 async function saveEdit() {
     const id = getEl('editId').value;
     if (!id) return;
-
     const btn = getEl('saveEditBtn');
     btn.disabled = true;
     btn.textContent = 'Saving...';
 
     try {
         const linkValue = getEl('editLink').value.trim();
-        
-        await db.collection('apks').doc(id).update({
+        const { error } = await supabase.from('apks').update({
             name: getEl('editName').value.trim(),
             version: getEl('editVersion').value.trim(),
             size: getEl('editSize').value.trim(),
@@ -600,14 +547,15 @@ async function saveEdit() {
             mod: getEl('editMod').value.trim(),
             link: linkValue,
             category: getEl('editCategory').value
-        });
+        }).eq('id', id);
+        if (error) throw error;
         closeModal();
         showToast('APK updated successfully!', 'success');
     } catch (e) {
         console.error('[Admin] Edit error:', e);
         let msg = 'Update failed: ' + e.message;
-        if (e.code === 'permission-denied') {
-            msg = 'Permission denied. Check Firestore rules.';
+        if (e.code === '42501' || e.message?.includes('row-level security')) {
+            msg = 'Permission denied. Check Supabase RLS policies.';
         }
         showToast(msg, 'error');
     } finally {
@@ -624,13 +572,14 @@ function closeModal() {
 async function deleteApp(id) {
     if (!confirm('Are you sure you want to delete this APK permanently?')) return;
     try {
-        await db.collection('apks').doc(id).delete();
+        const { error } = await supabase.from('apks').delete().eq('id', id);
+        if (error) throw error;
         showToast('APK deleted', 'success');
     } catch (e) {
         console.error('[Admin] Delete error:', e);
         let msg = 'Delete failed: ' + e.message;
-        if (e.code === 'permission-denied') {
-            msg = 'Permission denied. Check Firestore rules.';
+        if (e.code === '42501' || e.message?.includes('row-level security')) {
+            msg = 'Permission denied. Check Supabase RLS policies.';
         }
         showToast(msg, 'error');
     }
@@ -644,12 +593,7 @@ function updateStats() {
     const downloads = appsData.reduce((s, a) => s + (a.downloads || 0), 0);
     const games = appsData.filter(a => a.category === 'game').length;
     const apps = appsData.filter(a => a.category === 'app').length;
-
-    const setText = (id, val) => {
-        const el = getEl(id);
-        if (el) el.textContent = val;
-    };
-
+    const setText = (id, val) => { const el = getEl(id); if (el) el.textContent = val; };
     setText('totalApps', total);
     setText('totalDownloads', formatNum(downloads));
     setText('gamesCount', games);
@@ -657,10 +601,7 @@ function updateStats() {
 }
 
 function exportData() {
-    if (appsData.length === 0) {
-        showToast('No data to export', 'warning');
-        return;
-    }
+    if (appsData.length === 0) { showToast('No data to export', 'warning'); return; }
     const dataStr = JSON.stringify(appsData, null, 2);
     const blob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -674,14 +615,15 @@ function exportData() {
     showToast('Data exported!', 'success');
 }
 
-function logout() {
+async function logout() {
     if (!confirm('Are you sure you want to logout?')) return;
-    auth.signOut().then(() => {
+    try {
+        await supabase.auth.signOut();
         location.reload();
-    }).catch(err => {
+    } catch (err) {
         console.error('[Admin] Logout error:', err);
         showToast('Logout failed', 'error');
-    });
+    }
 }
 
 /* ==========================================
@@ -691,15 +633,11 @@ function showToast(message, type) {
     type = type || 'success';
     const container = getEl('toastContainer');
     if (!container) return;
-
     const toast = document.createElement('div');
     toast.className = 'toast ' + type;
-
     const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-exclamation-triangle';
     toast.innerHTML = '<i class="fas ' + icon + '"></i> <span>' + escapeHtml(message) + '</span>';
-
     container.appendChild(toast);
-
     setTimeout(() => {
         toast.classList.add('fade-out');
         setTimeout(() => { if (toast.parentElement) toast.remove(); }, 300);

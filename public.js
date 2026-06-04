@@ -1,9 +1,5 @@
-// public.js — Public Site Logic (Fixed Version)
-// ==============================================
-// Fixes:
-// 1. Checks for Firestore availability properly
-// 2. Admin link now checks Firestore admins collection
-// 3. Better error messages when Firestore fails
+// public.js — Public Site Logic (Supabase Version)
+// ================================================
 
 const MOD_LINK_OVERRIDES = {};
 let appsData = [];
@@ -19,12 +15,10 @@ let searchQuery = '';
 function initTheme() {
     const toggle = document.getElementById('themeToggle');
     if (!toggle) return;
-
     const html = document.documentElement;
     const saved = localStorage.getItem('theme') || 'dark';
     html.setAttribute('data-theme', saved);
     updateThemeIcon(saved);
-
     toggle.addEventListener('click', () => {
         const isDark = html.getAttribute('data-theme') === 'dark';
         const newTheme = isDark ? 'light' : 'dark';
@@ -37,9 +31,7 @@ function initTheme() {
 function updateThemeIcon(currentTheme) {
     const toggle = document.getElementById('themeToggle');
     if (!toggle) return;
-    toggle.innerHTML = currentTheme === 'dark'
-        ? '<i class="fas fa-sun"></i>'
-        : '<i class="fas fa-moon"></i>';
+    toggle.innerHTML = currentTheme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
 }
 
 /* ==========================================
@@ -50,37 +42,29 @@ function initMobileMenu() {
     const closeBtn = document.getElementById('closeMobileMenu');
     const overlay = document.getElementById('mobileMenuOverlay');
     const body = document.body;
-
     function open() { body.classList.add('mobile-menu-open'); }
     function close() { body.classList.remove('mobile-menu-open'); }
-
     if (mobileToggle) mobileToggle.addEventListener('click', open);
     if (closeBtn) closeBtn.addEventListener('click', close);
     if (overlay) overlay.addEventListener('click', close);
-
-    document.querySelectorAll('.mobile-nav-links a').forEach(link => {
-        link.addEventListener('click', close);
-    });
+    document.querySelectorAll('.mobile-nav-links a').forEach(link => link.addEventListener('click', close));
 }
 
 /* ==========================================
    AUTH & ADMIN LINK
    ========================================== */
 function initAuth() {
-    if (typeof auth === 'undefined') {
-        console.warn('[Public] Firebase Auth not loaded yet');
+    if (typeof supabase === 'undefined') {
+        console.warn('[Public] Supabase not loaded yet');
         return;
     }
-    auth.onAuthStateChanged(async (user) => {
+    supabase.auth.onAuthStateChange(async (event, session) => {
+        const user = session?.user ?? null;
         currentUser = user;
         let isAdmin = false;
         if (user) {
-            try {
-                const doc = await db.collection('admins').doc(user.uid).get();
-                isAdmin = doc.exists || user.email === 'jack1122@freelightmods.com';
-            } catch (e) {
-                isAdmin = user.email === 'jack1122@freelightmods.com';
-            }
+            const { data } = await supabase.from('admins').select('id').eq('id', user.id).maybeSingle();
+            isAdmin = !!data || user.email === 'jack1122@freelightmods.com';
         }
         const adminLink = document.getElementById('adminLink');
         const mobileAdminLink = document.getElementById('mobileAdminLink');
@@ -92,48 +76,44 @@ function initAuth() {
 /* ==========================================
    FIREBASE DATA LOADING
    ========================================== */
-function waitForFirebase(callback, retries) {
-    retries = retries || 30;
-    if (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length > 0 && typeof db !== 'undefined') {
-        callback();
-    } else if (retries > 0) {
-        setTimeout(() => waitForFirebase(callback, retries - 1), 200);
-    } else {
-        console.warn('[Public] Firebase not available. Using sample data.');
+function loadAppsData() {
+    if (typeof supabase === 'undefined') {
+        console.warn('[Public] Supabase not loaded');
         loadSampleData();
+        return;
     }
+    fetchAppsPublic();
+    supabase.channel('public:apks')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'apks' }, () => {
+            fetchAppsPublic();
+        })
+        .subscribe();
 }
 
-function loadAppsData() {
-    const grid = document.getElementById('appGrid');
-    if (!grid) return;
-
-    waitForFirebase(() => {
-        try {
-            db.collection('apks').orderBy('dateAdded', 'desc').onSnapshot((snapshot) => {
-                appsData = [];
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    if (MOD_LINK_OVERRIDES[doc.id]) {
-                        data.link = MOD_LINK_OVERRIDES[doc.id];
-                    }
-                    if (!data.link) data.link = '';
-                    appsData.push({ id: doc.id, ...data });
-                });
-                displayedCount = ITEMS_PER_LOAD;
-                renderGrid();
-            }, (error) => {
-                console.error('[Firestore] Error:', error);
-                if (error.code === 'permission-denied') {
-                    console.error('[Firestore] Permission denied reading APKs. Check your security rules.');
-                }
-                loadSampleData();
-            });
-        } catch (e) {
-            console.error('[Public] Firestore error:', e);
-            loadSampleData();
-        }
-    });
+async function fetchAppsPublic() {
+    const { data, error } = await supabase
+        .from('apks')
+        .select('*')
+        .order('date_added', { ascending: false });
+    if (error) {
+        console.error('[Public] Fetch error:', error);
+        loadSampleData();
+        return;
+    }
+    appsData = (data || []).map(row => ({
+        id: row.id,
+        name: row.name,
+        version: row.version,
+        size: row.size,
+        icon: row.icon,
+        image: row.image,
+        mod: row.mod,
+        link: row.link || '',
+        category: row.category || 'app',
+        downloads: row.downloads || 0
+    }));
+    displayedCount = ITEMS_PER_LOAD;
+    renderGrid();
 }
 
 function loadSampleData() {
@@ -142,9 +122,7 @@ function loadSampleData() {
         { id: 'youtube-premium', name: 'YouTube Premium', icon: 'fab fa-youtube', version: 'v18.45.41', size: '134 MB', mod: 'No Ads', downloads: 28750, link: '#', category: 'app', image: '' },
         { id: 'minecraft-mod', name: 'Minecraft Mod', icon: 'fas fa-cube', version: 'v1.20.0', size: '210 MB', mod: 'Unlimited Items', downloads: 8900, link: '#', category: 'game', image: '' }
     ];
-    appsData.forEach(app => {
-        if (MOD_LINK_OVERRIDES[app.id]) app.link = MOD_LINK_OVERRIDES[app.id];
-    });
+    appsData.forEach(app => { if (MOD_LINK_OVERRIDES[app.id]) app.link = MOD_LINK_OVERRIDES[app.id]; });
     displayedCount = ITEMS_PER_LOAD;
     renderGrid();
 }
@@ -156,23 +134,15 @@ function renderGrid() {
     const grid = document.getElementById('appGrid');
     if (!grid) return;
     grid.innerHTML = '';
-
     let filtered = getFilteredApps();
-
     if (filtered.length === 0) {
         grid.innerHTML = `<div class="no-results"><i class="fas fa-search"></i><h3>No mods found</h3><p>Try a different search or filter.</p></div>`;
         updateLoadMore(0);
         return;
     }
-
     const toShow = filtered.slice(0, displayedCount);
     const fragment = document.createDocumentFragment();
-
-    toShow.forEach(app => {
-        const card = buildAppCard(app);
-        fragment.appendChild(card);
-    });
-
+    toShow.forEach(app => fragment.appendChild(buildAppCard(app)));
     grid.appendChild(fragment);
     attachImageErrorHandlers(grid);
     updateLoadMore(filtered.length);
@@ -181,9 +151,7 @@ function renderGrid() {
 
 function getFilteredApps() {
     let result = appsData;
-    if (currentFilter !== 'all') {
-        result = result.filter(a => (a.category || 'app') === currentFilter);
-    }
+    if (currentFilter !== 'all') result = result.filter(a => (a.category || 'app') === currentFilter);
     if (searchQuery) {
         const q = searchQuery.toLowerCase();
         result = result.filter(a =>
@@ -206,10 +174,7 @@ function buildAppCard(app) {
     iconDiv.className = 'app-icon';
     if (app.image && app.image.trim()) {
         const img = document.createElement('img');
-        img.src = app.image;
-        img.alt = app.name || 'App icon';
-        img.loading = 'lazy';
-        img.dataset.fallback = 'true';
+        img.src = app.image; img.alt = app.name || 'App icon'; img.loading = 'lazy'; img.dataset.fallback = 'true';
         iconDiv.appendChild(img);
     } else {
         iconDiv.innerHTML = `<i class="${escapeHtml(app.icon || 'fas fa-mobile-alt')}"></i>`;
@@ -239,10 +204,7 @@ function buildAppCard(app) {
     card.appendChild(btn);
 
     card.addEventListener('click', () => handleDownload(app));
-    btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        handleDownload(app);
-    });
+    btn.addEventListener('click', (e) => { e.stopPropagation(); handleDownload(app); });
 
     return card;
 }
@@ -277,7 +239,6 @@ function initSearch() {
     const input = document.getElementById('searchInput');
     const clearBtn = document.getElementById('clearSearch');
     const filterTags = document.getElementById('filterTags');
-
     if (!input) return;
 
     let debounceTimer;
@@ -285,19 +246,13 @@ function initSearch() {
         searchQuery = input.value.trim();
         if (clearBtn) clearBtn.classList.toggle('visible', searchQuery.length > 0);
         clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => {
-            displayedCount = ITEMS_PER_LOAD;
-            renderGrid();
-        }, 150);
+        debounceTimer = setTimeout(() => { displayedCount = ITEMS_PER_LOAD; renderGrid(); }, 150);
     });
 
     if (clearBtn) {
         clearBtn.addEventListener('click', () => {
-            input.value = '';
-            searchQuery = '';
-            clearBtn.classList.remove('visible');
-            displayedCount = ITEMS_PER_LOAD;
-            renderGrid();
+            input.value = ''; searchQuery = ''; clearBtn.classList.remove('visible');
+            displayedCount = ITEMS_PER_LOAD; renderGrid();
         });
     }
 
@@ -308,8 +263,7 @@ function initSearch() {
             filterTags.querySelectorAll('.filter-tag').forEach(t => t.classList.remove('active'));
             tag.classList.add('active');
             currentFilter = tag.getAttribute('data-filter') || 'all';
-            displayedCount = ITEMS_PER_LOAD;
-            renderGrid();
+            displayedCount = ITEMS_PER_LOAD; renderGrid();
         });
     }
 }
@@ -317,10 +271,7 @@ function initSearch() {
 function initLoadMore() {
     const btn = document.getElementById('loadMoreBtn');
     if (!btn) return;
-    btn.addEventListener('click', () => {
-        displayedCount += ITEMS_PER_LOAD;
-        renderGrid();
-    });
+    btn.addEventListener('click', () => { displayedCount += ITEMS_PER_LOAD; renderGrid(); });
 }
 
 function updateLoadMore(total) {
@@ -343,46 +294,25 @@ function initAI() {
     const aiClose = document.getElementById('aiClose');
     const aiSend = document.getElementById('aiSend');
     const aiInput = document.getElementById('aiInput');
-
-    if (!aiToggle || !aiChat) {
-        console.warn('[AI] Toggle or chat window not found');
-        return;
-    }
+    if (!aiToggle || !aiChat) { console.warn('[AI] Toggle or chat window not found'); return; }
 
     aiToggle.addEventListener('click', () => {
-        aiChat.style.display = 'block';
-        aiToggle.style.display = 'none';
+        aiChat.style.display = 'block'; aiToggle.style.display = 'none';
         if (aiInput) aiInput.focus();
     });
-
-    if (aiClose) {
-        aiClose.addEventListener('click', () => {
-            aiChat.style.display = 'none';
-            aiToggle.style.display = 'flex';
-        });
-    }
-
+    if (aiClose) aiClose.addEventListener('click', () => { aiChat.style.display = 'none'; aiToggle.style.display = 'flex'; });
     if (aiSend) aiSend.addEventListener('click', sendAI);
-    if (aiInput) {
-        aiInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendAI();
-        });
-    }
+    if (aiInput) aiInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendAI(); });
 }
 
 function sendAI() {
     const input = document.getElementById('aiInput');
     const msg = input ? input.value.trim() : '';
     if (!msg) return;
-
     addAIMessage(msg, 'user');
     if (input) input.value = '';
-
     const typingId = showTypingIndicator();
-    setTimeout(() => {
-        removeTypingIndicator(typingId);
-        addAIMessage(getAIResponse(msg), 'bot');
-    }, 800 + Math.random() * 400);
+    setTimeout(() => { removeTypingIndicator(typingId); addAIMessage(getAIResponse(msg), 'bot'); }, 800 + Math.random() * 400);
 }
 
 function addAIMessage(text, type) {
@@ -401,11 +331,9 @@ function showTypingIndicator() {
     const box = document.getElementById('aiMessages');
     const id = 'typing-' + Date.now();
     const div = document.createElement('div');
-    div.id = id;
-    div.className = 'ai-message bot';
+    div.id = id; div.className = 'ai-message bot';
     div.innerHTML = '<i class="fas fa-robot"></i><div class="typing-indicator"><span></span><span></span><span></span></div>';
-    box.appendChild(div);
-    box.scrollTop = box.scrollHeight;
+    box.appendChild(div); box.scrollTop = box.scrollHeight;
     return id;
 }
 
@@ -463,9 +391,7 @@ document.addEventListener('keydown', (e) => {
    ========================================== */
 function updateYear() {
     const year = new Date().getFullYear();
-    document.querySelectorAll('#currentYear, #footerYear').forEach(el => {
-        if (el) el.textContent = year;
-    });
+    document.querySelectorAll('#currentYear, #footerYear').forEach(el => { if (el) el.textContent = year; });
 }
 
 /* ==========================================

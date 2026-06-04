@@ -14,62 +14,39 @@
     <style>
         .download-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 100px 20px 40px; }
         .download-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 32px;
-            padding: 48px 36px;
-            max-width: 480px;
-            width: 100%;
-            text-align: center;
-            box-shadow: var(--shadow-card);
-            animation: fadeInUp 0.5s ease;
+            background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 32px;
+            padding: 48px 36px; max-width: 480px; width: 100%; text-align: center;
+            box-shadow: var(--shadow-card); animation: fadeInUp 0.5s ease;
         }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
         .app-icon-large {
-            width: 100px; height: 100px;
-            background: linear-gradient(145deg, #1e2a3a, #141c28);
-            border-radius: 28px;
-            display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 24px;
-            font-size: 2.8rem;
-            color: var(--accent-cyan);
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            width: 100px; height: 100px; background: linear-gradient(145deg, #1e2a3a, #141c28);
+            border-radius: 28px; display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 24px; font-size: 2.8rem; color: var(--accent-cyan);
+            overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
         .app-icon-large img { width: 100%; height: 100%; object-fit: cover; border-radius: 28px; }
         [data-theme="light"] .app-icon-large { background: linear-gradient(145deg, #e2e8f0, #cbd5e1); }
 
         .download-card h1 { font-size: 1.6rem; margin-bottom: 12px; word-break: break-word; }
-        .download-meta {
-            display: flex; justify-content: center; gap: 20px;
-            color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 8px; flex-wrap: wrap;
-        }
+        .download-meta { display: flex; justify-content: center; gap: 20px; color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 8px; flex-wrap: wrap; }
         .download-meta i { color: var(--accent-purple); margin-right: 4px; }
         .download-mod {
             display: inline-flex; align-items: center; gap: 6px;
             background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.2);
-            color: #fbbf24; padding: 6px 14px; border-radius: 20px;
-            font-size: 0.85rem; font-weight: 600; margin-bottom: 28px;
+            color: #fbbf24; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; margin-bottom: 28px;
         }
 
         .download-action { margin-bottom: 24px; }
         .download-btn-large {
-            position: relative;
-            display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+            position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 10px;
             padding: 16px 40px; border-radius: 16px; font-size: 1.1rem; font-weight: 700;
-            background: var(--bg-card); color: var(--text-primary);
-            cursor: pointer; border: 3px solid transparent;
-            transition: all 0.3s ease; width: 100%; max-width: 320px;
-            animation: rgbBorder 2s linear infinite;
+            background: var(--bg-card); color: var(--text-primary); cursor: pointer; border: 3px solid transparent;
+            transition: all 0.3s ease; width: 100%; max-width: 320px; animation: rgbBorder 2s linear infinite;
         }
-        .download-btn-large:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(0, 242, 254, 0.2);
-        }
-        .download-btn-large:disabled {
-            opacity: 0.8; cursor: wait; filter: grayscale(0.3);
-        }
+        .download-btn-large:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0, 242, 254, 0.2); }
+        .download-btn-large:disabled { opacity: 0.8; cursor: wait; filter: grayscale(0.3); }
 
         @keyframes rgbBorder {
             0% { border-color: #ff0000; box-shadow: 0 0 15px rgba(255,0,0,0.4); }
@@ -79,39 +56,22 @@
             100% { border-color: #ff0000; box-shadow: 0 0 15px rgba(255,0,0,0.4); }
         }
 
-        .health-bar-container {
-            width: 100%; max-width: 320px; height: 8px;
-            background: var(--bg-primary); border-radius: 4px;
-            overflow: hidden; margin: 16px auto 12px;
-            border: 1px solid var(--border-color);
-        }
-        .health-bar {
-            height: 100%; width: 0%;
-            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
-            border-radius: 4px;
-            transition: width 0.1s linear;
-        }
-        .health-bar.animate {
-            animation: fillHealthBar 3s linear forwards;
-        }
+        .health-bar-container { width: 100%; max-width: 320px; height: 8px; background: var(--bg-primary); border-radius: 4px; overflow: hidden; margin: 16px auto 12px; border: 1px solid var(--border-color); }
+        .health-bar { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple)); border-radius: 4px; transition: width 0.1s linear; }
+        .health-bar.animate { animation: fillHealthBar 3s linear forwards; }
         @keyframes fillHealthBar { from { width: 0%; } to { width: 100%; } }
 
         .download-hint { color: var(--text-secondary); font-size: 0.9rem; min-height: 22px; }
         .download-hint.ready { color: var(--accent-success); font-weight: 600; }
         .download-hint.error { color: var(--accent-danger); font-weight: 600; }
 
-        .back-link {
-            display: inline-flex; align-items: center; gap: 8px;
-            color: var(--text-secondary); font-size: 0.9rem;
-            transition: var(--transition); margin-top: 8px;
-        }
+        .back-link { display: inline-flex; align-items: center; gap: 8px; color: var(--text-secondary); font-size: 0.9rem; transition: var(--transition); margin-top: 8px; }
         .back-link:hover { color: var(--accent-cyan); gap: 12px; }
 
         .error-box { padding: 40px 20px; text-align: center; }
         .error-box h2 { margin-bottom: 12px; color: var(--accent-danger); }
         .error-box p { color: var(--text-secondary); margin-bottom: 24px; }
 
-        /* Loading State */
         .loading-box { padding: 60px 20px; text-align: center; }
         .loading-box i { font-size: 2.5rem; color: var(--accent-cyan); margin-bottom: 16px; display: inline-block; animation: spin 1s linear infinite; }
         .loading-box p { color: var(--text-secondary); font-size: 1rem; }
@@ -120,12 +80,10 @@
 </head>
 <body>
 
-    <!-- Theme Toggle -->
     <button class="theme-toggle" id="themeToggle" aria-label="Toggle Theme">
         <i class="fas fa-sun"></i>
     </button>
 
-    <!-- Header -->
     <header class="header">
         <div class="container nav-container">
             <a href="index.html" class="logo">
@@ -141,13 +99,11 @@
     <main class="download-page">
         <div class="container" style="display:flex;justify-content:center">
             <div class="download-card" id="downloadCard">
-                <!-- Loading State (shown initially) -->
                 <div class="loading-box" id="loadingState">
                     <i class="fas fa-spinner"></i>
                     <p>Loading app details...</p>
                 </div>
 
-                <!-- App Content (hidden until loaded) -->
                 <div id="appContent" style="display:none;">
                     <div class="app-icon-large" id="appIconLarge">
                         <i class="fas fa-mobile-alt"></i>
@@ -173,12 +129,8 @@
         </div>
     </main>
 
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
-    <script src="firebase.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="supabase.js"></script>
     <script>
         /* ===== THEME TOGGLE ===== */
         (function() {
@@ -201,7 +153,6 @@
         const urlParams = new URLSearchParams(window.location.search);
         const appId = urlParams.get('id') || '';
 
-        // Elements
         const loadingState = document.getElementById('loadingState');
         const appContent = document.getElementById('appContent');
         const appNameEl = document.getElementById('appName');
@@ -218,14 +169,11 @@
         let countdownTimer = null;
         let currentAppData = null;
 
-        /* ===== SHOW ERROR STATE ===== */
         function showError(title, message) {
             if (loadingState) loadingState.style.display = 'none';
             if (appContent) appContent.style.display = 'none';
-
             const existingError = downloadCard.querySelector('.error-box');
             if (existingError) existingError.remove();
-
             const errorDiv = document.createElement('div');
             errorDiv.className = 'error-box';
             errorDiv.innerHTML = `
@@ -237,82 +185,49 @@
             downloadCard.insertBefore(errorDiv, downloadCard.querySelector('.back-link'));
         }
 
-        /* ===== LOAD APP DATA FROM FIRESTORE ===== */
         async function loadAppData() {
-            // Validate ID
-            if (!appId) {
-                showError('Invalid App ID', 'No app ID was provided in the URL.');
-                return;
-            }
-
-            // Wait for Firebase to be ready
-            let retries = 30;
-            while ((typeof firebase === 'undefined' || !firebase.apps || firebase.apps.length === 0) && retries > 0) {
-                await new Promise(r => setTimeout(r, 200));
-                retries--;
-            }
-
-            if (typeof firebase === 'undefined' || !firebase.apps || firebase.apps.length === 0) {
-                showError('Connection Error', 'Firebase is not available. Please check your internet connection and try again.');
-                return;
-            }
+            if (!appId) { showError('Invalid App ID', 'No app ID was provided in the URL.'); return; }
+            if (typeof supabase === 'undefined') { showError('Connection Error', 'Supabase is not available. Please check your connection.'); return; }
 
             try {
-                const db = firebase.firestore();
-                const doc = await db.collection('apks').doc(appId).get();
-
-                if (!doc.exists) {
+                const { data, error } = await supabase.from('apks').select('*').eq('id', appId).single();
+                if (error || !data) {
                     showError('App Not Found', 'This app does not exist in our database. It may have been removed.');
                     return;
                 }
-
-                const data = doc.data();
-                currentAppData = { id: doc.id, ...data };
+                currentAppData = data;
                 downloadLink = data.link || '';
 
-                // Validate download link
-                if (!downloadLink || downloadLink === '#' || !downloadLink.startsWith('http')) {
-                    showError('Download Link Missing',
-                        `The download link for "${escapeHtml(data.name || 'this app')}" has not been configured yet.<br><br>Please add it in the Admin Panel.`);
+                if (!downloadLink || !downloadLink.startsWith('http')) {
+                    showError('Download Link Missing', `The download link for "${escapeHtml(data.name || 'this app')}" has not been configured yet.<br><br>Please add it in the Admin Panel.`);
                     return;
                 }
 
-                // Hide loading, show content
                 loadingState.style.display = 'none';
                 appContent.style.display = 'block';
-
-                // Render app info
                 renderAppInfo(currentAppData);
-
-                // Start countdown
                 startCountdown();
-
             } catch (err) {
-                console.error('[Download] Error loading app:', err);
+                console.error('[Download] Error:', err);
                 showError('Failed to Load', 'Could not load app details from the server. Please try again later.');
             }
         }
 
-        /* ===== RENDER APP INFO ===== */
         function renderAppInfo(app) {
             appNameEl.textContent = app.name || 'Unknown App';
             appMetaEl.innerHTML = `
                 <span><i class="fas fa-code-branch"></i> ${escapeHtml(app.version || 'N/A')}</span>
                 <span><i class="fas fa-weight-hanging"></i> ${escapeHtml(app.size || 'N/A')}</span>
             `;
-
             if (app.mod) {
                 appModEl.style.display = 'inline-flex';
                 appModEl.innerHTML = `<i class="fas fa-crown"></i> ${escapeHtml(app.mod)}`;
             } else {
                 appModEl.style.display = 'none';
             }
-
-            // Render icon
             if (app.image && app.image.trim() && app.image !== 'null') {
                 const img = document.createElement('img');
-                img.src = app.image;
-                img.alt = app.name || 'App icon';
+                img.src = app.image; img.alt = app.name || 'App icon';
                 img.addEventListener('error', function handleError() {
                     this.removeEventListener('error', handleError);
                     this.remove();
@@ -325,74 +240,48 @@
             }
         }
 
-        /* ===== 3-SECOND COUNTDOWN + HEALTH BAR ===== */
         function startCountdown() {
             let seconds = 3;
-
-            // Start health bar animation
             healthBar.classList.add('animate');
-
-            // Update button text immediately
             btnText.textContent = `Starting in ${seconds}s...`;
-
             countdownTimer = setInterval(() => {
                 seconds--;
-
                 if (seconds > 0) {
                     btnText.textContent = `Starting in ${seconds}s...`;
                 } else {
-                    // Countdown complete
                     clearInterval(countdownTimer);
                     countdownTimer = null;
-
                     btnText.textContent = 'Download Now';
                     downloadBtn.disabled = false;
                     countdownText.textContent = 'Click the button above to start your download';
                     countdownText.classList.add('ready');
-
-                    // Try to trigger download (may be blocked by popup blocker)
-                    // The button is now enabled as reliable fallback
                     tryAutoDownload();
                 }
             }, 1000);
         }
 
-        /* ===== TRY AUTO DOWNLOAD (best effort) ===== */
         function tryAutoDownload() {
-            // Small delay to let UI update
             setTimeout(() => {
                 triggerDownload();
                 countdownText.textContent = 'If download did not start, click the button above';
             }, 300);
         }
 
-        /* ===== TRIGGER DOWNLOAD ===== */
-        function triggerDownload() {
-            if (!downloadLink) return;
-
-            // Increment download count in Firestore (fire and forget)
-            if (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length > 0 && appId) {
-                try {
-                    const db = firebase.firestore();
-                    db.collection('apks').doc(appId).update({
-                        downloads: firebase.firestore.FieldValue.increment(1)
-                    }).catch(() => {});
-                } catch (e) {}
+        async function triggerDownload() {
+            if (!downloadLink || !currentAppData) return;
+            try {
+                await supabase.rpc('increment_download', { apk_id: appId });
+            } catch (e) {
+                await supabase.from('apks').update({ downloads: (currentAppData.downloads || 0) + 1 }).eq('id', appId);
             }
-
-            // Method 1: Create anchor and click (works for direct links)
             const a = document.createElement('a');
             a.href = downloadLink;
             a.style.display = 'none';
             document.body.appendChild(a);
             a.click();
-
-            setTimeout(() => {
-                if (a.parentElement) document.body.removeChild(a);
-            }, 2000);
+            setTimeout(() => { if (a.parentElement) document.body.removeChild(a); }, 2000);
         }
 
-        /* ===== MANUAL DOWNLOAD BUTTON CLICK ===== */
         downloadBtn.addEventListener('click', () => {
             if (!downloadLink) {
                 countdownText.textContent = 'Download link is not available';
@@ -402,7 +291,6 @@
             triggerDownload();
         });
 
-        /* ===== ESCAPE HTML UTILITY ===== */
         function escapeHtml(str) {
             if (str == null) return '';
             return String(str)
@@ -413,7 +301,6 @@
                 .replace(/'/g, '&#039;');
         }
 
-        /* ===== START ===== */
         loadAppData();
     </script>
 </body>
