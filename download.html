@@ -115,12 +115,12 @@
                     <div class="download-action">
                         <button class="download-btn-large" id="downloadBtn" disabled>
                             <i class="fas fa-download"></i>
-                            <span id="btnText">Ready to download</span>
+                            <span id="btnText">Starting in 3s...</span>
                         </button>
                         <div class="health-bar-container">
                             <div class="health-bar" id="healthBar"></div>
                         </div>
-                        <p class="download-hint" id="countdownText">Click the button below to start your manual download</p>
+                        <p class="download-hint" id="countdownText">Preparing your secure download...</p>
                     </div>
                 </div>
 
@@ -166,8 +166,8 @@
         const downloadCard = document.getElementById('downloadCard');
 
         let downloadLink = '';
+        let countdownTimer = null;
         let currentAppData = null;
-        let downloadEnabled = false;
 
         function showError(title, message) {
             if (loadingState) loadingState.style.display = 'none';
@@ -206,7 +206,7 @@
                 loadingState.style.display = 'none';
                 appContent.style.display = 'block';
                 renderAppInfo(currentAppData);
-                prepareManualDownload();
+                startCountdown();
             } catch (err) {
                 console.error('[Download] Error:', err);
                 showError('Failed to Load', 'Could not load app details from the server. Please try again later.');
@@ -240,85 +240,46 @@
             }
         }
 
-        function prepareManualDownload() {
-            // Enable the download button immediately
-            downloadBtn.disabled = false;
-            btnText.textContent = 'Download Now';
-            
-            // Set the health bar to full width (100%) to indicate ready state
-            healthBar.style.width = '100%';
-            healthBar.classList.remove('animate');
-            
-            // Clear any countdown timers if existed (safety)
-            if (window._countdownTimer) clearInterval(window._countdownTimer);
-            
-            // Set friendly manual instruction
-            countdownText.textContent = 'Click the button above to start your download manually';
-            countdownText.classList.add('ready');
-            
-            downloadEnabled = true;
+        function startCountdown() {
+            let seconds = 3;
+            healthBar.classList.add('animate');
+            btnText.textContent = `Starting in ${seconds}s...`;
+            countdownTimer = setInterval(() => {
+                seconds--;
+                if (seconds > 0) {
+                    btnText.textContent = `Starting in ${seconds}s...`;
+                } else {
+                    clearInterval(countdownTimer);
+                    countdownTimer = null;
+                    btnText.textContent = 'Download Now';
+                    downloadBtn.disabled = false;
+                    countdownText.textContent = 'Click the button above to start your download';
+                    countdownText.classList.add('ready');
+                    // Auto-download removed — user must click the button manually
+                }
+            }, 1000);
         }
 
         async function triggerDownload() {
-            if (!downloadLink || !currentAppData) {
+            if (!downloadLink || !currentAppData) return;
+            try {
+                await supabase.rpc('increment_download', { apk_id: appId });
+            } catch (e) {
+                await supabase.from('apks').update({ downloads: (currentAppData.downloads || 0) + 1 }).eq('id', appId);
+            }
+            const a = document.createElement('a');
+            a.href = downloadLink;
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => { if (a.parentElement) document.body.removeChild(a); }, 2000);
+        }
+
+        downloadBtn.addEventListener('click', () => {
+            if (!downloadLink) {
                 countdownText.textContent = 'Download link is not available';
                 countdownText.classList.add('error');
                 return;
-            }
-            
-            try {
-                // Increment download count via RPC if available, fallback to update
-                if (typeof supabase !== 'undefined' && supabase.rpc) {
-                    try {
-                        await supabase.rpc('increment_download', { apk_id: appId });
-                    } catch (e) {
-                        // fallback: update downloads count directly
-                        await supabase.from('apks').update({ downloads: (currentAppData.downloads || 0) + 1 }).eq('id', appId);
-                    }
-                } else if (typeof supabase !== 'undefined') {
-                    await supabase.from('apks').update({ downloads: (currentAppData.downloads || 0) + 1 }).eq('id', appId);
-                }
-                
-                // Create temporary anchor to trigger manual download
-                const a = document.createElement('a');
-                a.href = downloadLink;
-                a.style.display = 'none';
-                a.setAttribute('download', ''); // optional, but helps with some file types
-                document.body.appendChild(a);
-                a.click();
-                
-                // Visual feedback
-                countdownText.textContent = 'Download started! Check your browser.';
-                countdownText.classList.remove('error');
-                countdownText.classList.add('ready');
-                
-                setTimeout(() => { 
-                    if (a.parentElement) document.body.removeChild(a);
-                    // Reset hint after a few seconds but keep the ready state
-                    setTimeout(() => {
-                        if (countdownText.textContent === 'Download started! Check your browser.') {
-                            countdownText.textContent = 'Click the button above if download didn\'t start';
-                        }
-                    }, 4000);
-                }, 2000);
-            } catch (err) {
-                console.error('[Manual Download Error]', err);
-                countdownText.textContent = 'Download failed. Please try again.';
-                countdownText.classList.add('error');
-                countdownText.classList.remove('ready');
-            }
-        }
-
-        // Event listener for manual download button
-        downloadBtn.addEventListener('click', () => {
-            if (!downloadLink) {
-                countdownText.textContent = 'Download link is missing or invalid';
-                countdownText.classList.add('error');
-                return;
-            }
-            if (!downloadEnabled) {
-                // Fallback: if somehow button is not ready, re-enable
-                downloadEnabled = true;
             }
             triggerDownload();
         });
@@ -333,7 +294,6 @@
                 .replace(/'/g, '&#039;');
         }
 
-        // Immediately load app data without any auto-download or redirect
         loadAppData();
     </script>
 </body>
