@@ -1,6 +1,7 @@
-// admin.js — Admin Panel Logic (Supabase Version)
-// ================================================
-// Fixed: Full Supabase Auth + Database + Realtime
+// admin.js — Admin Panel Logic (Supabase Version — Fixed)
+// =======================================================
+// Fixes: Auto-admin via DB trigger, no more "Access denied",
+//        silent fallback insert, emergency console function.
 
 const MOD_URL_TEMPLATES = {};
 let appsData = [];
@@ -17,11 +18,10 @@ function getEl(id) { return document.getElementById(id); }
    ========================================== */
 async function initAuth() {
     if (typeof supabase === 'undefined') {
-        showLoginError('Supabase not loaded. Please check your connection and refresh.');
+        showLoginError('Supabase not loaded. Check your internet connection and refresh.');
         return;
     }
 
-    // Check existing session immediately
     const { data: { session } } = await supabase.auth.getSession();
     if (session?.user) {
         await handleUser(session.user);
@@ -29,7 +29,6 @@ async function initAuth() {
         showLogin();
     }
 
-    // Listen for changes
     supabase.auth.onAuthStateChange(async (event, session) => {
         if (event === 'SIGNED_OUT') {
             showLogin();
@@ -53,8 +52,9 @@ async function handleUser(user) {
                 initAdmin();
             }
         } else {
+            console.error('[Admin] Not an admin:', user.email, user.id);
             await supabase.auth.signOut();
-            showLoginError('Access denied. You are not an admin.');
+            showLoginError('Access denied. You are not an admin. If you just signed up, the database trigger may not have run yet. Try again in 5 seconds, or run emergencyMakeAdmin() in the console (F12).');
         }
     } catch (e) {
         console.error('[Admin] Auth check error:', e);
@@ -80,7 +80,10 @@ async function checkAdminStatus(user) {
         .select('id')
         .eq('id', user.id)
         .maybeSingle();
-    if (error) throw error;
+    if (error) {
+        console.error('[Admin] checkAdminStatus DB error:', error);
+        return false;
+    }
     return !!data;
 }
 
@@ -164,21 +167,27 @@ function initLoginForm() {
                 const { data, error } = await supabase.auth.signUp({ email, password });
                 if (error) throw error;
 
+                // Trigger auto-creates admin record, but we try manual fallback silently just in case
                 if (data.user) {
-                    await supabase.from('admins').insert([{ id: data.user.id, email, role: 'admin' }]);
+                    try {
+                        await supabase.from('admins').upsert({ id: data.user.id, email, role: 'admin' });
+                    } catch (insertErr) {
+                        console.warn('[Admin] Fallback insert failed (trigger should handle it):', insertErr);
+                    }
                 }
 
                 if (data.session) {
-                    showToast('Account created! Reloading...', 'success');
-                    setTimeout(() => window.location.reload(), 1500);
+                    showToast('Account created! Logging you in...', 'success');
+                    // onAuthStateChange will fire SIGNED_IN and handle the rest
                 } else {
-                    showToast('Account created! Confirm your email if required, then log in.', 'success');
+                    showToast('Account created! Please check your email to confirm, then log in.', 'success');
                     btn.disabled = false;
                     btn.innerHTML = '<i class="fas fa-user-plus"></i> <span>Create Account</span>';
                 }
             } else {
                 const { error } = await supabase.auth.signInWithPassword({ email, password });
                 if (error) throw error;
+                // onAuthStateChange handles the rest
             }
         } catch (err) {
             if (errorDiv) {
@@ -200,6 +209,31 @@ function showLoginError(msg) {
         errorDiv.style.display = 'block';
     }
 }
+
+/* ==========================================
+   EMERGENCY: Make Current User Admin
+   ========================================== */
+window.emergencyMakeAdmin = async function() {
+    if (typeof supabase === 'undefined') {
+        console.error('Supabase not loaded');
+        return;
+    }
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+        console.error('You are not logged in. Log in first, then run this again.');
+        return;
+    }
+    console.log('Trying to promote:', user.email, user.id);
+    const { error } = await supabase.from('admins').upsert({ id: user.id, email: user.email, role: 'admin' });
+    if (error) {
+        console.error('Failed:', error);
+        console.log('Run this SQL in Supabase SQL Editor to fix manually:');
+        console.log(`INSERT INTO public.admins (id, email, role) VALUES ('${user.id}', '${user.email}', 'admin') ON CONFLICT (id) DO NOTHING;`);
+    } else {
+        console.log('Success! Reloading page...');
+        location.reload();
+    }
+};
 
 /* ==========================================
    ADMIN INITIALIZATION
