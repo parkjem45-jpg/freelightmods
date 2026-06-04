@@ -24,11 +24,6 @@
                     <p>Sign in to manage your mod repository</p>
                 </div>
 
-                <div class="auth-tabs">
-                    <button class="auth-tab active" data-tab="login">Login</button>
-                    <button class="auth-tab" data-tab="signup">Create Account</button>
-                </div>
-
                 <form id="authForm">
                     <div class="form-group">
                         <label><i class="fas fa-envelope"></i> Email</label>
@@ -37,10 +32,6 @@
                     <div class="form-group" id="passwordGroup">
                         <label><i class="fas fa-lock"></i> Password</label>
                         <input type="password" id="password" required placeholder="••••••••">
-                    </div>
-                    <div class="form-group" id="confirmPasswordGroup" style="display:none;">
-                        <label><i class="fas fa-check"></i> Confirm Password</label>
-                        <input type="password" id="confirmPassword" placeholder="••••••••">
                     </div>
                     <div id="authError" class="login-error" style="display:none;"></div>
                     <button type="submit" class="login-btn" id="authBtn">
@@ -333,5 +324,7 @@
 
     <!-- Firebase SDKs -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="supabase.js"></script>
-<script src="admin.js"></script>
+    <script src="supabase.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html>
