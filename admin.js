@@ -1,12 +1,12 @@
-// admin.js — Admin Panel Logic (Fixed Version)
-// ================================================
-// Fixed: Link field properly handled in edit/save operations.
-// Added: Better error handling, validation, and data integrity.
+// admin.js — Admin Panel Logic (Fixed & Stable Version)
+// =====================================================
+// Fixes:
+// 1. Firestore permission errors now show helpful messages
+// 2. Signup race condition fixed (reloads after admin doc is created)
+// 3. Storage crash no longer breaks Firebase
+// 4. All Firestore writes show permission-denied errors clearly
 
-const MOD_URL_TEMPLATES = {
-    // 'spotify-premium': 'https://example.com/spotify.apk',
-};
-
+const MOD_URL_TEMPLATES = {};
 let appsData = [];
 let currentUser = null;
 let currentPage = 1;
@@ -15,18 +15,15 @@ let unsubscribe = null;
 let searchDebounce = null;
 let adminInitialized = false;
 
-/* ==========================================
-   DOM HELPERS
-   ========================================== */
 function getEl(id) { return document.getElementById(id); }
 
 /* ==========================================
    AUTHENTICATION FLOW
    ========================================== */
 function initAuth() {
-    if (typeof auth === 'undefined') {
-        console.warn('[Admin] Firebase Auth not loaded');
-        showLoginError('Firebase not loaded. Please check your connection.');
+    if (typeof firebase === 'undefined' || typeof auth === 'undefined' || typeof db === 'undefined') {
+        console.error('[Admin] Firebase not loaded. Check script tags and internet connection.');
+        showLoginError('Firebase failed to load. Please check your connection and refresh the page.');
         return;
     }
 
@@ -44,11 +41,13 @@ function initAuth() {
                     }
                 } else {
                     await auth.signOut();
-                    showLoginError('Access denied. You are not an admin.');
+                    showLoginError('Access denied. You are not an admin. If you just signed up, wait a moment and try logging in again.');
                 }
             } catch (e) {
                 console.error('[Admin] Auth check error:', e);
-                if (user.email === 'jack1122@freelightmods.com') {
+                if (e.code === 'permission-denied' || (e.message && e.message.includes('permission'))) {
+                    showLoginError('Firestore permission denied. Please paste the security rules provided into your Firebase Console.');
+                } else if (user.email === 'jack1122@freelightmods.com') {
                     currentUser = user;
                     showDashboard();
                     updateUserInfo(user);
@@ -58,7 +57,7 @@ function initAuth() {
                     }
                 } else {
                     await auth.signOut();
-                    showLoginError('Authentication error. Please try again.');
+                    showLoginError('Authentication error: ' + (e.message || 'Unknown error'));
                 }
             }
         } else {
@@ -73,7 +72,8 @@ async function checkAdminStatus(user) {
         const doc = await db.collection('admins').doc(user.uid).get();
         return doc.exists;
     } catch (e) {
-        return false;
+        console.error('[Admin] checkAdminStatus error:', e);
+        throw e;
     }
 }
 
@@ -81,10 +81,13 @@ function showLogin() {
     const overlay = getEl('loginOverlay');
     const dash = getEl('adminDashboard');
     if (overlay) {
-        overlay.classList.remove('hidden');
         overlay.style.display = 'flex';
+        void overlay.offsetWidth; // force reflow
+        overlay.classList.remove('hidden');
     }
     if (dash) dash.style.display = 'none';
+    adminInitialized = false;
+    currentUser = null;
 }
 
 function showDashboard() {
@@ -159,8 +162,12 @@ function initLoginForm() {
                     role: 'admin',
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
-                showToast('Account created! Logging in...', 'success');
-                await auth.signInWithEmailAndPassword(email, password);
+                showToast('Account created! Reloading...', 'success');
+                // Reload so onAuthStateChanged picks up the new admin doc cleanly
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+                return;
             } else {
                 await auth.signInWithEmailAndPassword(email, password);
             }
@@ -201,9 +208,13 @@ function showLoginError(msg) {
 }
 
 /* ==========================================
-   ADMIN INITIALIZATION (Guarded)
+   ADMIN INITIALIZATION
    ========================================== */
 function initAdmin() {
+    if (typeof db === 'undefined') {
+        showToast('Firestore not available. Check that firebase.js loaded correctly.', 'error');
+        return;
+    }
     setupRealtime();
     setupTabs();
     setupForm();
@@ -228,7 +239,6 @@ function setupRealtime() {
                     if (MOD_URL_TEMPLATES[doc.id]) {
                         data.link = MOD_URL_TEMPLATES[doc.id];
                     }
-                    // Ensure link field always exists
                     if (!data.link) data.link = '';
                     appsData.push({ id: doc.id, ...data });
                 });
@@ -237,11 +247,15 @@ function setupRealtime() {
                 updateStats();
             }, (error) => {
                 console.error('[Admin] Realtime error:', error);
-                showToast('Failed to load apps. Check connection.', 'error');
+                let msg = 'Failed to load apps. Check connection.';
+                if (error.code === 'permission-denied') {
+                    msg = 'Permission denied reading APKs. Paste the Firestore rules provided into Firebase Console.';
+                }
+                showToast(msg, 'error');
             });
     } catch (e) {
         console.error('[Admin] Setup realtime error:', e);
-        showToast('Database connection failed.', 'error');
+        showToast('Database connection failed: ' + e.message, 'error');
     }
 }
 
@@ -341,7 +355,6 @@ function buildTableRow(app) {
     const tr = document.createElement('tr');
     tr.setAttribute('data-app-id', app.id);
 
-    // Build icon cell
     const iconCell = document.createElement('td');
     const iconDiv = document.createElement('div');
     iconDiv.className = 'app-icon-small';
@@ -357,11 +370,9 @@ function buildTableRow(app) {
     }
     iconCell.appendChild(iconDiv);
 
-    // Name cell
     const nameCell = document.createElement('td');
     nameCell.innerHTML = '<strong>' + escapeHtml(app.name) + '</strong><br><small class="text-secondary">' + escapeHtml(app.category || 'app') + '</small>';
 
-    // Other cells
     const versionCell = document.createElement('td');
     versionCell.textContent = app.version || 'N/A';
 
@@ -371,14 +382,12 @@ function buildTableRow(app) {
     const downloadsCell = document.createElement('td');
     downloadsCell.textContent = formatNum(app.downloads || 0);
 
-    // Link indicator cell
     const linkCell = document.createElement('td');
     const hasLink = app.link && app.link.startsWith('http');
     linkCell.innerHTML = hasLink
         ? '<span style="color:var(--accent-success);font-size:0.8rem"><i class="fas fa-check-circle"></i> Set</span>'
         : '<span style="color:var(--accent-danger);font-size:0.8rem"><i class="fas fa-times-circle"></i> Missing</span>';
 
-    // Actions cell
     const actionsCell = document.createElement('td');
     const actionsDiv = document.createElement('div');
     actionsDiv.className = 'action-buttons';
@@ -400,7 +409,7 @@ function buildTableRow(app) {
 }
 
 /* ==========================================
-   TABLE EVENT DELEGATION (Edit/Delete)
+   TABLE EVENT DELEGATION
    ========================================== */
 function setupTableActions() {
     const tbody = getEl('appsTableBody');
@@ -448,7 +457,6 @@ function renderPagination(totalItems) {
 
     const fragment = document.createDocumentFragment();
 
-    // Prev
     const prevBtn = document.createElement('button');
     prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
     prevBtn.disabled = currentPage === 1;
@@ -457,7 +465,6 @@ function renderPagination(totalItems) {
     });
     fragment.appendChild(prevBtn);
 
-    // Pages
     let startPage = Math.max(1, currentPage - 2);
     let endPage = Math.min(totalPages, startPage + 4);
     if (endPage - startPage < 4) startPage = Math.max(1, endPage - 4);
@@ -470,7 +477,6 @@ function renderPagination(totalItems) {
         fragment.appendChild(btn);
     }
 
-    // Next
     const nextBtn = document.createElement('button');
     nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
     nextBtn.disabled = currentPage === totalPages;
@@ -479,7 +485,6 @@ function renderPagination(totalItems) {
     });
     fragment.appendChild(nextBtn);
 
-    // Info
     const info = document.createElement('span');
     info.className = 'page-info';
     info.textContent = currentPage + ' / ' + totalPages;
@@ -519,8 +524,6 @@ function setupForm() {
 
         try {
             const linkValue = getEl('appLink').value.trim();
-
-            // Validate download link
             if (!linkValue || !linkValue.startsWith('http')) {
                 throw new Error('Please enter a valid download link starting with http:// or https://');
             }
@@ -544,7 +547,11 @@ function setupForm() {
             setTimeout(() => switchTab('apps'), 600);
         } catch (err) {
             console.error('[Admin] Add error:', err);
-            showToast('Failed to add APK: ' + err.message, 'error');
+            let msg = 'Failed to add APK: ' + err.message;
+            if (err.code === 'permission-denied') {
+                msg = 'Permission denied. Make sure Firestore rules are set correctly.';
+            }
+            showToast(msg, 'error');
         } finally {
             btn.disabled = false;
             btn.innerHTML = '<i class="fas fa-plus"></i> Add APK';
@@ -583,7 +590,7 @@ async function saveEdit() {
 
     try {
         const linkValue = getEl('editLink').value.trim();
-
+        
         await db.collection('apks').doc(id).update({
             name: getEl('editName').value.trim(),
             version: getEl('editVersion').value.trim(),
@@ -598,7 +605,11 @@ async function saveEdit() {
         showToast('APK updated successfully!', 'success');
     } catch (e) {
         console.error('[Admin] Edit error:', e);
-        showToast('Update failed: ' + e.message, 'error');
+        let msg = 'Update failed: ' + e.message;
+        if (e.code === 'permission-denied') {
+            msg = 'Permission denied. Check Firestore rules.';
+        }
+        showToast(msg, 'error');
     } finally {
         btn.disabled = false;
         btn.textContent = 'Save Changes';
@@ -617,7 +628,11 @@ async function deleteApp(id) {
         showToast('APK deleted', 'success');
     } catch (e) {
         console.error('[Admin] Delete error:', e);
-        showToast('Delete failed: ' + e.message, 'error');
+        let msg = 'Delete failed: ' + e.message;
+        if (e.code === 'permission-denied') {
+            msg = 'Permission denied. Check Firestore rules.';
+        }
+        showToast(msg, 'error');
     }
 }
 

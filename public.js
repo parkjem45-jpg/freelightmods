@@ -1,12 +1,11 @@
 // public.js — Public Site Logic (Fixed Version)
-// ================================================
-// BUG FIX: Download now passes only app ID; download.html fetches from Firestore.
-// This prevents download link corruption from URL parameter encoding issues.
+// ==============================================
+// Fixes:
+// 1. Checks for Firestore availability properly
+// 2. Admin link now checks Firestore admins collection
+// 3. Better error messages when Firestore fails
 
-const MOD_LINK_OVERRIDES = {
-    // Example: 'spotify-premium': 'https://example.com/spotify-mod.apk',
-};
-
+const MOD_LINK_OVERRIDES = {};
 let appsData = [];
 let currentUser = null;
 let displayedCount = 12;
@@ -72,9 +71,17 @@ function initAuth() {
         console.warn('[Public] Firebase Auth not loaded yet');
         return;
     }
-    auth.onAuthStateChanged((user) => {
+    auth.onAuthStateChanged(async (user) => {
         currentUser = user;
-        const isAdmin = user && user.email === 'jack1122@freelightmods.com';
+        let isAdmin = false;
+        if (user) {
+            try {
+                const doc = await db.collection('admins').doc(user.uid).get();
+                isAdmin = doc.exists || user.email === 'jack1122@freelightmods.com';
+            } catch (e) {
+                isAdmin = user.email === 'jack1122@freelightmods.com';
+            }
+        }
         const adminLink = document.getElementById('adminLink');
         const mobileAdminLink = document.getElementById('mobileAdminLink');
         if (adminLink) adminLink.style.display = isAdmin ? 'inline-flex' : 'none';
@@ -87,7 +94,7 @@ function initAuth() {
    ========================================== */
 function waitForFirebase(callback, retries) {
     retries = retries || 30;
-    if (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length > 0) {
+    if (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length > 0 && typeof db !== 'undefined') {
         callback();
     } else if (retries > 0) {
         setTimeout(() => waitForFirebase(callback, retries - 1), 200);
@@ -110,7 +117,6 @@ function loadAppsData() {
                     if (MOD_LINK_OVERRIDES[doc.id]) {
                         data.link = MOD_LINK_OVERRIDES[doc.id];
                     }
-                    // Ensure link field exists (even if empty)
                     if (!data.link) data.link = '';
                     appsData.push({ id: doc.id, ...data });
                 });
@@ -118,6 +124,9 @@ function loadAppsData() {
                 renderGrid();
             }, (error) => {
                 console.error('[Firestore] Error:', error);
+                if (error.code === 'permission-denied') {
+                    console.error('[Firestore] Permission denied reading APKs. Check your security rules.');
+                }
                 loadSampleData();
             });
         } catch (e) {
@@ -193,7 +202,6 @@ function buildAppCard(app) {
     card.setAttribute('data-category', app.category || 'app');
     card.style.cursor = 'pointer';
 
-    // Icon
     const iconDiv = document.createElement('div');
     iconDiv.className = 'app-icon';
     if (app.image && app.image.trim()) {
@@ -210,7 +218,6 @@ function buildAppCard(app) {
     const downloadCount = app.downloads ? `<span><i class="fas fa-download"></i> ${formatNum(app.downloads)}</span>` : '';
     const modBadge = app.mod ? `<span><i class="fas fa-crown" style="color:#fbbf24"></i> ${escapeHtml(app.mod)}</span>` : '';
 
-    // Info
     const infoDiv = document.createElement('div');
     infoDiv.className = 'app-info';
     infoDiv.innerHTML = `
@@ -223,7 +230,6 @@ function buildAppCard(app) {
         <div class="app-meta">${downloadCount}</div>
     `;
 
-    // Download button
     const btn = document.createElement('div');
     btn.className = 'download-btn';
     btn.innerHTML = '<i class="fas fa-download"></i> Download APK';
@@ -232,7 +238,6 @@ function buildAppCard(app) {
     card.appendChild(infoDiv);
     card.appendChild(btn);
 
-    // Click handler — passes only app ID, download.html fetches from Firestore
     card.addEventListener('click', () => handleDownload(app));
     btn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -243,11 +248,9 @@ function buildAppCard(app) {
 }
 
 /* ==========================================
-   DOWNLOAD HANDLER — Passes only App ID
+   DOWNLOAD HANDLER
    ========================================== */
 function handleDownload(app) {
-    // Only pass the app ID — download.html will fetch full data from Firestore
-    // This avoids download link corruption from URL parameter encoding
     const url = new URL('download.html', window.location.href);
     url.searchParams.set('id', app.id);
     window.open(url.toString(), '_blank');
