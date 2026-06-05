@@ -58,7 +58,8 @@
 
         .health-bar-container { width: 100%; max-width: 320px; height: 8px; background: var(--bg-primary); border-radius: 4px; overflow: hidden; margin: 16px auto 12px; border: 1px solid var(--border-color); }
         .health-bar { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple)); border-radius: 4px; transition: width 0.1s linear; }
-        .health-bar.animate { animation: fillHealthBar 3s linear forwards; }
+        /* MODIFIED: countdown duration from 3s to 15s for smooth fill */
+        .health-bar.animate { animation: fillHealthBar 15s linear forwards; }
         @keyframes fillHealthBar { from { width: 0%; } to { width: 100%; } }
 
         .download-hint { color: var(--text-secondary); font-size: 0.9rem; min-height: 22px; }
@@ -88,6 +89,13 @@
 <base target="_blank">
 </head>
 <body>
+
+    <!-- 🔵 BLUE SCROLL BUTTON (ADDED AT TOP, NO EXISTING CONTENT CHANGED) -->
+    <div style="display: flex; justify-content: center; margin: 20px 12px 0 12px; z-index: 30; position: relative;">
+        <button id="slowScrollDownBtn" style="background: #1e88e5; border: none; border-radius: 60px; padding: 12px 28px; color: white; font-weight: 700; font-size: 1rem; cursor: pointer; font-family: inherit; letter-spacing: 0.3px; transition: 0.2s; box-shadow: 0 6px 14px rgba(30,136,229,0.3); display: inline-flex; align-items: center; gap: 10px;">
+            <span>scroll down to download</span> <span style="font-size: 1.2rem;">↓</span>
+        </button>
+    </div>
 
     <button class="theme-toggle" id="themeToggle" aria-label="Toggle Theme">
         <i class="fas fa-sun"></i>
@@ -134,7 +142,7 @@
                     <div class="download-action">
                         <button class="download-btn-large" id="downloadBtn" disabled>
                             <i class="fas fa-download"></i>
-                            <span id="btnText">Starting in 3s...</span>
+                            <span id="btnText">Starting in 15s...</span>
                         </button>
                         <div class="health-bar-container">
                             <div class="health-bar" id="healthBar"></div>
@@ -275,24 +283,34 @@
             }
         }
 
-        // FIXED: Manual download only — countdown enables button, NO auto-download
+        // =========== UPDATED COUNTDOWN: 15 SECONDS ===========
         function startCountdown() {
-            let seconds = 3;
-            // Add animation class to health bar for 3s fill effect
+            // Countdown extended to 15 seconds (was 3)
+            let seconds = 15;
+            // Remove any previous animation class and restart
+            healthBar.classList.remove('animate');
+            void healthBar.offsetWidth; // force reflow
             healthBar.classList.add('animate');
             btnText.textContent = 'Starting in ' + seconds + 's...';
+            countdownText.textContent = `Please wait ${seconds} seconds, then click download`;
+            countdownText.classList.remove('ready', 'error');
+            
+            if (countdownTimer) clearInterval(countdownTimer);
             countdownTimer = setInterval(() => {
                 seconds--;
                 if (seconds > 0) {
                     btnText.textContent = 'Starting in ' + seconds + 's...';
+                    countdownText.textContent = `Preparing download — ${seconds} seconds remaining`;
                 } else {
                     clearInterval(countdownTimer);
                     countdownTimer = null;
                     // Enable manual download button (user must click)
                     btnText.textContent = 'Download Now';
                     downloadBtn.disabled = false;
-                    countdownText.textContent = 'Ready to download. Click the button above to start.';
+                    countdownText.textContent = '✅ Ready to download. Click the button above to start.';
                     countdownText.classList.add('ready');
+                    // Ensure health bar is fully filled at end (safety)
+                    healthBar.style.width = '100%';
                 }
             }, 1000);
         }
@@ -335,7 +353,7 @@
                 return;
             }
             if (downloadBtn.disabled) {
-                countdownText.textContent = 'Please wait for the countdown to finish.';
+                countdownText.textContent = 'Please wait for the countdown to finish (15 seconds).';
                 return;
             }
             triggerDownload();
@@ -413,7 +431,7 @@
                 if (container) { container.style.display = 'none'; container.innerHTML = ''; }
             }
 
-            // Bottom ad — FIXED: robust check with defaults
+            // Bottom ad 
             if (settings.downloadBottom && settings.downloadBottom.enabled && settings.downloadBottom.code) {
                 const container = document.getElementById('adDownloadBottom');
                 if (container) {
@@ -442,6 +460,30 @@
             if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
             return n.toString();
         }
+
+        // ================ SCROLL BUTTON: SMOOTH SCROLL TO DOWNLOAD CARD ================
+        (function initScrollButton() {
+            const scrollBtn = document.getElementById('slowScrollDownBtn');
+            if (scrollBtn) {
+                scrollBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetElement = document.getElementById('downloadCard');
+                    if (targetElement) {
+                        targetElement.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start',
+                            inline: 'nearest'
+                        });
+                    } else {
+                        // fallback: scroll to main download container
+                        const fallback = document.querySelector('.download-page');
+                        if (fallback) {
+                            fallback.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                    }
+                });
+            }
+        })();
 
         loadAppData();
     </script>
