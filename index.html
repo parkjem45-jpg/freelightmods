@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Free Lite Mods — Premium modded APKs and games. Safe, fast, and verified.">
-    <title>Free Lite Mods • Premium Mod APKs</title>
+    <title>Free Lite Mods • Premium Modded APKs</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -70,7 +70,7 @@
             <div class="hero-badge"><i class="fas fa-check-circle"></i> Verified & Safe</div>
             <h1 class="hero-title">
                 Premium Mods,<br>
-                <span class="animated-gradient-text">Download Now! </span>
+                <span class="animated-gradient-text">Zero Compromise</span>
             </h1>
             <p class="hero-description">
                 Discover a curated collection of modded APKs and games. 
@@ -162,50 +162,6 @@
         </div>
     </section>
 
-    <!-- Remote Router Panel -->
-    <section class="featured-section" id="routerPanel">
-        <div class="container">
-            <div class="section-header">
-                <div>
-                    <h2><i class="fas fa-wifi"></i> Remote Router</h2>
-                </div>
-                <span class="hero-badge" id="routerBadge" style="background:#ff4d4d"><i class="fas fa-circle"></i> Offline</span>
-            </div>
-
-            <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px">
-                <div class="card">
-                    <div class="card-title">CPU Load</div>
-                    <div class="value" id="rCpu">--</div>
-                    <div class="sub" id="rCpuSub">waiting...</div>
-                </div>
-                <div class="card">
-                    <div class="card-title">Memory</div>
-                    <div class="value" id="rMem">--</div>
-                    <div class="sub" id="rMemSub">waiting...</div>
-                </div>
-                <div class="card">
-                    <div class="card-title">Conntrack</div>
-                    <div class="value" id="rConn">--</div>
-                    <div class="sub" id="rConnSub">waiting...</div>
-                </div>
-                <div class="card">
-                    <div class="card-title">Uptime</div>
-                    <div class="value" id="rUp">--</div>
-                    <div class="sub">system active</div>
-                </div>
-            </div>
-
-            <div class="btn-grid" style="margin-top:18px">
-                <button class="btn btn-primary full" onclick="rCmd('clean')"><i class="fas fa-broom"></i> Boost Network</button>
-            </div>
-
-            <div class="card" style="margin-top:14px">
-                <div class="card-title">Activity Log</div>
-                <div style="background:#0f101a;border-radius:8px;padding:12px;max-height:120px;overflow-y:auto;font-size:0.78rem;color:#a0aab8;font-family:monospace" id="rLog">Waiting for router...</div>
-            </div>
-        </div>
-    </section>
-
     <!-- Footer -->
     <footer class="footer">
         <div class="container footer-container">
@@ -256,7 +212,7 @@
             <div class="ai-messages" id="aiMessages">
                 <div class="ai-message bot">
                     <i class="fas fa-robot"></i>
-                    <div>Hello!😃 I am here to help you find the best mods. Ask me anything!</div>
+                    <div>Hello! I am here to help you find the best mods. Ask me anything!</div>
                 </div>
             </div>
             <div class="ai-input-area">
@@ -266,92 +222,9 @@
         </div>
     </div>
 
-    <!-- Supabase SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-    <script src="supabase.js"></script>
-    <script src="public.js"></script>
-
-    <!-- Remote Router Script -->
-    <script>
-    (function(){
-        const ROUTER_ID = 'ac20_main';
-        const client = window.supabase;
-        if(!client){
-            console.error('[Router] Supabase client not found');
-            return;
-        }
-
-        const $ = id => document.getElementById(id);
-
-        function fmtSec(s){
-            const d = Math.floor(s / 86400);
-            const h = Math.floor((s % 86400) / 3600);
-            const m = Math.floor((s % 3600) / 60);
-            const sec = s % 60;
-            const pad = n => n < 10 ? '0' + n : n;
-            return (d ? d + 'd ' : '') + pad(h) + ':' + pad(m) + ':' + pad(sec);
-        }
-
-        async function poll(){
-            const { data, error } = await client.from('router_status').select('*').eq('router_id', ROUTER_ID).single();
-            if(error || !data){
-                $('#routerBadge').innerHTML = '<i class="fas fa-circle"></i> No Data';
-                $('#routerBadge').style.background = '#ff4d4d';
-                $('#routerBadge').style.color = '#fff';
-                return;
-            }
-
-            const age = Math.floor(Date.now() / 1000) - Math.floor(new Date(data.updated_at).getTime() / 1000);
-            const badge = $('#routerBadge');
-            if(age < 30){
-                badge.innerHTML = '<i class="fas fa-circle"></i> Online';
-                badge.style.background = '#00f0ff';
-                badge.style.color = '#0b0c15';
-            } else {
-                badge.innerHTML = '<i class="fas fa-circle"></i> Stale ' + age + 's';
-                badge.style.background = '#ffb020';
-                badge.style.color = '#1a1a1a';
-            }
-
-            $('#rCpu').textContent = (data.cpu_pct || 0) + '%';
-            $('#rCpuSub').textContent = (data.cpu_pct || 0) < 30 ? 'Light' : (data.cpu_pct || 0) < 60 ? 'Moderate' : (data.cpu_pct || 0) < 85 ? 'Heavy' : 'Critical';
-            $('#rMem').textContent = (data.mem_avail || 0) + ' MB';
-            $('#rMemSub').textContent = 'of ' + (data.mem_total || 1) + ' MB';
-            $('#rConn').textContent = data.conntrack || 0;
-            $('#rConnSub').textContent = (data.conntrack || 0) < 1000 ? 'Healthy' : 'High';
-            $('#rUp').textContent = fmtSec(data.uptime_sec || 0);
-
-            $('#rLog').innerHTML = 'IP: ' + (data.public_ip || 'hidden') + '<br>Synced: ' + new Date(data.updated_at).toLocaleTimeString() + '<br>Delay: ' + age + 's';
-        }
-
-        async function pollAck(){
-            const { data } = await client.from('router_commands').select('*').eq('router_id', ROUTER_ID).eq('executed', true).order('done_at', {ascending: false}).limit(3);
-            if(data && data.length){
-                const html = data.map(c => '<span style="color:#00f0ff">[' + new Date(c.done_at).toLocaleTimeString() + ']</span> ' + c.cmd + ' → ' + (c.result || 'done')).join('<br>');
-                $('#rLog').innerHTML += '<br><br><strong>Last Commands:</strong><br>' + html;
-            }
-        }
-
-        window.rCmd = async function(cmd){
-            if(!confirm('Send "' + cmd + '" to router?')) return;
-            const { error } = await client.from('router_commands').insert({
-                router_id: ROUTER_ID,
-                cmd: cmd,
-                from_source: 'freelightmods.netlify.app'
-            });
-            if(error){
-                alert('Failed: ' + error.message);
-            } else {
-                $('#rLog').innerHTML += '<br><span style="color:#ffb020">Sent: ' + cmd + '</span>';
-            }
-        };
-
-        poll();
-        pollAck();
-        setInterval(poll, 3000);
-        setInterval(pollAck, 8000);
-    })();
-    </script>
-
+    <!-- Firebase SDKs -->
+   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="supabase.js"></script>
+<script src="public.js"></script>
 </body>
 </html>
