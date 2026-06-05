@@ -1,5 +1,7 @@
-// admin.js — Admin Panel Logic (Supabase Version) with Sliders, File Extensions & AI Images
-// =========================================================================================
+// admin.js — Admin Panel Logic (Supabase Version)
+// ================================================
+// LOGIN: Kept exactly from working old version
+// NEW: 2 publish forms, sliders, file extensions, image styling
 
 const MOD_URL_TEMPLATES = {};
 let appsData = [];
@@ -12,7 +14,7 @@ let adminInitialized = false;
 function getEl(id) { return document.getElementById(id); }
 
 /* ==========================================
-   AUTHENTICATION FLOW
+   AUTHENTICATION FLOW — EXACTLY FROM OLD WORKING VERSION
    ========================================== */
 async function initAuth() {
     if (typeof supabase === 'undefined') {
@@ -116,7 +118,7 @@ function updateUserInfo(user) {
 }
 
 /* ==========================================
-   LOGIN FORM
+   LOGIN FORM — EXACTLY FROM OLD WORKING VERSION
    ========================================== */
 function initLoginForm() {
     const form = getEl('authForm');
@@ -129,26 +131,24 @@ function initLoginForm() {
     const passwordGroup = getEl('passwordGroup');
     const confirmGroup = getEl('confirmPasswordGroup');
 
-    if (tabs.length) {
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                tabs.forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                mode = tab.getAttribute('data-tab');
-                if (errorDiv) errorDiv.style.display = 'none';
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            mode = tab.getAttribute('data-tab');
+            if (errorDiv) errorDiv.style.display = 'none';
 
-                if (mode === 'signup') {
-                    if (passwordGroup) passwordGroup.style.display = 'block';
-                    if (confirmGroup) confirmGroup.style.display = 'block';
-                    btn.innerHTML = '<i class="fas fa-user-plus"></i> <span>Create Account</span>';
-                } else {
-                    if (passwordGroup) passwordGroup.style.display = 'block';
-                    if (confirmGroup) confirmGroup.style.display = 'none';
-                    btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> <span>Login</span>';
-                }
-            });
+            if (mode === 'signup') {
+                passwordGroup.style.display = 'block';
+                if (confirmGroup) confirmGroup.style.display = 'block';
+                btn.innerHTML = '<i class="fas fa-user-plus"></i> <span>Create Account</span>';
+            } else {
+                passwordGroup.style.display = 'block';
+                if (confirmGroup) confirmGroup.style.display = 'none';
+                btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> <span>Login</span>';
+            }
         });
-    }
+    });
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -243,6 +243,7 @@ function initAdmin() {
     setupRealtime();
     setupTabs();
     setupForm();
+    setupImageForm();
     setupImagePreview();
     setupSearch();
     setupMobileSidebar();
@@ -341,11 +342,11 @@ function setupLogout() {
 }
 
 /* ==========================================
-   IMAGE PREVIEW (Live preview when typing URL)
+   IMAGE PREVIEW (for Add Image tab)
    ========================================== */
 function setupImagePreview() {
-    const imgInput = getEl('appImage');
-    const previewBox = getEl('imagePreviewBox');
+    const imgInput = getEl('imgImage');
+    const previewBox = getEl('imgPreviewBox');
     if (!imgInput || !previewBox) return;
 
     let debounceTimer;
@@ -354,11 +355,9 @@ function setupImagePreview() {
         debounceTimer = setTimeout(() => {
             const url = imgInput.value.trim();
             if (url && url.startsWith('http')) {
-                previewBox.innerHTML = '<img src="' + escapeHtml(url) + '" alt="Preview" onerror="this.parentElement.innerHTML='<span style=color:var(--accent-danger)><i class=\'fas fa-exclamation-circle\'></i> Failed to load image</span>'">';
-                previewBox.classList.add('has-image');
+                previewBox.innerHTML = '<img src="' + escapeHtml(url) + '" alt="Preview" onerror="this.style.display='none';this.parentElement.innerHTML='<span style=color:var(--accent-danger)><i class=\'fas fa-exclamation-circle\'></i> Failed to load</span>'">';
             } else {
-                previewBox.innerHTML = '<span style="color:var(--text-secondary);font-size:0.85rem"><i class="fas fa-image"></i> Preview will appear here</span>';
-                previewBox.classList.remove('has-image');
+                previewBox.innerHTML = '<span style="color:var(--text-secondary);font-size:0.85rem"><i class="fas fa-image"></i> Image preview will appear here</span>';
             }
         }, 300);
     });
@@ -380,7 +379,7 @@ function renderTable() {
     }
     tb.innerHTML = '';
     if (filtered.length === 0) {
-        tb.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-secondary)">No apps found</td></tr>';
+        tb.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-secondary)">No items found</td></tr>';
         renderPagination(0);
         return;
     }
@@ -537,7 +536,7 @@ function setupSearch() {
 }
 
 /* ==========================================
-   ADD APK FORM
+   ADD MOD / GAME FORM
    ========================================== */
 function setupForm() {
     const f = getEl('addApkForm');
@@ -576,17 +575,11 @@ function setupForm() {
             if (error) throw error;
 
             f.reset();
-            // Reset preview box
-            const previewBox = getEl('imagePreviewBox');
-            if (previewBox) {
-                previewBox.innerHTML = '<span style="color:var(--text-secondary);font-size:0.85rem"><i class="fas fa-image"></i> Preview will appear here</span>';
-                previewBox.classList.remove('has-image');
-            }
-            showToast('Item added successfully!', 'success');
+            showToast('Mod / Game added successfully!', 'success');
             setTimeout(() => switchTab('apps'), 600);
         } catch (err) {
             console.error('[Admin] Add error:', err);
-            let msg = 'Failed to add item: ' + err.message;
+            let msg = 'Failed to add: ' + err.message;
             if (err.code === '42501' || err.message?.includes('row-level security')) {
                 msg = 'Permission denied. Make sure you ran the SQL setup in Supabase.';
             }
@@ -596,7 +589,74 @@ function setupForm() {
             showToast(msg, 'error');
         } finally {
             btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-plus"></i> Add Item';
+            btn.innerHTML = '<i class="fas fa-plus"></i> Add Mod / Game';
+        }
+    });
+}
+
+/* ==========================================
+   ADD IMAGE FORM
+   ========================================== */
+function setupImageForm() {
+    const f = getEl('addImageForm');
+    if (!f) return;
+
+    f.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = f.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Publishing...';
+
+        try {
+            const linkValue = getEl('imgLink').value.trim();
+            const imgValue = getEl('imgImage').value.trim();
+            if (!linkValue || !linkValue.startsWith('http')) {
+                throw new Error('Please enter a valid download link starting with http:// or https://');
+            }
+            if (!imgValue || !imgValue.startsWith('http')) {
+                throw new Error('Please enter a valid image URL starting with http:// or https://');
+            }
+
+            const newItem = {
+                name: getEl('imgName').value.trim(),
+                version: getEl('imgVersion').value.trim() || 'v1.0',
+                size: getEl('imgSize').value.trim() || 'N/A',
+                icon: getEl('imgIcon').value.trim() || 'fas fa-image',
+                image: imgValue,
+                mod: getEl('imgMod').value.trim(),
+                link: linkValue,
+                category: getEl('imgCategory').value,
+                downloads: 0,
+                file_extension: getEl('imgFileExt').value,
+                slider_section: getEl('imgSliderSection').value ? parseInt(getEl('imgSliderSection').value) : null,
+                aspect_ratio: getEl('imgAspectRatio').value,
+                border_radius: getEl('imgBorderRadius').value,
+                border_style: getEl('imgBorderStyle').value
+            };
+
+            const { error } = await supabase.from('apks').insert([newItem]);
+            if (error) throw error;
+
+            f.reset();
+            const previewBox = getEl('imgPreviewBox');
+            if (previewBox) {
+                previewBox.innerHTML = '<span style="color:var(--text-secondary);font-size:0.85rem"><i class="fas fa-image"></i> Image preview will appear here</span>';
+            }
+            showToast('Image published successfully!', 'success');
+            setTimeout(() => switchTab('apps'), 600);
+        } catch (err) {
+            console.error('[Admin] Image add error:', err);
+            let msg = 'Failed to publish image: ' + err.message;
+            if (err.code === '42501' || err.message?.includes('row-level security')) {
+                msg = 'Permission denied. Make sure you ran the SQL setup in Supabase.';
+            }
+            if (err.message && err.message.includes('column')) {
+                msg = 'Database columns missing. Please run the schema.sql in Supabase SQL Editor first!';
+            }
+            showToast(msg, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-plus"></i> Publish Image';
         }
     });
 }
@@ -697,12 +757,12 @@ function updateStats() {
     const total = appsData.length;
     const downloads = appsData.reduce((s, a) => s + (a.downloads || 0), 0);
     const games = appsData.filter(a => a.category === 'game').length;
-    const apps = appsData.filter(a => a.category === 'app').length;
+    const images = appsData.filter(a => ['image','ai-image','wallpaper','asset'].includes(a.category)).length;
     const setText = (id, val) => { const el = getEl(id); if (el) el.textContent = val; };
     setText('totalApps', total);
     setText('totalDownloads', formatNum(downloads));
     setText('gamesCount', games);
-    setText('appsCount', apps);
+    setText('imagesCount', images);
 }
 
 function exportData() {

@@ -65,10 +65,13 @@
                         <i class="fas fa-chart-pie"></i> Dashboard
                     </a>
                     <a href="#" class="nav-item" data-tab="apps">
-                        <i class="fas fa-box"></i> Manage APKs
+                        <i class="fas fa-box"></i> Manage Items
                     </a>
                     <a href="#" class="nav-item" data-tab="add">
-                        <i class="fas fa-plus-circle"></i> Add New
+                        <i class="fas fa-plus-circle"></i> Add Mod / Game
+                    </a>
+                    <a href="#" class="nav-item" data-tab="add-image">
+                        <i class="fas fa-image"></i> Add Image
                     </a>
                     <a href="#" class="nav-item" data-tab="settings">
                         <i class="fas fa-cog"></i> Settings
@@ -99,14 +102,14 @@
                 <div id="dashboard" class="tab-content active">
                     <div class="page-header">
                         <h1>Dashboard</h1>
-                        <p class="text-secondary">Overview of your APK repository</p>
+                        <p class="text-secondary">Overview of your repository</p>
                     </div>
                     <div class="stats-grid">
                         <div class="stat-card">
                             <i class="fas fa-box"></i>
                             <div>
                                 <span class="stat-value" id="totalApps">0</span>
-                                <span class="stat-label">Total APKs</span>
+                                <span class="stat-label">Total Items</span>
                             </div>
                         </div>
                         <div class="stat-card">
@@ -124,10 +127,10 @@
                             </div>
                         </div>
                         <div class="stat-card">
-                            <i class="fas fa-mobile-alt"></i>
+                            <i class="fas fa-image"></i>
                             <div>
-                                <span class="stat-value" id="appsCount">0</span>
-                                <span class="stat-label">Apps</span>
+                                <span class="stat-value" id="imagesCount">0</span>
+                                <span class="stat-label">Images</span>
                             </div>
                         </div>
                     </div>
@@ -135,18 +138,19 @@
                     <div class="card">
                         <div class="card-header"><h2>Quick Actions</h2></div>
                         <div class="quick-actions">
-                            <button class="btn-primary" onclick="switchTab('add')"><i class="fas fa-plus"></i> Add New APK</button>
+                            <button class="btn-primary" onclick="switchTab('add')"><i class="fas fa-plus"></i> Add Mod / Game</button>
+                            <button class="btn-primary" onclick="switchTab('add-image')" style="background:linear-gradient(135deg,var(--accent-purple),var(--accent-pink))"><i class="fas fa-image"></i> Add Image</button>
                             <button class="btn-secondary" onclick="exportData()"><i class="fas fa-file-export"></i> Export Data</button>
                             <button class="btn-secondary" onclick="location.reload()"><i class="fas fa-sync"></i> Refresh</button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Manage APKs -->
+                <!-- Manage Items -->
                 <div id="apps" class="tab-content">
                     <div class="page-header">
-                        <h1>Manage APKs</h1>
-                        <p class="text-secondary">Edit or delete your modded applications</p>
+                        <h1>Manage Items</h1>
+                        <p class="text-secondary">Edit or delete your mods, games, and images</p>
                     </div>
 
                     <div class="search-bar">
@@ -178,17 +182,17 @@
                     </div>
                 </div>
 
-                <!-- Add New -->
+                <!-- Add Mod / Game -->
                 <div id="add" class="tab-content">
                     <div class="page-header">
-                        <h1>Add New Item</h1>
-                        <p class="text-secondary">Upload APKs, AI images, or PC games to the database</p>
+                        <h1>Add Mod / Game</h1>
+                        <p class="text-secondary">Upload a new modded APK or PC game</p>
                     </div>
                     <div class="card">
                         <form id="addApkForm">
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label>Name *</label>
+                                    <label>App / Game Name *</label>
                                     <input type="text" id="appName" required placeholder="e.g. Spotify Premium">
                                 </div>
                                 <div class="form-group">
@@ -210,18 +214,16 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label>Mod Features / Description *</label>
+                                <label>Mod Features *</label>
                                 <input type="text" id="appMod" required placeholder="e.g. No Ads, Unlocked Premium">
                             </div>
 
-                            <!-- Download Link -->
                             <div class="form-group">
                                 <label>Download Link *</label>
                                 <input type="url" id="appLink" required placeholder="https://your-cdn.com/file.apk">
                                 <small class="form-hint">Paste the direct download URL here. Must start with http:// or https://</small>
                             </div>
 
-                            <!-- File Extension -->
                             <div class="form-row">
                                 <div class="form-group">
                                     <label>File Extension</label>
@@ -231,8 +233,6 @@
                                         <option value="exe">EXE (.exe)</option>
                                         <option value="rar">RAR (.rar)</option>
                                         <option value="7z">7Z (.7z)</option>
-                                        <option value="pdf">PDF (.pdf)</option>
-                                        <option value="mp4">MP4 (.mp4)</option>
                                         <option value="iso">ISO (.iso)</option>
                                         <option value="tar">TAR (.tar)</option>
                                         <option value="other">Other</option>
@@ -244,34 +244,30 @@
                                     <select id="appSliderSection">
                                         <option value="">None (Grid Only)</option>
                                         <option value="1">1 - Popular Mod APKs</option>
-                                        <option value="2">2 - AI Images</option>
                                         <option value="3">3 - Best Free PC Games</option>
                                     </select>
                                     <small class="form-hint">Choose which homepage slider shows this item</small>
                                 </div>
                             </div>
 
-                            <!-- ===== AI IMAGE / COVER IMAGE UPLOAD ===== -->
                             <div class="form-section-divider">
-                                <i class="fas fa-image"></i> Cover Image Settings
+                                <i class="fas fa-paint-brush"></i> Image Styling
                             </div>
 
-                            <div class="form-group">
-                                <label>
-                                    <i class="fas fa-image" style="color:var(--accent-cyan)"></i> 
-                                    Cover Image URL (AI Image / Screenshot / Thumbnail)
-                                </label>
-                                <input type="url" id="appImage" placeholder="https://i.imgur.com/abc123.png">
-                                <small class="form-hint">
-                                    <strong>For AI Images:</strong> Paste the direct image link here (Imgur, CDN, etc.). This image will show in the slider.<br>
-                                    <strong>For Mods:</strong> App icon or screenshot URL. Leave empty to use FontAwesome icon.
-                                </small>
-                            </div>
-
-                            <!-- Image Styling Controls -->
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label>Image Aspect Ratio</label>
+                                    <label>Image URL (Optional)</label>
+                                    <input type="url" id="appImage" placeholder="https://i.imgur.com/...">
+                                    <small class="form-hint">App icon or screenshot. Leave empty to use FontAwesome icon.</small>
+                                </div>
+                                <div class="form-group">
+                                    <label>Icon Class (FontAwesome)</label>
+                                    <input type="text" id="appIcon" placeholder="fas fa-music" value="fas fa-mobile-alt">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Aspect Ratio</label>
                                     <select id="appAspectRatio">
                                         <option value="auto">Auto (Best Fit)</option>
                                         <option value="16:9" selected>16:9 (Widescreen)</option>
@@ -281,13 +277,9 @@
                                         <option value="3:2">3:2 (Photo)</option>
                                         <option value="9:16">9:16 (Portrait)</option>
                                     </select>
-                                    <small class="form-hint">
-                                        <strong>Auto:</strong> Automatically fits the image without cropping. Best for AI images with unknown sizes.<br>
-                                        <strong>16:9:</strong> Best for screenshots and banners.
-                                    </small>
                                 </div>
                                 <div class="form-group">
-                                    <label>Image Border Radius</label>
+                                    <label>Border Radius</label>
                                     <select id="appBorderRadius">
                                         <option value="0px">0px (Sharp)</option>
                                         <option value="8px">8px (Slight)</option>
@@ -295,11 +287,10 @@
                                         <option value="24px">24px (More Rounded)</option>
                                         <option value="50%">50% (Circle)</option>
                                     </select>
-                                    <small class="form-hint">Corner roundness of the slider image</small>
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label>Image Border Style</label>
+                                <label>Border Style</label>
                                 <select id="appBorderStyle">
                                     <option value="none">None</option>
                                     <option value="2px solid var(--accent-cyan)">Cyan Solid</option>
@@ -309,24 +300,156 @@
                                     <option value="2px solid var(--accent-danger)">Red Solid</option>
                                     <option value="2px solid rgba(255,255,255,0.2)">White Subtle</option>
                                 </select>
-                                <small class="form-hint">Border style for the slider card image</small>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn-primary"><i class="fas fa-plus"></i> Add Mod / Game</button>
+                                <button type="reset" class="btn-secondary">Reset</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Add Image / AI Image -->
+                <div id="add-image" class="tab-content">
+                    <div class="page-header">
+                        <h1>Add Image / AI Image</h1>
+                        <p class="text-secondary">Upload images, AI art, wallpapers, or assets</p>
+                    </div>
+                    <div class="card">
+                        <form id="addImageForm">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Image Name *</label>
+                                    <input type="text" id="imgName" required placeholder="e.g. Cyberpunk City Wallpaper">
+                                </div>
+                                <div class="form-group">
+                                    <label>Version / Tag</label>
+                                    <input type="text" id="imgVersion" placeholder="e.g. v1.0 or 4K">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Size</label>
+                                    <input type="text" id="imgSize" placeholder="e.g. 2.5 MB">
+                                </div>
+                                <div class="form-group">
+                                    <label>Category</label>
+                                    <select id="imgCategory">
+                                        <option value="image">Image</option>
+                                        <option value="ai-image">AI Image</option>
+                                        <option value="wallpaper">Wallpaper</option>
+                                        <option value="asset">Asset</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Description *</label>
+                                <input type="text" id="imgMod" required placeholder="e.g. AI-generated cyberpunk cityscape, 4K resolution">
+                            </div>
+
+                            <div class="form-group">
+                                <label>
+                                    <i class="fas fa-image" style="color:var(--accent-cyan)"></i> 
+                                    Image URL (Direct Link) *
+                                </label>
+                                <input type="url" id="imgImage" required placeholder="https://i.imgur.com/abc123.png">
+                                <small class="form-hint">Paste the <strong>direct image link</strong> here. This image will display in the slider. Supported: Imgur, CDN, direct links.</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Download Link *</label>
+                                <input type="url" id="imgLink" required placeholder="https://your-cdn.com/image.zip">
+                                <small class="form-hint">Direct download URL for the full-resolution file</small>
                             </div>
 
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label>Icon Class (FontAwesome)</label>
-                                    <input type="text" id="appIcon" placeholder="fas fa-music" value="fas fa-mobile-alt">
-                                    <small class="form-hint">Used when no image URL is provided. e.g. fas fa-robot for AI, fas fa-desktop for PC games</small>
+                                    <label>File Extension</label>
+                                    <select id="imgFileExt">
+                                        <option value="zip">ZIP (.zip)</option>
+                                        <option value="png">PNG (.png)</option>
+                                        <option value="jpg">JPG (.jpg)</option>
+                                        <option value="jpeg">JPEG (.jpeg)</option>
+                                        <option value="webp">WEBP (.webp)</option>
+                                        <option value="gif">GIF (.gif)</option>
+                                        <option value="pdf">PDF (.pdf)</option>
+                                        <option value="mp4">MP4 (.mp4)</option>
+                                        <option value="rar">RAR (.rar)</option>
+                                        <option value="7z">7Z (.7z)</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                    <small class="form-hint">File type users will download</small>
                                 </div>
                                 <div class="form-group">
-                                    <label>Image Preview</label>
-                                    <div id="imagePreviewBox" style="width:100%;height:120px;background:var(--bg-primary);border:1px solid var(--border-color);border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
-                                        <span style="color:var(--text-secondary);font-size:0.85rem"><i class="fas fa-image"></i> Preview will appear here</span>
-                                    </div>
+                                    <label>Slider Section</label>
+                                    <select id="imgSliderSection">
+                                        <option value="">None (Grid Only)</option>
+                                        <option value="2" selected>2 - AI Images</option>
+                                        <option value="1">1 - Popular Mod APKs</option>
+                                        <option value="3">3 - Best Free PC Games</option>
+                                    </select>
+                                    <small class="form-hint">Images usually go to Slider 2</small>
                                 </div>
                             </div>
+
+                            <div class="form-section-divider">
+                                <i class="fas fa-paint-brush"></i> Image Styling
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Aspect Ratio</label>
+                                    <select id="imgAspectRatio">
+                                        <option value="auto" selected>Auto (Best Fit)</option>
+                                        <option value="16:9">16:9 (Widescreen)</option>
+                                        <option value="4:3">4:3 (Standard)</option>
+                                        <option value="1:1">1:1 (Square)</option>
+                                        <option value="21:9">21:9 (Ultra Wide)</option>
+                                        <option value="3:2">3:2 (Photo)</option>
+                                        <option value="9:16">9:16 (Portrait)</option>
+                                    </select>
+                                    <small class="form-hint"><strong>Auto</strong> recommended for AI images — no cropping</small>
+                                </div>
+                                <div class="form-group">
+                                    <label>Border Radius</label>
+                                    <select id="imgBorderRadius">
+                                        <option value="0px">0px (Sharp)</option>
+                                        <option value="8px">8px (Slight)</option>
+                                        <option value="16px" selected>16px (Rounded)</option>
+                                        <option value="24px">24px (More Rounded)</option>
+                                        <option value="50%">50% (Circle)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Border Style</label>
+                                <select id="imgBorderStyle">
+                                    <option value="none">None</option>
+                                    <option value="2px solid var(--accent-cyan)">Cyan Solid</option>
+                                    <option value="2px dashed var(--accent-purple)">Purple Dashed</option>
+                                    <option value="3px solid var(--accent-success)">Green Solid</option>
+                                    <option value="2px dotted var(--accent-warning)">Orange Dotted</option>
+                                    <option value="2px solid var(--accent-danger)">Red Solid</option>
+                                    <option value="2px solid rgba(255,255,255,0.2)">White Subtle</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Icon Class (Fallback)</label>
+                                <input type="text" id="imgIcon" placeholder="fas fa-image" value="fas fa-image">
+                                <small class="form-hint">Used only if the image URL fails to load</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Live Preview</label>
+                                <div id="imgPreviewBox" style="width:100%;height:160px;background:var(--bg-primary);border:1px solid var(--border-color);border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+                                    <span style="color:var(--text-secondary);font-size:0.85rem"><i class="fas fa-image"></i> Image preview will appear here</span>
+                                </div>
+                            </div>
+
                             <div class="form-actions">
-                                <button type="submit" class="btn-primary"><i class="fas fa-plus"></i> Add Item</button>
+                                <button type="submit" class="btn-primary" style="background:linear-gradient(135deg,var(--accent-purple),var(--accent-pink))"><i class="fas fa-plus"></i> Publish Image</button>
                                 <button type="reset" class="btn-secondary">Reset</button>
                             </div>
                         </form>
@@ -384,30 +507,20 @@
                     <label>Icon Class</label>
                     <input type="text" id="editIcon">
                 </div>
-
-                <!-- ===== EDIT: AI IMAGE / COVER IMAGE ===== -->
                 <div class="form-group">
-                    <label>
-                        <i class="fas fa-image" style="color:var(--accent-cyan)"></i> 
-                        Cover Image URL (AI Image / Screenshot)
-                    </label>
+                    <label>Image URL</label>
                     <input type="text" id="editImage">
-                    <small class="form-hint">Update the image URL. For AI images, use direct image links.</small>
+                    <small class="form-hint">Update the cover image or screenshot URL</small>
                 </div>
-
                 <div class="form-group">
                     <label>Mod Features / Description</label>
                     <input type="text" id="editMod">
                 </div>
-
-                <!-- Edit Download Link -->
                 <div class="form-group">
                     <label>Download Link</label>
                     <input type="url" id="editLink" placeholder="https://your-cdn.com/file.apk">
                     <small class="form-hint">Update the direct download URL here. Must start with http:// or https://</small>
                 </div>
-
-                <!-- Edit File Extension & Slider -->
                 <div class="form-row">
                     <div class="form-group">
                         <label>File Extension</label>
@@ -417,6 +530,11 @@
                             <option value="exe">EXE (.exe)</option>
                             <option value="rar">RAR (.rar)</option>
                             <option value="7z">7Z (.7z)</option>
+                            <option value="png">PNG (.png)</option>
+                            <option value="jpg">JPG (.jpg)</option>
+                            <option value="jpeg">JPEG (.jpeg)</option>
+                            <option value="webp">WEBP (.webp)</option>
+                            <option value="gif">GIF (.gif)</option>
                             <option value="pdf">PDF (.pdf)</option>
                             <option value="mp4">MP4 (.mp4)</option>
                             <option value="iso">ISO (.iso)</option>
@@ -434,8 +552,6 @@
                         </select>
                     </div>
                 </div>
-
-                <!-- Edit Image Styling -->
                 <div class="form-row">
                     <div class="form-group">
                         <label>Aspect Ratio</label>
@@ -472,12 +588,15 @@
                         <option value="2px solid rgba(255,255,255,0.2)">White Subtle</option>
                     </select>
                 </div>
-
                 <div class="form-group">
                     <label>Category</label>
                     <select id="editCategory">
                         <option value="app">App</option>
                         <option value="game">Game</option>
+                        <option value="image">Image</option>
+                        <option value="ai-image">AI Image</option>
+                        <option value="wallpaper">Wallpaper</option>
+                        <option value="asset">Asset</option>
                     </select>
                 </div>
             </div>
@@ -488,7 +607,6 @@
         </div>
     </div>
 
-    <!-- Firebase SDKs -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <script src="supabase.js"></script>
     <script src="admin.js"></script>
