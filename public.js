@@ -1,5 +1,5 @@
-// public.js — Public Site Logic (Supabase Version) + Swiper Sliders
-// ================================================================
+// public.js — Public Site Logic (Supabase Version) + Swiper Sliders + AI Images
+// =============================================================================
 
 const MOD_LINK_OVERRIDES = {};
 let appsData = [];
@@ -184,13 +184,26 @@ function renderSliderGroup(section, items) {
         const radius = app.border_radius || '16px';
         const border = app.border_style || 'none';
         const ext = app.file_extension || 'apk';
+        const isAuto = ratio === 'auto';
 
         const imgUrl = app.image && app.image.trim() ? app.image : '';
 
+        // Build image HTML based on auto vs fixed ratio
+        let imageHtml = '';
+        if (imgUrl) {
+            if (isAuto) {
+                imageHtml = `<img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(app.name)}" loading="lazy" style="object-fit:contain;max-height:220px;width:auto;max-width:100%;" onerror="this.style.display='none';this.parentElement.innerHTML='<i class=\'fas fa-image img-fallback\'></i>';">`;
+            } else {
+                imageHtml = `<img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(app.name)}" loading="lazy" onerror="this.style.display='none';this.parentElement.innerHTML='<i class=\'fas fa-image img-fallback\'></i>';">`;
+            }
+        } else {
+            imageHtml = '<i class="fas fa-image img-fallback"></i>';
+        }
+
         slide.innerHTML = `
             <div class="slider-card" onclick="handleSliderDownload('${escapeHtml(app.id)}')">
-                <div class="slider-image-wrap" style="--img-ratio:${ratio};--img-radius:${radius};--img-border:${border}">
-                    ${imgUrl ? `<img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(app.name)}" loading="lazy" onerror="this.style.display='none';this.parentElement.innerHTML='<i class=\'fas fa-image img-fallback\'></i>';">` : '<i class="fas fa-image img-fallback"></i>'}
+                <div class="slider-image-wrap" data-ratio="${escapeHtml(ratio)}" style="--img-ratio:${isAuto ? 'auto' : ratio};--img-radius:${radius};--img-border:${border};${isAuto ? 'min-height:160px;' : ''}">
+                    ${imageHtml}
                 </div>
                 <div class="slider-content">
                     <h3>${escapeHtml(app.name)}</h3>

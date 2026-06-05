@@ -1,5 +1,5 @@
-// admin.js — Admin Panel Logic (Supabase Version) with Sliders & File Extensions
-// =================================================================================
+// admin.js — Admin Panel Logic (Supabase Version) with Sliders, File Extensions & AI Images
+// =========================================================================================
 
 const MOD_URL_TEMPLATES = {};
 let appsData = [];
@@ -243,6 +243,7 @@ function initAdmin() {
     setupRealtime();
     setupTabs();
     setupForm();
+    setupImagePreview();
     setupSearch();
     setupMobileSidebar();
     setupLogout();
@@ -291,7 +292,6 @@ async function fetchApps() {
         category: row.category || 'app',
         downloads: row.downloads || 0,
         dateAdded: row.date_added,
-        // NEW FIELDS
         fileExtension: row.file_extension || 'apk',
         sliderSection: row.slider_section,
         aspectRatio: row.aspect_ratio || '16:9',
@@ -338,6 +338,30 @@ function setupMobileSidebar() {
 function setupLogout() {
     const logoutNav = getEl('logoutNavItem');
     if (logoutNav) logoutNav.addEventListener('click', (e) => { e.preventDefault(); logout(); });
+}
+
+/* ==========================================
+   IMAGE PREVIEW (Live preview when typing URL)
+   ========================================== */
+function setupImagePreview() {
+    const imgInput = getEl('appImage');
+    const previewBox = getEl('imagePreviewBox');
+    if (!imgInput || !previewBox) return;
+
+    let debounceTimer;
+    imgInput.addEventListener('input', () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            const url = imgInput.value.trim();
+            if (url && url.startsWith('http')) {
+                previewBox.innerHTML = '<img src="' + escapeHtml(url) + '" alt="Preview" onerror="this.parentElement.innerHTML='<span style=color:var(--accent-danger)><i class=\'fas fa-exclamation-circle\'></i> Failed to load image</span>'">';
+                previewBox.classList.add('has-image');
+            } else {
+                previewBox.innerHTML = '<span style="color:var(--text-secondary);font-size:0.85rem"><i class="fas fa-image"></i> Preview will appear here</span>';
+                previewBox.classList.remove('has-image');
+            }
+        }, 300);
+    });
 }
 
 /* ==========================================
@@ -541,11 +565,10 @@ function setupForm() {
                 link: linkValue,
                 category: getEl('appCategory').value,
                 downloads: 0,
-                // NEW FIELDS
                 file_extension: getEl('appFileExt').value,
                 slider_section: getEl('appSliderSection').value ? parseInt(getEl('appSliderSection').value) : null,
-                aspect_ratio: getEl('appAspectRatio').value.trim() || '16:9',
-                border_radius: getEl('appBorderRadius').value.trim() || '16px',
+                aspect_ratio: getEl('appAspectRatio').value,
+                border_radius: getEl('appBorderRadius').value,
                 border_style: getEl('appBorderStyle').value
             };
 
@@ -553,11 +576,17 @@ function setupForm() {
             if (error) throw error;
 
             f.reset();
-            showToast('APK added successfully!', 'success');
+            // Reset preview box
+            const previewBox = getEl('imagePreviewBox');
+            if (previewBox) {
+                previewBox.innerHTML = '<span style="color:var(--text-secondary);font-size:0.85rem"><i class="fas fa-image"></i> Preview will appear here</span>';
+                previewBox.classList.remove('has-image');
+            }
+            showToast('Item added successfully!', 'success');
             setTimeout(() => switchTab('apps'), 600);
         } catch (err) {
             console.error('[Admin] Add error:', err);
-            let msg = 'Failed to add APK: ' + err.message;
+            let msg = 'Failed to add item: ' + err.message;
             if (err.code === '42501' || err.message?.includes('row-level security')) {
                 msg = 'Permission denied. Make sure you ran the SQL setup in Supabase.';
             }
@@ -567,7 +596,7 @@ function setupForm() {
             showToast(msg, 'error');
         } finally {
             btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-plus"></i> Add APK';
+            btn.innerHTML = '<i class="fas fa-plus"></i> Add Item';
         }
     });
 }
@@ -587,7 +616,6 @@ function editApp(id) {
     getEl('editMod').value = app.mod || '';
     getEl('editLink').value = app.link || '';
     getEl('editCategory').value = app.category || 'app';
-    // NEW FIELDS
     getEl('editFileExt').value = app.fileExtension || 'apk';
     getEl('editSliderSection').value = app.sliderSection || '';
     getEl('editAspectRatio').value = app.aspectRatio || '16:9';
@@ -616,16 +644,15 @@ async function saveEdit() {
             mod: getEl('editMod').value.trim(),
             link: linkValue,
             category: getEl('editCategory').value,
-            // NEW FIELDS
             file_extension: getEl('editFileExt').value,
             slider_section: getEl('editSliderSection').value ? parseInt(getEl('editSliderSection').value) : null,
-            aspect_ratio: getEl('editAspectRatio').value.trim() || '16:9',
-            border_radius: getEl('editBorderRadius').value.trim() || '16px',
+            aspect_ratio: getEl('editAspectRatio').value,
+            border_radius: getEl('editBorderRadius').value,
             border_style: getEl('editBorderStyle').value
         }).eq('id', id);
         if (error) throw error;
         closeModal();
-        showToast('APK updated successfully!', 'success');
+        showToast('Item updated successfully!', 'success');
     } catch (e) {
         console.error('[Admin] Edit error:', e);
         let msg = 'Update failed: ' + e.message;
@@ -648,11 +675,11 @@ function closeModal() {
 }
 
 async function deleteApp(id) {
-    if (!confirm('Are you sure you want to delete this APK permanently?')) return;
+    if (!confirm('Are you sure you want to delete this item permanently?')) return;
     try {
         const { error } = await supabase.from('apks').delete().eq('id', id);
         if (error) throw error;
-        showToast('APK deleted', 'success');
+        showToast('Item deleted', 'success');
     } catch (e) {
         console.error('[Admin] Delete error:', e);
         let msg = 'Delete failed: ' + e.message;

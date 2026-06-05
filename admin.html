@@ -181,14 +181,14 @@
                 <!-- Add New -->
                 <div id="add" class="tab-content">
                     <div class="page-header">
-                        <h1>Add New APK</h1>
-                        <p class="text-secondary">Upload a new modded application to the database</p>
+                        <h1>Add New Item</h1>
+                        <p class="text-secondary">Upload APKs, AI images, or PC games to the database</p>
                     </div>
                     <div class="card">
                         <form id="addApkForm">
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label>App Name *</label>
+                                    <label>Name *</label>
                                     <input type="text" id="appName" required placeholder="e.g. Spotify Premium">
                                 </div>
                                 <div class="form-group">
@@ -210,7 +210,7 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label>Mod Features *</label>
+                                <label>Mod Features / Description *</label>
                                 <input type="text" id="appMod" required placeholder="e.g. No Ads, Unlocked Premium">
                             </div>
 
@@ -251,17 +251,51 @@
                                 </div>
                             </div>
 
+                            <!-- ===== AI IMAGE / COVER IMAGE UPLOAD ===== -->
+                            <div class="form-section-divider">
+                                <i class="fas fa-image"></i> Cover Image Settings
+                            </div>
+
+                            <div class="form-group">
+                                <label>
+                                    <i class="fas fa-image" style="color:var(--accent-cyan)"></i> 
+                                    Cover Image URL (AI Image / Screenshot / Thumbnail)
+                                </label>
+                                <input type="url" id="appImage" placeholder="https://i.imgur.com/abc123.png">
+                                <small class="form-hint">
+                                    <strong>For AI Images:</strong> Paste the direct image link here (Imgur, CDN, etc.). This image will show in the slider.<br>
+                                    <strong>For Mods:</strong> App icon or screenshot URL. Leave empty to use FontAwesome icon.
+                                </small>
+                            </div>
+
                             <!-- Image Styling Controls -->
                             <div class="form-row">
                                 <div class="form-group">
                                     <label>Image Aspect Ratio</label>
-                                    <input type="text" id="appAspectRatio" placeholder="16:9" value="16:9">
-                                    <small class="form-hint">e.g. 16:9, 4:3, 1:1, 21:9, 3:2</small>
+                                    <select id="appAspectRatio">
+                                        <option value="auto">Auto (Best Fit)</option>
+                                        <option value="16:9" selected>16:9 (Widescreen)</option>
+                                        <option value="4:3">4:3 (Standard)</option>
+                                        <option value="1:1">1:1 (Square)</option>
+                                        <option value="21:9">21:9 (Ultra Wide)</option>
+                                        <option value="3:2">3:2 (Photo)</option>
+                                        <option value="9:16">9:16 (Portrait)</option>
+                                    </select>
+                                    <small class="form-hint">
+                                        <strong>Auto:</strong> Automatically fits the image without cropping. Best for AI images with unknown sizes.<br>
+                                        <strong>16:9:</strong> Best for screenshots and banners.
+                                    </small>
                                 </div>
                                 <div class="form-group">
                                     <label>Image Border Radius</label>
-                                    <input type="text" id="appBorderRadius" placeholder="16px" value="16px">
-                                    <small class="form-hint">e.g. 16px, 8px, 50%, 0px</small>
+                                    <select id="appBorderRadius">
+                                        <option value="0px">0px (Sharp)</option>
+                                        <option value="8px">8px (Slight)</option>
+                                        <option value="16px" selected>16px (Rounded)</option>
+                                        <option value="24px">24px (More Rounded)</option>
+                                        <option value="50%">50% (Circle)</option>
+                                    </select>
+                                    <small class="form-hint">Corner roundness of the slider image</small>
                                 </div>
                             </div>
                             <div class="form-group">
@@ -273,6 +307,7 @@
                                     <option value="3px solid var(--accent-success)">Green Solid</option>
                                     <option value="2px dotted var(--accent-warning)">Orange Dotted</option>
                                     <option value="2px solid var(--accent-danger)">Red Solid</option>
+                                    <option value="2px solid rgba(255,255,255,0.2)">White Subtle</option>
                                 </select>
                                 <small class="form-hint">Border style for the slider card image</small>
                             </div>
@@ -281,14 +316,17 @@
                                 <div class="form-group">
                                     <label>Icon Class (FontAwesome)</label>
                                     <input type="text" id="appIcon" placeholder="fas fa-music" value="fas fa-mobile-alt">
+                                    <small class="form-hint">Used when no image URL is provided. e.g. fas fa-robot for AI, fas fa-desktop for PC games</small>
                                 </div>
                                 <div class="form-group">
-                                    <label>Image URL (Optional)</label>
-                                    <input type="url" id="appImage" placeholder="https://i.imgur.com/...">
+                                    <label>Image Preview</label>
+                                    <div id="imagePreviewBox" style="width:100%;height:120px;background:var(--bg-primary);border:1px solid var(--border-color);border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+                                        <span style="color:var(--text-secondary);font-size:0.85rem"><i class="fas fa-image"></i> Preview will appear here</span>
+                                    </div>
                                 </div>
                             </div>
                             <div class="form-actions">
-                                <button type="submit" class="btn-primary"><i class="fas fa-plus"></i> Add APK</button>
+                                <button type="submit" class="btn-primary"><i class="fas fa-plus"></i> Add Item</button>
                                 <button type="reset" class="btn-secondary">Reset</button>
                             </div>
                         </form>
@@ -323,13 +361,13 @@
     <div id="editModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Edit APK</h2>
+                <h2>Edit Item</h2>
                 <button class="modal-close" onclick="closeModal()" aria-label="Close modal">&times;</button>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="editId">
                 <div class="form-group">
-                    <label>App Name</label>
+                    <label>Name</label>
                     <input type="text" id="editName">
                 </div>
                 <div class="form-row">
@@ -346,12 +384,19 @@
                     <label>Icon Class</label>
                     <input type="text" id="editIcon">
                 </div>
+
+                <!-- ===== EDIT: AI IMAGE / COVER IMAGE ===== -->
                 <div class="form-group">
-                    <label>Image URL</label>
+                    <label>
+                        <i class="fas fa-image" style="color:var(--accent-cyan)"></i> 
+                        Cover Image URL (AI Image / Screenshot)
+                    </label>
                     <input type="text" id="editImage">
+                    <small class="form-hint">Update the image URL. For AI images, use direct image links.</small>
                 </div>
+
                 <div class="form-group">
-                    <label>Mod Features</label>
+                    <label>Mod Features / Description</label>
                     <input type="text" id="editMod">
                 </div>
 
@@ -394,11 +439,25 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>Aspect Ratio</label>
-                        <input type="text" id="editAspectRatio" placeholder="16:9">
+                        <select id="editAspectRatio">
+                            <option value="auto">Auto (Best Fit)</option>
+                            <option value="16:9">16:9 (Widescreen)</option>
+                            <option value="4:3">4:3 (Standard)</option>
+                            <option value="1:1">1:1 (Square)</option>
+                            <option value="21:9">21:9 (Ultra Wide)</option>
+                            <option value="3:2">3:2 (Photo)</option>
+                            <option value="9:16">9:16 (Portrait)</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label>Border Radius</label>
-                        <input type="text" id="editBorderRadius" placeholder="16px">
+                        <select id="editBorderRadius">
+                            <option value="0px">0px (Sharp)</option>
+                            <option value="8px">8px (Slight)</option>
+                            <option value="16px">16px (Rounded)</option>
+                            <option value="24px">24px (More Rounded)</option>
+                            <option value="50%">50% (Circle)</option>
+                        </select>
                     </div>
                 </div>
                 <div class="form-group">
@@ -410,6 +469,7 @@
                         <option value="3px solid var(--accent-success)">Green Solid</option>
                         <option value="2px dotted var(--accent-warning)">Orange Dotted</option>
                         <option value="2px solid var(--accent-danger)">Red Solid</option>
+                        <option value="2px solid rgba(255,255,255,0.2)">White Subtle</option>
                     </select>
                 </div>
 
