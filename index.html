@@ -13,6 +13,8 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -97,6 +99,74 @@
         </div>
     </section>
 
+    <!-- ===== SWIPER SLIDERS SECTION ===== -->
+    <section class="sliders-wrapper" id="sliders">
+        <div class="container">
+
+            <!-- Slider 1: Popular Mod APKs -->
+            <div class="slider-block">
+                <div class="section-header slider-header">
+                    <div>
+                        <h2><i class="fas fa-fire" style="color:var(--accent-orange)"></i> Popular Mod APKs</h2>
+                        <p class="section-subtitle">Hand-picked by admin, auto-rotating showcase</p>
+                    </div>
+                </div>
+                <div class="swiper swiper-slider-1" id="swiper1">
+                    <div class="swiper-wrapper" id="sliderWrapper1">
+                        <div class="swiper-slide">
+                            <div class="slider-loading"><i class="fas fa-spinner fa-spin"></i> Loading mods...</div>
+                        </div>
+                    </div>
+                    <div class="swiper-pagination swiper-pagination-1"></div>
+                    <div class="swiper-button-next swiper-btn-next-1"></div>
+                    <div class="swiper-button-prev swiper-btn-prev-1"></div>
+                </div>
+            </div>
+
+            <!-- Slider 2: AI Images -->
+            <div class="slider-block">
+                <div class="section-header slider-header">
+                    <div>
+                        <h2><i class="fas fa-robot" style="color:var(--accent-purple)"></i> AI Images</h2>
+                        <p class="section-subtitle">Curated AI-generated wallpapers, art & assets</p>
+                    </div>
+                </div>
+                <div class="swiper swiper-slider-2" id="swiper2">
+                    <div class="swiper-wrapper" id="sliderWrapper2">
+                        <div class="swiper-slide">
+                            <div class="slider-loading"><i class="fas fa-spinner fa-spin"></i> Loading AI images...</div>
+                        </div>
+                    </div>
+                    <div class="swiper-pagination swiper-pagination-2"></div>
+                    <div class="swiper-button-next swiper-btn-next-2"></div>
+                    <div class="swiper-button-prev swiper-btn-prev-2"></div>
+                </div>
+            </div>
+
+            <!-- Slider 3: Best Free PC Games -->
+            <div class="slider-block">
+                <div class="section-header slider-header">
+                    <div>
+                        <h2><i class="fas fa-desktop" style="color:var(--accent-cyan)"></i> Best Free PC Games</h2>
+                        <p class="section-subtitle">Top rated PC game mods, repacks & pre-installs</p>
+                    </div>
+                </div>
+                <div class="swiper swiper-slider-3" id="swiper3">
+                    <div class="swiper-wrapper" id="sliderWrapper3">
+                        <div class="swiper-slide">
+                            <div class="slider-loading"><i class="fas fa-spinner fa-spin"></i> Loading PC games...</div>
+                        </div>
+                    </div>
+                    <div class="swiper-pagination swiper-pagination-3"></div>
+                    <div class="swiper-button-next swiper-btn-next-3"></div>
+                    <div class="swiper-button-prev swiper-btn-prev-3"></div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+    <!-- ===== END SLIDERS ===== -->
+
     <!-- Search & Filter -->
     <section class="search-section" id="apps">
         <div class="container">
@@ -113,7 +183,7 @@
         </div>
     </section>
 
-    <!-- Featured Apps -->
+    <!-- Featured Apps Grid -->
     <section class="featured-section">
         <div class="container">
             <div class="section-header">
@@ -151,7 +221,7 @@
                 <div class="step-card">
                     <div class="step-icon"><i class="fas fa-download"></i></div>
                     <h3>2. Download</h3>
-                    <p class="text-secondary">Click download and get the APK file instantly. No wait timers.</p>
+                    <p class="text-secondary">Click download and get the file instantly. No wait timers.</p>
                 </div>
                 <div class="step-card">
                     <div class="step-icon"><i class="fas fa-play"></i></div>
@@ -222,9 +292,11 @@
         </div>
     </div>
 
-    <!-- Firebase SDKs -->
-   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="supabase.js"></script>
-<script src="public.js"></script>
+    <!-- Swiper JS -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="supabase.js"></script>
+    <script src="public.js"></script>
 </body>
 </html>

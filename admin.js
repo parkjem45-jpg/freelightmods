@@ -1,7 +1,5 @@
-// admin.js — Admin Panel Logic (Supabase Version — Fixed)
-// =======================================================
-// Fixes: Auto-admin via DB trigger, no more "Access denied",
-//        silent fallback insert, emergency console function.
+// admin.js — Admin Panel Logic (Supabase Version) with Sliders & File Extensions
+// =================================================================================
 
 const MOD_URL_TEMPLATES = {};
 let appsData = [];
@@ -131,24 +129,26 @@ function initLoginForm() {
     const passwordGroup = getEl('passwordGroup');
     const confirmGroup = getEl('confirmPasswordGroup');
 
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            tabs.forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-            mode = tab.getAttribute('data-tab');
-            if (errorDiv) errorDiv.style.display = 'none';
+    if (tabs.length) {
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                mode = tab.getAttribute('data-tab');
+                if (errorDiv) errorDiv.style.display = 'none';
 
-            if (mode === 'signup') {
-                passwordGroup.style.display = 'block';
-                confirmGroup.style.display = 'block';
-                btn.innerHTML = '<i class="fas fa-user-plus"></i> <span>Create Account</span>';
-            } else {
-                passwordGroup.style.display = 'block';
-                confirmGroup.style.display = 'none';
-                btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> <span>Login</span>';
-            }
+                if (mode === 'signup') {
+                    if (passwordGroup) passwordGroup.style.display = 'block';
+                    if (confirmGroup) confirmGroup.style.display = 'block';
+                    btn.innerHTML = '<i class="fas fa-user-plus"></i> <span>Create Account</span>';
+                } else {
+                    if (passwordGroup) passwordGroup.style.display = 'block';
+                    if (confirmGroup) confirmGroup.style.display = 'none';
+                    btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> <span>Login</span>';
+                }
+            });
         });
-    });
+    }
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -160,14 +160,13 @@ function initLoginForm() {
 
         try {
             if (mode === 'signup') {
-                const confirm = getEl('confirmPassword').value;
-                if (password !== confirm) throw new Error('Passwords do not match');
+                const confirm = getEl('confirmPassword') ? getEl('confirmPassword').value : '';
+                if (confirm && password !== confirm) throw new Error('Passwords do not match');
                 if (password.length < 6) throw new Error('Password must be at least 6 characters');
 
                 const { data, error } = await supabase.auth.signUp({ email, password });
                 if (error) throw error;
 
-                // Trigger auto-creates admin record, but we try manual fallback silently just in case
                 if (data.user) {
                     try {
                         await supabase.from('admins').upsert({ id: data.user.id, email, role: 'admin' });
@@ -178,7 +177,6 @@ function initLoginForm() {
 
                 if (data.session) {
                     showToast('Account created! Logging you in...', 'success');
-                    // onAuthStateChange will fire SIGNED_IN and handle the rest
                 } else {
                     showToast('Account created! Please check your email to confirm, then log in.', 'success');
                     btn.disabled = false;
@@ -187,7 +185,6 @@ function initLoginForm() {
             } else {
                 const { error } = await supabase.auth.signInWithPassword({ email, password });
                 if (error) throw error;
-                // onAuthStateChange handles the rest
             }
         } catch (err) {
             if (errorDiv) {
@@ -293,7 +290,13 @@ async function fetchApps() {
         link: row.link || '',
         category: row.category || 'app',
         downloads: row.downloads || 0,
-        dateAdded: row.date_added
+        dateAdded: row.date_added,
+        // NEW FIELDS
+        fileExtension: row.file_extension || 'apk',
+        sliderSection: row.slider_section,
+        aspectRatio: row.aspect_ratio || '16:9',
+        borderRadius: row.border_radius || '16px',
+        borderStyle: row.border_style || 'none'
     }));
     currentPage = 1;
     renderTable();
@@ -353,7 +356,7 @@ function renderTable() {
     }
     tb.innerHTML = '';
     if (filtered.length === 0) {
-        tb.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-secondary)">No apps found</td></tr>';
+        tb.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-secondary)">No apps found</td></tr>';
         renderPagination(0);
         return;
     }
@@ -386,11 +389,21 @@ function buildTableRow(app) {
     iconCell.appendChild(iconDiv);
 
     const nameCell = document.createElement('td');
-    nameCell.innerHTML = '<strong>' + escapeHtml(app.name) + '</strong><br><small class="text-secondary">' + escapeHtml(app.category || 'app') + '</small>';
+    const sliderBadge = app.sliderSection ? `<span style="display:inline-block;margin-left:6px;padding:2px 8px;border-radius:6px;background:linear-gradient(135deg,var(--accent-cyan),var(--accent-purple));color:var(--bg-primary);font-size:0.7rem;font-weight:700">S${app.sliderSection}</span>` : '';
+    nameCell.innerHTML = '<strong>' + escapeHtml(app.name) + '</strong>' + sliderBadge + '<br><small class="text-secondary">' + escapeHtml(app.category || 'app') + '</small>';
 
     const versionCell = document.createElement('td'); versionCell.textContent = app.version || 'N/A';
     const sizeCell = document.createElement('td'); sizeCell.textContent = app.size || 'N/A';
-    const downloadsCell = document.createElement('td'); downloadsCell.textContent = formatNum(app.downloads || 0);
+
+    const extCell = document.createElement('td');
+    extCell.innerHTML = '<span style="font-family:monospace;font-size:0.8rem;color:var(--accent-cyan)">.' + escapeHtml(app.fileExtension || 'apk') + '</span>';
+
+    const sliderCell = document.createElement('td');
+    if (app.sliderSection) {
+        sliderCell.innerHTML = '<span style="display:inline-block;padding:4px 10px;border-radius:20px;background:rgba(0,242,254,0.1);color:var(--accent-cyan);font-size:0.75rem;font-weight:700;border:1px solid rgba(0,242,254,0.2)">Slider ' + app.sliderSection + '</span>';
+    } else {
+        sliderCell.innerHTML = '<span style="color:var(--text-secondary);font-size:0.8rem">—</span>';
+    }
 
     const linkCell = document.createElement('td');
     const hasLink = app.link && app.link.startsWith('http');
@@ -407,8 +420,14 @@ function buildTableRow(app) {
     `;
     actionsCell.appendChild(actionsDiv);
 
-    tr.appendChild(iconCell); tr.appendChild(nameCell); tr.appendChild(versionCell);
-    tr.appendChild(sizeCell); tr.appendChild(downloadsCell); tr.appendChild(linkCell); tr.appendChild(actionsCell);
+    tr.appendChild(iconCell); 
+    tr.appendChild(nameCell); 
+    tr.appendChild(versionCell);
+    tr.appendChild(sizeCell); 
+    tr.appendChild(extCell); 
+    tr.appendChild(sliderCell); 
+    tr.appendChild(linkCell); 
+    tr.appendChild(actionsCell);
     return tr;
 }
 
@@ -521,7 +540,13 @@ function setupForm() {
                 mod: getEl('appMod').value.trim(),
                 link: linkValue,
                 category: getEl('appCategory').value,
-                downloads: 0
+                downloads: 0,
+                // NEW FIELDS
+                file_extension: getEl('appFileExt').value,
+                slider_section: getEl('appSliderSection').value ? parseInt(getEl('appSliderSection').value) : null,
+                aspect_ratio: getEl('appAspectRatio').value.trim() || '16:9',
+                border_radius: getEl('appBorderRadius').value.trim() || '16px',
+                border_style: getEl('appBorderStyle').value
             };
 
             const { error } = await supabase.from('apks').insert([newApp]);
@@ -535,6 +560,9 @@ function setupForm() {
             let msg = 'Failed to add APK: ' + err.message;
             if (err.code === '42501' || err.message?.includes('row-level security')) {
                 msg = 'Permission denied. Make sure you ran the SQL setup in Supabase.';
+            }
+            if (err.message && err.message.includes('column')) {
+                msg = 'Database columns missing. Please run the schema.sql in Supabase SQL Editor first!';
             }
             showToast(msg, 'error');
         } finally {
@@ -559,6 +587,13 @@ function editApp(id) {
     getEl('editMod').value = app.mod || '';
     getEl('editLink').value = app.link || '';
     getEl('editCategory').value = app.category || 'app';
+    // NEW FIELDS
+    getEl('editFileExt').value = app.fileExtension || 'apk';
+    getEl('editSliderSection').value = app.sliderSection || '';
+    getEl('editAspectRatio').value = app.aspectRatio || '16:9';
+    getEl('editBorderRadius').value = app.borderRadius || '16px';
+    getEl('editBorderStyle').value = app.borderStyle || 'none';
+
     const modal = getEl('editModal');
     if (modal) modal.classList.add('active');
 }
@@ -580,7 +615,13 @@ async function saveEdit() {
             image: getEl('editImage').value.trim(),
             mod: getEl('editMod').value.trim(),
             link: linkValue,
-            category: getEl('editCategory').value
+            category: getEl('editCategory').value,
+            // NEW FIELDS
+            file_extension: getEl('editFileExt').value,
+            slider_section: getEl('editSliderSection').value ? parseInt(getEl('editSliderSection').value) : null,
+            aspect_ratio: getEl('editAspectRatio').value.trim() || '16:9',
+            border_radius: getEl('editBorderRadius').value.trim() || '16px',
+            border_style: getEl('editBorderStyle').value
         }).eq('id', id);
         if (error) throw error;
         closeModal();
@@ -590,6 +631,9 @@ async function saveEdit() {
         let msg = 'Update failed: ' + e.message;
         if (e.code === '42501' || e.message?.includes('row-level security')) {
             msg = 'Permission denied. Check Supabase RLS policies.';
+        }
+        if (e.message && e.message.includes('column')) {
+            msg = 'Database columns missing. Run schema.sql in Supabase first!';
         }
         showToast(msg, 'error');
     } finally {

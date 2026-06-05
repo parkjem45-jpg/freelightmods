@@ -163,13 +163,14 @@
                                         <th>Name</th>
                                         <th>Version</th>
                                         <th>Size</th>
-                                        <th>Downloads</th>
+                                        <th>Ext</th>
+                                        <th>Slider</th>
                                         <th>Link</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody id="appsTableBody">
-                                    <tr><td colspan="7" style="text-align:center;padding:40px">Loading...</td></tr>
+                                    <tr><td colspan="8" style="text-align:center;padding:40px">Loading...</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -213,13 +214,68 @@
                                 <input type="text" id="appMod" required placeholder="e.g. No Ads, Unlocked Premium">
                             </div>
 
-                            <!-- ===== MOD DOWNLOAD LINK FIELD ===== -->
+                            <!-- Download Link -->
                             <div class="form-group">
                                 <label>Download Link *</label>
                                 <input type="url" id="appLink" required placeholder="https://your-cdn.com/file.apk">
-                                <small class="form-hint">Paste the direct APK download URL here. Must start with http:// or https://</small>
+                                <small class="form-hint">Paste the direct download URL here. Must start with http:// or https://</small>
                             </div>
-                            <!-- ===== END MOD DOWNLOAD LINK FIELD ===== -->
+
+                            <!-- File Extension -->
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>File Extension</label>
+                                    <select id="appFileExt">
+                                        <option value="apk">APK (.apk)</option>
+                                        <option value="zip">ZIP (.zip)</option>
+                                        <option value="exe">EXE (.exe)</option>
+                                        <option value="rar">RAR (.rar)</option>
+                                        <option value="7z">7Z (.7z)</option>
+                                        <option value="pdf">PDF (.pdf)</option>
+                                        <option value="mp4">MP4 (.mp4)</option>
+                                        <option value="iso">ISO (.iso)</option>
+                                        <option value="tar">TAR (.tar)</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                    <small class="form-hint">Select the file type users will download</small>
+                                </div>
+                                <div class="form-group">
+                                    <label>Slider Section</label>
+                                    <select id="appSliderSection">
+                                        <option value="">None (Grid Only)</option>
+                                        <option value="1">1 - Popular Mod APKs</option>
+                                        <option value="2">2 - AI Images</option>
+                                        <option value="3">3 - Best Free PC Games</option>
+                                    </select>
+                                    <small class="form-hint">Choose which homepage slider shows this item</small>
+                                </div>
+                            </div>
+
+                            <!-- Image Styling Controls -->
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Image Aspect Ratio</label>
+                                    <input type="text" id="appAspectRatio" placeholder="16:9" value="16:9">
+                                    <small class="form-hint">e.g. 16:9, 4:3, 1:1, 21:9, 3:2</small>
+                                </div>
+                                <div class="form-group">
+                                    <label>Image Border Radius</label>
+                                    <input type="text" id="appBorderRadius" placeholder="16px" value="16px">
+                                    <small class="form-hint">e.g. 16px, 8px, 50%, 0px</small>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Image Border Style</label>
+                                <select id="appBorderStyle">
+                                    <option value="none">None</option>
+                                    <option value="2px solid var(--accent-cyan)">Cyan Solid</option>
+                                    <option value="2px dashed var(--accent-purple)">Purple Dashed</option>
+                                    <option value="3px solid var(--accent-success)">Green Solid</option>
+                                    <option value="2px dotted var(--accent-warning)">Orange Dotted</option>
+                                    <option value="2px solid var(--accent-danger)">Red Solid</option>
+                                </select>
+                                <small class="form-hint">Border style for the slider card image</small>
+                            </div>
 
                             <div class="form-row">
                                 <div class="form-group">
@@ -299,13 +355,63 @@
                     <input type="text" id="editMod">
                 </div>
 
-                <!-- ===== MOD DOWNLOAD LINK EDIT FIELD ===== -->
+                <!-- Edit Download Link -->
                 <div class="form-group">
                     <label>Download Link</label>
                     <input type="url" id="editLink" placeholder="https://your-cdn.com/file.apk">
-                    <small class="form-hint">Update the direct APK download URL here. Must start with http:// or https://</small>
+                    <small class="form-hint">Update the direct download URL here. Must start with http:// or https://</small>
                 </div>
-                <!-- ===== END MOD DOWNLOAD LINK EDIT FIELD ===== -->
+
+                <!-- Edit File Extension & Slider -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>File Extension</label>
+                        <select id="editFileExt">
+                            <option value="apk">APK (.apk)</option>
+                            <option value="zip">ZIP (.zip)</option>
+                            <option value="exe">EXE (.exe)</option>
+                            <option value="rar">RAR (.rar)</option>
+                            <option value="7z">7Z (.7z)</option>
+                            <option value="pdf">PDF (.pdf)</option>
+                            <option value="mp4">MP4 (.mp4)</option>
+                            <option value="iso">ISO (.iso)</option>
+                            <option value="tar">TAR (.tar)</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Slider Section</label>
+                        <select id="editSliderSection">
+                            <option value="">None</option>
+                            <option value="1">1 - Popular Mod APKs</option>
+                            <option value="2">2 - AI Images</option>
+                            <option value="3">3 - Best Free PC Games</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Edit Image Styling -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Aspect Ratio</label>
+                        <input type="text" id="editAspectRatio" placeholder="16:9">
+                    </div>
+                    <div class="form-group">
+                        <label>Border Radius</label>
+                        <input type="text" id="editBorderRadius" placeholder="16px">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Border Style</label>
+                    <select id="editBorderStyle">
+                        <option value="none">None</option>
+                        <option value="2px solid var(--accent-cyan)">Cyan Solid</option>
+                        <option value="2px dashed var(--accent-purple)">Purple Dashed</option>
+                        <option value="3px solid var(--accent-success)">Green Solid</option>
+                        <option value="2px dotted var(--accent-warning)">Orange Dotted</option>
+                        <option value="2px solid var(--accent-danger)">Red Solid</option>
+                    </select>
+                </div>
 
                 <div class="form-group">
                     <label>Category</label>

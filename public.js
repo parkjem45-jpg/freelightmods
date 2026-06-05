@@ -1,5 +1,5 @@
-// public.js — Public Site Logic (Supabase Version)
-// ================================================
+// public.js — Public Site Logic (Supabase Version) + Swiper Sliders
+// ================================================================
 
 const MOD_LINK_OVERRIDES = {};
 let appsData = [];
@@ -8,6 +8,7 @@ let displayedCount = 12;
 const ITEMS_PER_LOAD = 12;
 let currentFilter = 'all';
 let searchQuery = '';
+let swiperInstances = {};
 
 /* ==========================================
    THEME TOGGLE
@@ -74,7 +75,7 @@ function initAuth() {
 }
 
 /* ==========================================
-   FIREBASE DATA LOADING
+   DATA LOADING
    ========================================== */
 function loadAppsData() {
     if (typeof supabase === 'undefined') {
@@ -110,22 +111,146 @@ async function fetchAppsPublic() {
         mod: row.mod,
         link: row.link || '',
         category: row.category || 'app',
-        downloads: row.downloads || 0
+        downloads: row.downloads || 0,
+        fileExtension: row.file_extension || 'apk',
+        sliderSection: row.slider_section,
+        aspectRatio: row.aspect_ratio || '16:9',
+        borderRadius: row.border_radius || '16px',
+        borderStyle: row.border_style || 'none'
     }));
     displayedCount = ITEMS_PER_LOAD;
     renderGrid();
+    loadSliders();
 }
 
 function loadSampleData() {
     appsData = [
-        { id: 'spotify-premium', name: 'Spotify Premium', icon: 'fab fa-spotify', version: 'v8.9.18', size: '82 MB', mod: 'Unlocked', downloads: 15420, link: '#', category: 'app', image: '' },
-        { id: 'youtube-premium', name: 'YouTube Premium', icon: 'fab fa-youtube', version: 'v18.45.41', size: '134 MB', mod: 'No Ads', downloads: 28750, link: '#', category: 'app', image: '' },
-        { id: 'minecraft-mod', name: 'Minecraft Mod', icon: 'fas fa-cube', version: 'v1.20.0', size: '210 MB', mod: 'Unlimited Items', downloads: 8900, link: '#', category: 'game', image: '' }
+        { id: 'spotify-premium', name: 'Spotify Premium', icon: 'fab fa-spotify', version: 'v8.9.18', size: '82 MB', mod: 'Unlocked', downloads: 15420, link: '#', category: 'app', image: '', fileExtension: 'apk' },
+        { id: 'youtube-premium', name: 'YouTube Premium', icon: 'fab fa-youtube', version: 'v18.45.41', size: '134 MB', mod: 'No Ads', downloads: 28750, link: '#', category: 'app', image: '', fileExtension: 'apk' },
+        { id: 'minecraft-mod', name: 'Minecraft Mod', icon: 'fas fa-cube', version: 'v1.20.0', size: '210 MB', mod: 'Unlimited Items', downloads: 8900, link: '#', category: 'game', image: '', fileExtension: 'apk' }
     ];
     appsData.forEach(app => { if (MOD_LINK_OVERRIDES[app.id]) app.link = MOD_LINK_OVERRIDES[app.id]; });
     displayedCount = ITEMS_PER_LOAD;
     renderGrid();
+    loadSliders();
 }
+
+/* ==========================================
+   SLIDERS (Swiper.js)
+   ========================================== */
+async function loadSliders() {
+    if (typeof supabase === 'undefined') {
+        console.warn('[Public] Supabase not loaded for sliders');
+        return;
+    }
+    try {
+        const { data, error } = await supabase
+            .from('apks')
+            .select('*')
+            .in('slider_section', [1, 2, 3])
+            .order('date_added', { ascending: false });
+
+        if (error) throw error;
+
+        const grouped = { 1: [], 2: [], 3: [] };
+        (data || []).forEach(row => {
+            if (grouped[row.slider_section]) grouped[row.slider_section].push(row);
+        });
+
+        renderSliderGroup(1, grouped[1]);
+        renderSliderGroup(2, grouped[2]);
+        renderSliderGroup(3, grouped[3]);
+    } catch (err) {
+        console.error('[Slider] Error:', err);
+    }
+}
+
+function renderSliderGroup(section, items) {
+    const wrapper = document.getElementById('sliderWrapper' + section);
+    if (!wrapper) return;
+    wrapper.innerHTML = '';
+
+    if (!items || items.length === 0) {
+        wrapper.innerHTML = '<div class="swiper-slide"><div class="slider-loading">No items yet. Add from Admin Panel.</div></div>';
+        initSwiper(section, []);
+        return;
+    }
+
+    items.forEach(app => {
+        const slide = document.createElement('div');
+        slide.className = 'swiper-slide';
+
+        const ratio = app.aspect_ratio || '16:9';
+        const radius = app.border_radius || '16px';
+        const border = app.border_style || 'none';
+        const ext = app.file_extension || 'apk';
+
+        const imgUrl = app.image && app.image.trim() ? app.image : '';
+
+        slide.innerHTML = `
+            <div class="slider-card" onclick="handleSliderDownload('${escapeHtml(app.id)}')">
+                <div class="slider-image-wrap" style="--img-ratio:${ratio};--img-radius:${radius};--img-border:${border}">
+                    ${imgUrl ? `<img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(app.name)}" loading="lazy" onerror="this.style.display='none';this.parentElement.innerHTML='<i class=\'fas fa-image img-fallback\'></i>';">` : '<i class="fas fa-image img-fallback"></i>'}
+                </div>
+                <div class="slider-content">
+                    <h3>${escapeHtml(app.name)}</h3>
+                    <p>${escapeHtml(app.mod || app.category || 'Featured')}</p>
+                    <div class="slider-meta">
+                        <span><i class="fas fa-code-branch"></i> ${escapeHtml(app.version || 'v1.0')}</span>
+                        <span><i class="fas fa-weight-hanging"></i> ${escapeHtml(app.size || 'N/A')}</span>
+                        <span><i class="fas fa-file"></i> .${escapeHtml(ext)}</span>
+                    </div>
+                    <button class="slider-btn"><i class="fas fa-download"></i> Download</button>
+                </div>
+            </div>
+        `;
+        wrapper.appendChild(slide);
+    });
+
+    initSwiper(section, items);
+}
+
+function initSwiper(section, items) {
+    const selector = '.swiper-slider-' + section;
+    if (swiperInstances[section]) {
+        swiperInstances[section].destroy(true, true);
+    }
+
+    const hasEnoughSlides = items.length >= 4;
+
+    swiperInstances[section] = new Swiper(selector, {
+        loop: hasEnoughSlides,
+        autoplay: {
+            delay: 3000 + (section * 800),
+            disableOnInteraction: false,
+            pauseOnMouseEnter: true
+        },
+        pagination: {
+            el: '.swiper-pagination-' + section,
+            clickable: true,
+            dynamicBullets: true
+        },
+        navigation: {
+            nextEl: '.swiper-btn-next-' + section,
+            prevEl: '.swiper-btn-prev-' + section
+        },
+        breakpoints: {
+            320: { slidesPerView: 1, spaceBetween: 16 },
+            640: { slidesPerView: 2, spaceBetween: 20 },
+            1024: { slidesPerView: 3, spaceBetween: 28 },
+            1280: { slidesPerView: 4, spaceBetween: 28 }
+        },
+        grabCursor: true,
+        centeredSlides: false,
+        speed: 600
+    });
+}
+
+window.handleSliderDownload = function(appId) {
+    const url = new URL('download.html', window.location.href);
+    url.searchParams.set('id', appId);
+    window.open(url.toString(), '_blank');
+};
 
 /* ==========================================
    GRID RENDERING
@@ -197,7 +322,7 @@ function buildAppCard(app) {
 
     const btn = document.createElement('div');
     btn.className = 'download-btn';
-    btn.innerHTML = '<i class="fas fa-download"></i> Download APK';
+    btn.innerHTML = '<i class="fas fa-download"></i> Download';
 
     card.appendChild(iconDiv);
     card.appendChild(infoDiv);
@@ -344,7 +469,7 @@ function removeTypingIndicator(id) {
 
 function getAIResponse(q) {
     const l = q.toLowerCase();
-    if (l.includes('download') || l.includes('install')) return 'Tap "Download APK" and enable "Unknown Sources" in Android settings. If a link is missing, the admin has not set it yet.';
+    if (l.includes('download') || l.includes('install')) return 'Tap "Download" and enable "Unknown Sources" in Android settings. If a link is missing, the admin has not set it yet.';
     if (l.includes('safe') || l.includes('virus') || l.includes('secure')) return 'All mods are scanned and verified before publishing. We never upload malware.';
     if (l.includes('admin')) return 'Press the "A" key 5 times rapidly on your keyboard for secret admin access.';
     if (l.includes('free') || l.includes('price') || l.includes('cost')) return '100% free. No hidden fees, no subscriptions.';

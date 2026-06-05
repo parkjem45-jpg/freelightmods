@@ -76,6 +76,14 @@
         .loading-box i { font-size: 2.5rem; color: var(--accent-cyan); margin-bottom: 16px; display: inline-block; animation: spin 1s linear infinite; }
         .loading-box p { color: var(--text-secondary); font-size: 1rem; }
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        .file-ext-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(0, 242, 254, 0.1); border: 1px solid rgba(0, 242, 254, 0.2);
+            color: var(--accent-cyan); padding: 4px 12px; border-radius: 20px;
+            font-size: 0.85rem; font-weight: 700; font-family: monospace;
+            margin-bottom: 16px;
+        }
     </style>
 </head>
 <body>
@@ -109,6 +117,12 @@
                         <i class="fas fa-mobile-alt"></i>
                     </div>
                     <h1 id="appName">Loading...</h1>
+
+                    <!-- File Extension Badge -->
+                    <div class="file-ext-badge" id="fileExtBadge" style="display:none">
+                        <i class="fas fa-file"></i> <span id="fileExtText">.apk</span>
+                    </div>
+
                     <div class="download-meta" id="appMeta"></div>
                     <div class="download-mod" id="appMod" style="display:none"></div>
 
@@ -164,6 +178,8 @@
         const healthBar = document.getElementById('healthBar');
         const countdownText = document.getElementById('countdownText');
         const downloadCard = document.getElementById('downloadCard');
+        const fileExtBadge = document.getElementById('fileExtBadge');
+        const fileExtText = document.getElementById('fileExtText');
 
         let downloadLink = '';
         let countdownTimer = null;
@@ -215,9 +231,18 @@
 
         function renderAppInfo(app) {
             appNameEl.textContent = app.name || 'Unknown App';
+
+            // Show file extension badge
+            const ext = app.file_extension || 'apk';
+            if (fileExtBadge && fileExtText) {
+                fileExtText.textContent = '.' + ext;
+                fileExtBadge.style.display = 'inline-flex';
+            }
+
             appMetaEl.innerHTML = `
                 <span><i class="fas fa-code-branch"></i> ${escapeHtml(app.version || 'N/A')}</span>
                 <span><i class="fas fa-weight-hanging"></i> ${escapeHtml(app.size || 'N/A')}</span>
+                <span><i class="fas fa-download"></i> ${formatNum(app.downloads || 0)}</span>
             `;
             if (app.mod) {
                 appModEl.style.display = 'inline-flex';
@@ -255,9 +280,16 @@
                     downloadBtn.disabled = false;
                     countdownText.textContent = 'Click the button above to start your download';
                     countdownText.classList.add('ready');
-                    // Auto-download removed — user must click the button manually
+                    tryAutoDownload();
                 }
             }, 1000);
+        }
+
+        function tryAutoDownload() {
+            setTimeout(() => {
+                triggerDownload();
+                countdownText.textContent = 'If download did not start, click the button above';
+            }, 300);
         }
 
         async function triggerDownload() {
@@ -292,6 +324,13 @@
                 .replace(/>/g, '&gt;')
                 .replace(/"/g, '&quot;')
                 .replace(/'/g, '&#039;');
+        }
+
+        function formatNum(n) {
+            if (!n) return '0';
+            if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+            if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+            return n.toString();
         }
 
         loadAppData();
