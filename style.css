@@ -519,31 +519,94 @@ a { text-decoration: none; color: inherit; transition: var(--transition); }
     }
 }
 
-/* ===== Form Section Divider (Admin) ===== */
-.form-section-divider {
+/* ===== Ad Containers & Script Injection Styles ===== */
+.ad-container {
+    width: 100%;
     display: flex;
+    justify-content: center;
     align-items: center;
-    gap: 12px;
-    margin: 24px 0 16px;
     padding: 12px 16px;
-    background: linear-gradient(135deg, rgba(0,242,254,0.08), rgba(79,172,254,0.08));
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    color: var(--accent-cyan);
-    font-weight: 700;
-    font-size: 0.95rem;
-}
-.form-section-divider i {
-    font-size: 1.1rem;
+    margin: 0 auto;
+    overflow: hidden;
+    box-sizing: border-box;
 }
 
-/* ===== Image Preview Box (Admin) ===== */
-#imagePreviewBox img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    border-radius: 8px;
+.ad-container iframe,
+.ad-container ins,
+.ad-container div[id*="ad"],
+.ad-container div[class*="ad"] {
+    max-width: 100% !important;
+    height: auto !important;
 }
-#imagePreviewBox.has-image {
-    background: var(--bg-primary);
+
+/* Home Top Ad - Above Hero */
+.ad-home-top {
+    padding: 12px 16px;
+    background: linear-gradient(180deg, rgba(0,242,254,0.03) 0%, transparent 100%);
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Home Inline Ad - Inside Grid */
+.ad-inline-slot {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: center;
+    padding: 8px 0;
+    min-height: 100px;
+}
+.ad-inline-slot .ad-inner {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+/* Download Ads */
+.ad-download-top {
+    padding: 16px;
+    margin-bottom: 0;
+}
+.ad-download-bottom {
+    padding: 16px;
+    margin-top: 0;
+}
+
+/* Smart Size Classes */
+.ad-size-auto { max-width: 100%; }
+.ad-size-auto iframe { width: 100%; }
+
+.ad-size-small { max-width: 320px; }
+.ad-size-small iframe { width: 320px; height: 50px; }
+
+.ad-size-medium { max-width: 728px; }
+.ad-size-medium iframe { width: 728px; height: 90px; }
+
+.ad-size-large { max-width: 970px; }
+.ad-size-large iframe { width: 970px; height: 250px; }
+
+.ad-size-full { max-width: 100%; }
+.ad-size-full iframe { width: 100%; }
+
+.ad-size-square { max-width: 300px; }
+.ad-size-square iframe { width: 300px; height: 300px; }
+
+/* Responsive Ad Sizes */
+@media (max-width: 768px) {
+    .ad-size-large { max-width: 100%; }
+    .ad-size-large iframe { width: 100%; height: auto; min-height: 150px; }
+
+    .ad-size-medium { max-width: 100%; }
+    .ad-size-medium iframe { width: 100%; height: auto; min-height: 60px; }
+
+    .ad-size-square { max-width: 100%; }
+    .ad-size-square iframe { width: 100%; height: auto; min-height: 250px; }
+
+    .ad-container { padding: 8px; }
+}
+
+@media (max-width: 480px) {
+    .ad-size-small { max-width: 100%; }
+    .ad-size-small iframe { width: 100%; height: auto; }
+
+    .ad-home-top { padding: 8px; }
+    .ad-inline-slot { padding: 4px 0; }
 }

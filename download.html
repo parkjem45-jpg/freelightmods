@@ -105,7 +105,11 @@
     </header>
 
     <main class="download-page">
-        <div class="container" style="display:flex;justify-content:center">
+        <div class="container" style="display:flex;justify-content:center;flex-direction:column;align-items:center;gap:20px;">
+
+            <!-- Top Ad Banner (Smart Position) -->
+            <div id="adDownloadTop" class="ad-container ad-download-top" style="display:none;width:100%;max-width:480px;"></div>
+
             <div class="download-card" id="downloadCard">
                 <div class="loading-box" id="loadingState">
                     <i class="fas fa-spinner"></i>
@@ -140,6 +144,9 @@
 
                 <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Home</a>
             </div>
+
+            <!-- Bottom Ad Banner (Smart Position) -->
+            <div id="adDownloadBottom" class="ad-container ad-download-bottom" style="display:none;width:100%;max-width:480px;"></div>
         </div>
     </main>
 
@@ -192,12 +199,11 @@
             if (existingError) existingError.remove();
             const errorDiv = document.createElement('div');
             errorDiv.className = 'error-box';
-            errorDiv.innerHTML = `
-                <i class="fas fa-exclamation-circle" style="font-size:3rem;color:var(--accent-danger);margin-bottom:16px;display:block"></i>
-                <h2>${escapeHtml(title)}</h2>
-                <p>${escapeHtml(message)}</p>
-                <a href="index.html" class="btn btn-primary"><i class="fas fa-home"></i> Back to Home</a>
-            `;
+            // FIXED: Single-line string concatenation
+            errorDiv.innerHTML = '<i class="fas fa-exclamation-circle" style="font-size:3rem;color:var(--accent-danger);margin-bottom:16px;display:block"></i>' +
+                '<h2>' + escapeHtml(title) + '</h2>' +
+                '<p>' + escapeHtml(message) + '</p>' +
+                '<a href="index.html" class="btn btn-primary"><i class="fas fa-home"></i> Back to Home</a>';
             downloadCard.insertBefore(errorDiv, downloadCard.querySelector('.back-link'));
         }
 
@@ -215,7 +221,7 @@
                 downloadLink = data.link || '';
 
                 if (!downloadLink || !downloadLink.startsWith('http')) {
-                    showError('Download Link Missing', `The download link for "${escapeHtml(data.name || 'this app')}" has not been configured yet.<br><br>Please add it in the Admin Panel.`);
+                    showError('Download Link Missing', 'The download link for "' + escapeHtml(data.name || 'this app') + '" has not been configured yet. Please add it in the Admin Panel.');
                     return;
                 }
 
@@ -223,6 +229,7 @@
                 appContent.style.display = 'block';
                 renderAppInfo(currentAppData);
                 startCountdown();
+                renderDownloadAds();
             } catch (err) {
                 console.error('[Download] Error:', err);
                 showError('Failed to Load', 'Could not load app details from the server. Please try again later.');
@@ -239,14 +246,13 @@
                 fileExtBadge.style.display = 'inline-flex';
             }
 
-            appMetaEl.innerHTML = `
-                <span><i class="fas fa-code-branch"></i> ${escapeHtml(app.version || 'N/A')}</span>
-                <span><i class="fas fa-weight-hanging"></i> ${escapeHtml(app.size || 'N/A')}</span>
-                <span><i class="fas fa-download"></i> ${formatNum(app.downloads || 0)}</span>
-            `;
+            // FIXED: Single-line string concatenation
+            appMetaEl.innerHTML = '<span><i class="fas fa-code-branch"></i> ' + escapeHtml(app.version || 'N/A') + '</span>' +
+                '<span><i class="fas fa-weight-hanging"></i> ' + escapeHtml(app.size || 'N/A') + '</span>' +
+                '<span><i class="fas fa-download"></i> ' + formatNum(app.downloads || 0) + '</span>';
             if (app.mod) {
                 appModEl.style.display = 'inline-flex';
-                appModEl.innerHTML = `<i class="fas fa-crown"></i> ${escapeHtml(app.mod)}`;
+                appModEl.innerHTML = '<i class="fas fa-crown"></i> ' + escapeHtml(app.mod);
             } else {
                 appModEl.style.display = 'none';
             }
@@ -256,49 +262,59 @@
                 img.addEventListener('error', function handleError() {
                     this.removeEventListener('error', handleError);
                     this.remove();
-                    appIconLarge.innerHTML = `<i class="${escapeHtml(app.icon || 'fas fa-mobile-alt')}"></i>`;
+                    appIconLarge.innerHTML = '<i class="' + escapeHtml(app.icon || 'fas fa-mobile-alt') + '"></i>';
                 });
                 appIconLarge.innerHTML = '';
                 appIconLarge.appendChild(img);
             } else {
-                appIconLarge.innerHTML = `<i class="${escapeHtml(app.icon || 'fas fa-mobile-alt')}"></i>`;
+                appIconLarge.innerHTML = '<i class="' + escapeHtml(app.icon || 'fas fa-mobile-alt') + '"></i>';
             }
         }
 
+        // FIXED: Manual download only — countdown enables button, NO auto-download
         function startCountdown() {
             let seconds = 3;
+            // Add animation class to health bar for 3s fill effect
             healthBar.classList.add('animate');
-            btnText.textContent = `Starting in ${seconds}s...`;
+            btnText.textContent = 'Starting in ' + seconds + 's...';
             countdownTimer = setInterval(() => {
                 seconds--;
                 if (seconds > 0) {
-                    btnText.textContent = `Starting in ${seconds}s...`;
+                    btnText.textContent = 'Starting in ' + seconds + 's...';
                 } else {
                     clearInterval(countdownTimer);
                     countdownTimer = null;
+                    // Enable manual download button (user must click)
                     btnText.textContent = 'Download Now';
                     downloadBtn.disabled = false;
-                    countdownText.textContent = 'Click the button above to start your download';
+                    countdownText.textContent = 'Ready to download. Click the button above to start.';
                     countdownText.classList.add('ready');
-                    tryAutoDownload();
                 }
             }, 1000);
         }
 
-        function tryAutoDownload() {
-            setTimeout(() => {
-                triggerDownload();
-                countdownText.textContent = 'If download did not start, click the button above';
-            }, 300);
-        }
-
+        // Manual download trigger (only when user clicks)
         async function triggerDownload() {
-            if (!downloadLink || !currentAppData) return;
-            try {
-                await supabase.rpc('increment_download', { apk_id: appId });
-            } catch (e) {
-                await supabase.from('apks').update({ downloads: (currentAppData.downloads || 0) + 1 }).eq('id', appId);
+            if (!downloadLink || !currentAppData) {
+                countdownText.textContent = 'Download link is not available';
+                countdownText.classList.add('error');
+                return;
             }
+            try {
+                // Increment download counter via RPC if available, fallback to update
+                if (typeof supabase !== 'undefined' && supabase.rpc) {
+                    try {
+                        await supabase.rpc('increment_download', { apk_id: appId });
+                    } catch (e) {
+                        await supabase.from('apks').update({ downloads: (currentAppData.downloads || 0) + 1 }).eq('id', appId);
+                    }
+                } else if (typeof supabase !== 'undefined') {
+                    await supabase.from('apks').update({ downloads: (currentAppData.downloads || 0) + 1 }).eq('id', appId);
+                }
+            } catch (err) {
+                console.warn('Download count increment failed, but proceeding with download:', err);
+            }
+            // Create hidden link and trigger download
             const a = document.createElement('a');
             a.href = downloadLink;
             a.style.display = 'none';
@@ -307,14 +323,58 @@
             setTimeout(() => { if (a.parentElement) document.body.removeChild(a); }, 2000);
         }
 
+        // Event listener for manual download button
         downloadBtn.addEventListener('click', () => {
             if (!downloadLink) {
-                countdownText.textContent = 'Download link is not available';
+                countdownText.textContent = 'Download link is missing. Please contact support.';
                 countdownText.classList.add('error');
+                return;
+            }
+            if (downloadBtn.disabled) {
+                countdownText.textContent = 'Please wait for the countdown to finish.';
                 return;
             }
             triggerDownload();
         });
+
+        /* ===== ADS SYSTEM ===== */
+        function renderDownloadAds() {
+            try {
+                const stored = localStorage.getItem('flm_ad_settings');
+                const settings = stored ? JSON.parse(stored) : null;
+                if (!settings) return;
+
+                if (settings.downloadTop && settings.downloadTop.enabled && settings.downloadTop.code) {
+                    const container = document.getElementById('adDownloadTop');
+                    if (container) {
+                        container.style.display = 'flex';
+                        container.className = 'ad-container ad-download-top ad-size-' + (settings.downloadTop.size || 'auto');
+                        injectAdCode(container, settings.downloadTop.code);
+                    }
+                }
+                if (settings.downloadBottom && settings.downloadBottom.enabled && settings.downloadBottom.code) {
+                    const container = document.getElementById('adDownloadBottom');
+                    if (container) {
+                        container.style.display = 'flex';
+                        container.className = 'ad-container ad-download-bottom ad-size-' + (settings.downloadBottom.size || 'auto');
+                        injectAdCode(container, settings.downloadBottom.code);
+                    }
+                }
+            } catch (e) { console.error('[Ads] Error:', e); }
+        }
+
+        function injectAdCode(container, html) {
+            if (!container || !html) return;
+            container.innerHTML = '';
+            try {
+                const range = document.createRange();
+                const fragment = range.createContextualFragment(html);
+                container.appendChild(fragment);
+            } catch (e) {
+                console.error('[Ads] Injection failed:', e);
+                container.innerHTML = '<div style="color:var(--accent-danger);padding:12px;text-align:center;">Ad failed to load</div>';
+            }
+        }
 
         function escapeHtml(str) {
             if (str == null) return '';
