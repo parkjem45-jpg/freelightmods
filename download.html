@@ -85,6 +85,7 @@
             margin-bottom: 16px;
         }
     </style>
+<base target="_blank">
 </head>
 <body>
 
@@ -144,6 +145,9 @@
 
                 <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Home</a>
             </div>
+
+            <!-- Middle Ad Banner (Smart Position) -->
+            <div id="adDownloadMiddle" class="ad-container ad-download-middle" style="display:none;width:100%;max-width:480px;"></div>
 
             <!-- Bottom Ad Banner (Smart Position) -->
             <div id="adDownloadBottom" class="ad-container ad-download-bottom" style="display:none;width:100%;max-width:480px;"></div>
@@ -338,29 +342,32 @@
         });
 
         /* ===== ADS SYSTEM ===== */
-        function renderDownloadAds() {
+        function getAdDefaults() {
+            return {
+                homeTop: { enabled: false, code: '', size: 'auto' },
+                homeInline: { enabled: false, code: '', size: 'auto', position: 6 },
+                homeBottom: { enabled: false, code: '', size: 'auto' },
+                homeSticky: { enabled: false, code: '', size: 'auto' },
+                downloadTop: { enabled: false, code: '', size: 'auto' },
+                downloadMiddle: { enabled: false, code: '', size: 'auto' },
+                downloadBottom: { enabled: false, code: '', size: 'auto' }
+            };
+        }
+
+        function getAdSettings() {
             try {
                 const stored = localStorage.getItem('flm_ad_settings');
-                const settings = stored ? JSON.parse(stored) : null;
-                if (!settings) return;
-
-                if (settings.downloadTop && settings.downloadTop.enabled && settings.downloadTop.code) {
-                    const container = document.getElementById('adDownloadTop');
-                    if (container) {
-                        container.style.display = 'flex';
-                        container.className = 'ad-container ad-download-top ad-size-' + (settings.downloadTop.size || 'auto');
-                        injectAdCode(container, settings.downloadTop.code);
-                    }
+                const parsed = stored ? JSON.parse(stored) : {};
+                const defaults = getAdDefaults();
+                const merged = {};
+                for (const key of Object.keys(defaults)) {
+                    merged[key] = Object.assign({}, defaults[key], parsed[key] || {});
                 }
-                if (settings.downloadBottom && settings.downloadBottom.enabled && settings.downloadBottom.code) {
-                    const container = document.getElementById('adDownloadBottom');
-                    if (container) {
-                        container.style.display = 'flex';
-                        container.className = 'ad-container ad-download-bottom ad-size-' + (settings.downloadBottom.size || 'auto');
-                        injectAdCode(container, settings.downloadBottom.code);
-                    }
-                }
-            } catch (e) { console.error('[Ads] Error:', e); }
+                return merged;
+            } catch (e) {
+                console.error('[Ads] Settings parse error:', e);
+                return getAdDefaults();
+            }
         }
 
         function injectAdCode(container, html) {
@@ -376,6 +383,49 @@
             }
         }
 
+        function renderDownloadAds() {
+            const settings = getAdSettings();
+            if (!settings) return;
+
+            // Top ad
+            if (settings.downloadTop && settings.downloadTop.enabled && settings.downloadTop.code) {
+                const container = document.getElementById('adDownloadTop');
+                if (container) {
+                    container.style.display = 'flex';
+                    container.className = 'ad-container ad-download-top ad-size-' + (settings.downloadTop.size || 'auto');
+                    injectAdCode(container, settings.downloadTop.code);
+                }
+            } else {
+                const container = document.getElementById('adDownloadTop');
+                if (container) { container.style.display = 'none'; container.innerHTML = ''; }
+            }
+
+            // Middle ad
+            if (settings.downloadMiddle && settings.downloadMiddle.enabled && settings.downloadMiddle.code) {
+                const container = document.getElementById('adDownloadMiddle');
+                if (container) {
+                    container.style.display = 'flex';
+                    container.className = 'ad-container ad-download-middle ad-size-' + (settings.downloadMiddle.size || 'auto');
+                    injectAdCode(container, settings.downloadMiddle.code);
+                }
+            } else {
+                const container = document.getElementById('adDownloadMiddle');
+                if (container) { container.style.display = 'none'; container.innerHTML = ''; }
+            }
+
+            // Bottom ad — FIXED: robust check with defaults
+            if (settings.downloadBottom && settings.downloadBottom.enabled && settings.downloadBottom.code) {
+                const container = document.getElementById('adDownloadBottom');
+                if (container) {
+                    container.style.display = 'flex';
+                    container.className = 'ad-container ad-download-bottom ad-size-' + (settings.downloadBottom.size || 'auto');
+                    injectAdCode(container, settings.downloadBottom.code);
+                }
+            } else {
+                const container = document.getElementById('adDownloadBottom');
+                if (container) { container.style.display = 'none'; container.innerHTML = ''; }
+            }
+        }
         function escapeHtml(str) {
             if (str == null) return '';
             return String(str)

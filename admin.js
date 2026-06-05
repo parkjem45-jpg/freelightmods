@@ -634,25 +634,36 @@ async function deleteApp(id) {
 }
 
 /* ==========================================
-   ADS MANAGER (Script Support)
+   ADS MANAGER (Script Support) — Robust
    ========================================== */
 function initAdsManager() {
     loadAdSettings();
 }
 
-function loadAdSettings() {
-    const defaults = {
+function getAdDefaults() {
+    return {
         homeTop: { enabled: false, code: '', size: 'auto' },
         homeInline: { enabled: false, code: '', size: 'auto', position: 6 },
+        homeBottom: { enabled: false, code: '', size: 'auto' },
+        homeSticky: { enabled: false, code: '', size: 'auto' },
         downloadTop: { enabled: false, code: '', size: 'auto' },
+        downloadMiddle: { enabled: false, code: '', size: 'auto' },
         downloadBottom: { enabled: false, code: '', size: 'auto' }
     };
+}
+
+function loadAdSettings() {
+    const defaults = getAdDefaults();
     const stored = localStorage.getItem('flm_ad_settings');
-    let settings = defaults;
+    let parsed = {};
     if (stored) {
-        try { settings = JSON.parse(stored); } catch (e) { console.error('[Ads] Parse error', e); }
+        try { parsed = JSON.parse(stored); } catch (e) { console.error('[Ads] Parse error', e); }
     }
-    settings = Object.assign({}, defaults, settings);
+    // Deep merge per slot
+    const settings = {};
+    for (const key of Object.keys(defaults)) {
+        settings[key] = Object.assign({}, defaults[key], parsed[key] || {});
+    }
 
     const setVal = (id, val) => { const el = getEl(id); if (el) el.value = val !== undefined ? val : ''; };
     const setChecked = (id, val) => { const el = getEl(id); if (el) el.value = val ? 'true' : 'false'; };
@@ -666,9 +677,21 @@ function loadAdSettings() {
     setVal('adHomeInlinePosition', settings.homeInline.position || 6);
     setVal('adHomeInlineCode', settings.homeInline.code);
 
+    setChecked('adHomeBottomEnabled', settings.homeBottom.enabled);
+    setVal('adHomeBottomSize', settings.homeBottom.size);
+    setVal('adHomeBottomCode', settings.homeBottom.code);
+
+    setChecked('adHomeStickyEnabled', settings.homeSticky.enabled);
+    setVal('adHomeStickySize', settings.homeSticky.size);
+    setVal('adHomeStickyCode', settings.homeSticky.code);
+
     setChecked('adDownloadTopEnabled', settings.downloadTop.enabled);
     setVal('adDownloadTopSize', settings.downloadTop.size);
     setVal('adDownloadTopCode', settings.downloadTop.code);
+
+    setChecked('adDownloadMiddleEnabled', settings.downloadMiddle.enabled);
+    setVal('adDownloadMiddleSize', settings.downloadMiddle.size);
+    setVal('adDownloadMiddleCode', settings.downloadMiddle.code);
 
     setChecked('adDownloadBottomEnabled', settings.downloadBottom.enabled);
     setVal('adDownloadBottomSize', settings.downloadBottom.size);
@@ -691,10 +714,25 @@ function saveAdSettings() {
             size: getVal('adHomeInlineSize'),
             position: parseInt(getVal('adHomeInlinePosition')) || 6
         },
+        homeBottom: {
+            enabled: getBool('adHomeBottomEnabled'),
+            code: getVal('adHomeBottomCode').trim(),
+            size: getVal('adHomeBottomSize')
+        },
+        homeSticky: {
+            enabled: getBool('adHomeStickyEnabled'),
+            code: getVal('adHomeStickyCode').trim(),
+            size: getVal('adHomeStickySize')
+        },
         downloadTop: {
             enabled: getBool('adDownloadTopEnabled'),
             code: getVal('adDownloadTopCode').trim(),
             size: getVal('adDownloadTopSize')
+        },
+        downloadMiddle: {
+            enabled: getBool('adDownloadMiddleEnabled'),
+            code: getVal('adDownloadMiddleCode').trim(),
+            size: getVal('adDownloadMiddleSize')
         },
         downloadBottom: {
             enabled: getBool('adDownloadBottomEnabled'),
@@ -706,7 +744,6 @@ function saveAdSettings() {
     localStorage.setItem('flm_ad_settings', JSON.stringify(settings));
     showToast('Ad settings saved successfully!', 'success');
 }
-
 /* ==========================================
    STATS & UTILITIES
    ========================================== */

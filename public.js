@@ -138,13 +138,34 @@ function loadSampleData() {
 }
 
 /* ==========================================
-   ADS SYSTEM — Script Injection
+   ADS SYSTEM — Script Injection (Robust)
    ========================================== */
+function getAdDefaults() {
+    return {
+        homeTop: { enabled: false, code: '', size: 'auto' },
+        homeInline: { enabled: false, code: '', size: 'auto', position: 6 },
+        homeBottom: { enabled: false, code: '', size: 'auto' },
+        homeSticky: { enabled: false, code: '', size: 'auto' },
+        downloadTop: { enabled: false, code: '', size: 'auto' },
+        downloadMiddle: { enabled: false, code: '', size: 'auto' },
+        downloadBottom: { enabled: false, code: '', size: 'auto' }
+    };
+}
+
 function getAdSettings() {
     try {
         const stored = localStorage.getItem('flm_ad_settings');
-        return stored ? JSON.parse(stored) : null;
-    } catch (e) { return null; }
+        const parsed = stored ? JSON.parse(stored) : {};
+        const defaults = getAdDefaults();
+        const merged = {};
+        for (const key of Object.keys(defaults)) {
+            merged[key] = Object.assign({}, defaults[key], parsed[key] || {});
+        }
+        return merged;
+    } catch (e) {
+        console.error('[Ads] Settings parse error:', e);
+        return getAdDefaults();
+    }
 }
 
 function injectAdCode(container, html) {
@@ -162,7 +183,6 @@ function injectAdCode(container, html) {
 
 function renderHomeAds() {
     const settings = getAdSettings();
-    if (!settings) return;
 
     // Top ad (above hero)
     if (settings.homeTop && settings.homeTop.enabled && settings.homeTop.code) {
@@ -179,11 +199,44 @@ function renderHomeAds() {
 
     // Inline ad (inside grid) — handled by insertInlineAds after renderGrid
     insertInlineAds();
+
+    // Bottom ad (above footer)
+    if (settings.homeBottom && settings.homeBottom.enabled && settings.homeBottom.code) {
+        const container = document.getElementById('adHomeBottom');
+        if (container) {
+            container.style.display = 'flex';
+            container.className = 'ad-container ad-home-bottom ad-size-' + (settings.homeBottom.size || 'auto');
+            injectAdCode(container, settings.homeBottom.code);
+        }
+    } else {
+        const container = document.getElementById('adHomeBottom');
+        if (container) { container.style.display = 'none'; container.innerHTML = ''; }
+    }
+
+    // Sticky footer ad
+    if (settings.homeSticky && settings.homeSticky.enabled && settings.homeSticky.code) {
+        const container = document.getElementById('adHomeSticky');
+        const inner = document.getElementById('adHomeStickyInner');
+        if (container && inner) {
+            container.style.display = 'flex';
+            container.classList.add('active');
+            container.className = 'ad-container ad-home-sticky active ad-size-' + (settings.homeSticky.size || 'auto');
+            injectAdCode(inner, settings.homeSticky.code);
+        }
+    } else {
+        const container = document.getElementById('adHomeSticky');
+        if (container) { container.style.display = 'none'; container.classList.remove('active'); container.innerHTML = '<div id="adHomeStickyInner" class="ad-inner"></div><button class="ad-sticky-close" id="adHomeStickyClose" aria-label="Close ad"><i class="fas fa-times"></i></button>'; }
+    }
 }
 
 function insertInlineAds() {
     const settings = getAdSettings();
-    if (!settings || !settings.homeInline || !settings.homeInline.enabled || !settings.homeInline.code) return;
+    if (!settings || !settings.homeInline || !settings.homeInline.enabled || !settings.homeInline.code) {
+        // Remove existing inline ads if disabled
+        const grid = document.getElementById('appGrid');
+        if (grid) grid.querySelectorAll('.ad-inline-slot').forEach(el => el.remove());
+        return;
+    }
 
     const grid = document.getElementById('appGrid');
     if (!grid) return;
@@ -209,6 +262,18 @@ function insertInlineAds() {
     }
 }
 
+function initStickyAdClose() {
+    const closeBtn = document.getElementById('adHomeStickyClose');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            const container = document.getElementById('adHomeSticky');
+            if (container) {
+                container.style.display = 'none';
+                container.classList.remove('active');
+            }
+        });
+    }
+}
 /* ==========================================
    SLIDERS (Swiper.js)
    ========================================== */
@@ -617,4 +682,5 @@ document.addEventListener('DOMContentLoaded', () => {
     initLoadMore();
     initAI();
     loadAppsData();
+    initStickyAdClose();
 });

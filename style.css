@@ -610,3 +610,52 @@ a { text-decoration: none; color: inherit; transition: var(--transition); }
     .ad-home-top { padding: 8px; }
     .ad-inline-slot { padding: 4px 0; }
 }
+
+/* ===== New Ad Container Styles ===== */
+.ad-home-bottom {
+    padding: 16px;
+    background: linear-gradient(180deg, transparent 0%, rgba(0,242,254,0.03) 100%);
+    border-top: 1px solid var(--border-color);
+    margin-top: 20px;
+}
+
+.ad-home-sticky {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 999;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-color);
+    padding: 8px 16px;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+}
+
+.ad-home-sticky.active { display: flex; }
+
+.ad-sticky-close {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 4px 8px;
+    transition: var(--transition);
+}
+.ad-sticky-close:hover { color: var(--accent-danger); }
+
+.ad-download-middle {
+    padding: 16px;
+    margin: 0 auto;
+}
+
+/* Responsive new ads */
+@media (max-width: 768px) {
+    .ad-home-sticky { padding: 6px 8px; }
+    .ad-home-bottom { padding: 12px; }
+    .ad-download-middle { padding: 12px; }
+}

@@ -10,6 +10,7 @@ admin_html = r'''<!DOCTYPE html>
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="admin.css">
+<base target="_blank">
 </head>
 <body>
 
@@ -535,6 +536,65 @@ admin_html = r'''<!DOCTYPE html>
                         </div>
                     </div>
 
+                    <!-- Home Bottom Ad -->
+                    <div class="card">
+                        <div class="card-header"><h2><i class="fas fa-arrow-up" style="color:var(--accent-success)"></i> Home Page — Bottom Banner</h2></div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Enable Ad</label>
+                                <select id="adHomeBottomEnabled">
+                                    <option value="false">Disabled</option>
+                                    <option value="true">Enabled</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Container Size</label>
+                                <select id="adHomeBottomSize">
+                                    <option value="auto">Auto (Responsive)</option>
+                                    <option value="small">Small (320×50)</option>
+                                    <option value="medium">Medium (728×90)</option>
+                                    <option value="large">Large (970×250)</option>
+                                    <option value="full">Full Width</option>
+                                    <option value="square">Square (300×300)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Ad Script HTML *</label>
+                            <textarea id="adHomeBottomCode" rows="6" placeholder="Paste your full ad script here..." style="font-family:monospace;font-size:0.85rem;resize:vertical;"></textarea>
+                            <small class="form-hint">Paste the complete &lt;script&gt; tag from your ad network dashboard.</small>
+                        </div>
+                    </div>
+
+                    <!-- Home Sticky Footer Ad -->
+                    <div class="card">
+                        <div class="card-header"><h2><i class="fas fa-thumbtack" style="color:var(--accent-pink)"></i> Home Page — Sticky Footer</h2></div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Enable Ad</label>
+                                <select id="adHomeStickyEnabled">
+                                    <option value="false">Disabled</option>
+                                    <option value="true">Enabled</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Container Size</label>
+                                <select id="adHomeStickySize">
+                                    <option value="auto">Auto (Responsive)</option>
+                                    <option value="small">Small (320×50)</option>
+                                    <option value="medium">Medium (728×90)</option>
+                                    <option value="large">Large (970×90)</option>
+                                    <option value="full">Full Width</option>
+                                    <option value="square">Square (300×300)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Ad Script HTML *</label>
+                            <textarea id="adHomeStickyCode" rows="6" placeholder="Paste your full ad script here..." style="font-family:monospace;font-size:0.85rem;resize:vertical;"></textarea>
+                            <small class="form-hint">Sticky footer ad stays fixed at the bottom of the homepage. Users can close it.</small>
+                        </div>
+                    </div>
                     <!-- Download Top Ad -->
                     <div class="card">
                         <div class="card-header"><h2><i class="fas fa-download" style="color:var(--accent-orange)"></i> Download Page — Top Banner</h2></div>
@@ -562,6 +622,36 @@ admin_html = r'''<!DOCTYPE html>
                             <label>Ad Script HTML *</label>
                             <textarea id="adDownloadTopCode" rows="6" placeholder="Paste your full ad script here..." style="font-family:monospace;font-size:0.85rem;resize:vertical;"></textarea>
                             <small class="form-hint">Paste the complete &lt;script&gt; tag from your ad network dashboard.</small>
+                        </div>
+                    </div>
+
+                    <!-- Download Middle Ad -->
+                    <div class="card">
+                        <div class="card-header"><h2><i class="fas fa-grip-lines" style="color:var(--accent-warning)"></i> Download Page — Middle Banner</h2></div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Enable Ad</label>
+                                <select id="adDownloadMiddleEnabled">
+                                    <option value="false">Disabled</option>
+                                    <option value="true">Enabled</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Container Size</label>
+                                <select id="adDownloadMiddleSize">
+                                    <option value="auto">Auto (Responsive)</option>
+                                    <option value="small">Small</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="large">Large</option>
+                                    <option value="full">Full Width</option>
+                                    <option value="square">Square</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Ad Script HTML *</label>
+                            <textarea id="adDownloadMiddleCode" rows="6" placeholder="Paste your full ad script here..." style="font-family:monospace;font-size:0.85rem;resize:vertical;"></textarea>
+                            <small class="form-hint">Appears between the download card and the bottom banner on the download page.</small>
                         </div>
                     </div>
 
