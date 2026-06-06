@@ -1,6 +1,4 @@
-
-# admin.html - Ads Manager tab with script textareas
-admin_html = r'''<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -10,6 +8,7 @@ admin_html = r'''<!DOCTYPE html>
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="admin.css">
+<base target="_blank">
 <base target="_blank">
 </head>
 <body>
@@ -846,9 +845,4 @@ admin_html = r'''<!DOCTYPE html>
     <script src="supabase.js"></script>
     <script src="admin.js"></script>
 </body>
-</html>'''
-
-with open('/mnt/agents/output/admin.html', 'w', encoding='utf-8') as f:
-    f.write(admin_html)
-
-print("admin.html written")
+</html>

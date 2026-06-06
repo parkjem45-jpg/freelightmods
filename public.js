@@ -1,5 +1,5 @@
-// public.js — Public Site Logic + Swiper Sliders + AI Images + AD SCRIPT INJECTION
-// =======================================================================================
+// public.js — Public Site Logic + Swiper Sliders + AI Images + AD SCRIPT INJECTION (Supabase Sync)
+// =================================================================================================
 
 const MOD_LINK_OVERRIDES = {};
 let appsData = [];
@@ -10,136 +10,34 @@ let currentFilter = 'all';
 let searchQuery = '';
 let swiperInstances = {};
 
-/* ==========================================
-   THEME TOGGLE
-   ========================================== */
-function initTheme() {
-    const toggle = document.getElementById('themeToggle');
-    if (!toggle) return;
-    const html = document.documentElement;
-    const saved = localStorage.getItem('theme') || 'dark';
-    html.setAttribute('data-theme', saved);
-    updateThemeIcon(saved);
-    toggle.addEventListener('click', () => {
-        const isDark = html.getAttribute('data-theme') === 'dark';
-        const newTheme = isDark ? 'light' : 'dark';
-        html.setAttribute('data-theme', newTheme);
-        localStorage.setItem('theme', newTheme);
-        updateThemeIcon(newTheme);
-    });
-}
-
-function updateThemeIcon(currentTheme) {
-    const toggle = document.getElementById('themeToggle');
-    if (!toggle) return;
-    toggle.innerHTML = currentTheme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-}
+// Global ad settings cache (populated from Supabase)
+let _flmAdSettings = null;
+const AD_SETTINGS_PUBLIC_URL = 'https://egexyoqnzhaygvcbsdyi.supabase.co/storage/v1/object/public/termux-bucket/ad_settings.json';
 
 /* ==========================================
-   MOBILE MENU
+   ADS SYSTEM — Supabase Storage Sync
    ========================================== */
-function initMobileMenu() {
-    const mobileToggle = document.getElementById('mobileToggle');
-    const closeBtn = document.getElementById('closeMobileMenu');
-    const overlay = document.getElementById('mobileMenuOverlay');
-    const body = document.body;
-    function open() { body.classList.add('mobile-menu-open'); }
-    function close() { body.classList.remove('mobile-menu-open'); }
-    if (mobileToggle) mobileToggle.addEventListener('click', open);
-    if (closeBtn) closeBtn.addEventListener('click', close);
-    if (overlay) overlay.addEventListener('click', close);
-    document.querySelectorAll('.mobile-nav-links a').forEach(link => link.addEventListener('click', close));
-}
-
-/* ==========================================
-   AUTH & ADMIN LINK
-   ========================================== */
-function initAuth() {
-    if (typeof supabase === 'undefined') {
-        console.warn('[Public] Supabase not loaded yet');
-        return;
-    }
-    supabase.auth.onAuthStateChange(async (event, session) => {
-        const user = session?.user ?? null;
-        currentUser = user;
-        let isAdmin = false;
-        if (user) {
-            const { data } = await supabase.from('admins').select('id').eq('id', user.id).maybeSingle();
-            isAdmin = !!data || user.email === 'jack1122@freelightmods.com';
+async function syncAdSettingsFromSupabase() {
+    try {
+        const url = AD_SETTINGS_PUBLIC_URL + '?t=' + Date.now();
+        const response = await fetch(url, { cache: 'no-store' });
+        if (!response.ok) {
+            if (response.status === 404) {
+                console.log('[Ads] No remote ad settings found yet');
+            }
+            return;
         }
-        const adminLink = document.getElementById('adminLink');
-        const mobileAdminLink = document.getElementById('mobileAdminLink');
-        if (adminLink) adminLink.style.display = isAdmin ? 'inline-flex' : 'none';
-        if (mobileAdminLink) mobileAdminLink.style.display = isAdmin ? 'flex' : 'none';
-    });
-}
-
-/* ==========================================
-   DATA LOADING
-   ========================================== */
-function loadAppsData() {
-    if (typeof supabase === 'undefined') {
-        console.warn('[Public] Supabase not loaded');
-        loadSampleData();
-        return;
+        const data = await response.json();
+        _flmAdSettings = data;
+        // Cache in localStorage for offline fallback
+        localStorage.setItem('flm_ad_settings', JSON.stringify(data));
+        console.log('[Ads] Settings synced from Supabase');
+    } catch (e) {
+        console.warn('[Ads] Failed to sync from Supabase:', e);
+        // Will fall back to localStorage in getAdSettings()
     }
-    fetchAppsPublic();
-    supabase.channel('public:apks')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'apks' }, () => {
-            fetchAppsPublic();
-        })
-        .subscribe();
 }
 
-async function fetchAppsPublic() {
-    const { data, error } = await supabase
-        .from('apks')
-        .select('*')
-        .order('date_added', { ascending: false });
-    if (error) {
-        console.error('[Public] Fetch error:', error);
-        loadSampleData();
-        return;
-    }
-    appsData = (data || []).map(row => ({
-        id: row.id,
-        name: row.name,
-        version: row.version,
-        size: row.size,
-        icon: row.icon,
-        image: row.image,
-        mod: row.mod,
-        link: row.link || '',
-        category: row.category || 'app',
-        downloads: row.downloads || 0,
-        fileExtension: row.file_extension || 'apk',
-        sliderSection: row.slider_section,
-        aspectRatio: row.aspect_ratio || '16:9',
-        borderRadius: row.border_radius || '16px',
-        borderStyle: row.border_style || 'none'
-    }));
-    displayedCount = ITEMS_PER_LOAD;
-    renderGrid();
-    loadSliders();
-    renderHomeAds();
-}
-
-function loadSampleData() {
-    appsData = [
-        { id: 'spotify-premium', name: 'Spotify Premium', icon: 'fab fa-spotify', version: 'v8.9.18', size: '82 MB', mod: 'Unlocked', downloads: 15420, link: '#', category: 'app', image: '', fileExtension: 'apk' },
-        { id: 'youtube-premium', name: 'YouTube Premium', icon: 'fab fa-youtube', version: 'v18.45.41', size: '134 MB', mod: 'No Ads', downloads: 28750, link: '#', category: 'app', image: '', fileExtension: 'apk' },
-        { id: 'minecraft-mod', name: 'Minecraft Mod', icon: 'fas fa-cube', version: 'v1.20.0', size: '210 MB', mod: 'Unlimited Items', downloads: 8900, link: '#', category: 'game', image: '', fileExtension: 'apk' }
-    ];
-    appsData.forEach(app => { if (MOD_LINK_OVERRIDES[app.id]) app.link = MOD_LINK_OVERRIDES[app.id]; });
-    displayedCount = ITEMS_PER_LOAD;
-    renderGrid();
-    loadSliders();
-    renderHomeAds();
-}
-
-/* ==========================================
-   ADS SYSTEM — Script Injection (Robust)
-   ========================================== */
 function getAdDefaults() {
     return {
         homeTop: { enabled: false, code: '', size: 'auto' },
@@ -153,6 +51,9 @@ function getAdDefaults() {
 }
 
 function getAdSettings() {
+    // Use synced settings from Supabase if available
+    if (_flmAdSettings) return _flmAdSettings;
+    // Fallback to localStorage
     try {
         const stored = localStorage.getItem('flm_ad_settings');
         const parsed = stored ? JSON.parse(stored) : {};
@@ -274,6 +175,136 @@ function initStickyAdClose() {
         });
     }
 }
+
+/* ==========================================
+   THEME TOGGLE
+   ========================================== */
+function initTheme() {
+    const toggle = document.getElementById('themeToggle');
+    if (!toggle) return;
+    const html = document.documentElement;
+    const saved = localStorage.getItem('theme') || 'dark';
+    html.setAttribute('data-theme', saved);
+    updateThemeIcon(saved);
+    toggle.addEventListener('click', () => {
+        const isDark = html.getAttribute('data-theme') === 'dark';
+        const newTheme = isDark ? 'light' : 'dark';
+        html.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        updateThemeIcon(newTheme);
+    });
+}
+
+function updateThemeIcon(currentTheme) {
+    const toggle = document.getElementById('themeToggle');
+    if (!toggle) return;
+    toggle.innerHTML = currentTheme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+}
+
+/* ==========================================
+   MOBILE MENU
+   ========================================== */
+function initMobileMenu() {
+    const mobileToggle = document.getElementById('mobileToggle');
+    const closeBtn = document.getElementById('closeMobileMenu');
+    const overlay = document.getElementById('mobileMenuOverlay');
+    const body = document.body;
+    function open() { body.classList.add('mobile-menu-open'); }
+    function close() { body.classList.remove('mobile-menu-open'); }
+    if (mobileToggle) mobileToggle.addEventListener('click', open);
+    if (closeBtn) closeBtn.addEventListener('click', close);
+    if (overlay) overlay.addEventListener('click', close);
+    document.querySelectorAll('.mobile-nav-links a').forEach(link => link.addEventListener('click', close));
+}
+
+/* ==========================================
+   AUTH & ADMIN LINK
+   ========================================== */
+function initAuth() {
+    if (typeof supabase === 'undefined') {
+        console.warn('[Public] Supabase not loaded yet');
+        return;
+    }
+    supabase.auth.onAuthStateChange(async (event, session) => {
+        const user = session?.user ?? null;
+        currentUser = user;
+        let isAdmin = false;
+        if (user) {
+            const { data } = await supabase.from('admins').select('id').eq('id', user.id).maybeSingle();
+            isAdmin = !!data || user.email === 'jack1122@freelightmods.com';
+        }
+        const adminLink = document.getElementById('adminLink');
+        const mobileAdminLink = document.getElementById('mobileAdminLink');
+        if (adminLink) adminLink.style.display = isAdmin ? 'inline-flex' : 'none';
+        if (mobileAdminLink) mobileAdminLink.style.display = isAdmin ? 'flex' : 'none';
+    });
+}
+
+/* ==========================================
+   DATA LOADING
+   ========================================== */
+function loadAppsData() {
+    if (typeof supabase === 'undefined') {
+        console.warn('[Public] Supabase not loaded');
+        loadSampleData();
+        return;
+    }
+    fetchAppsPublic();
+    supabase.channel('public:apks')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'apks' }, () => {
+            fetchAppsPublic();
+        })
+        .subscribe();
+}
+
+async function fetchAppsPublic() {
+    const { data, error } = await supabase
+        .from('apks')
+        .select('*')
+        .order('date_added', { ascending: false });
+    if (error) {
+        console.error('[Public] Fetch error:', error);
+        loadSampleData();
+        return;
+    }
+    appsData = (data || []).map(row => ({
+        id: row.id,
+        name: row.name,
+        version: row.version,
+        size: row.size,
+        icon: row.icon,
+        image: row.image,
+        mod: row.mod,
+        link: row.link || '',
+        category: row.category || 'app',
+        downloads: row.downloads || 0,
+        fileExtension: row.file_extension || 'apk',
+        sliderSection: row.slider_section,
+        aspectRatio: row.aspect_ratio || '16:9',
+        borderRadius: row.border_radius || '16px',
+        borderStyle: row.border_style || 'none'
+    }));
+    displayedCount = ITEMS_PER_LOAD;
+    renderGrid();
+    loadSliders();
+    // Sync ads from Supabase before rendering them
+    await syncAdSettingsFromSupabase();
+    renderHomeAds();
+}
+
+function loadSampleData() {
+    appsData = [
+        { id: 'spotify-premium', name: 'Spotify Premium', icon: 'fab fa-spotify', version: 'v8.9.18', size: '82 MB', mod: 'Unlocked', downloads: 15420, link: '#', category: 'app', image: '', fileExtension: 'apk' },
+        { id: 'youtube-premium', name: 'YouTube Premium', icon: 'fab fa-youtube', version: 'v18.45.41', size: '134 MB', mod: 'No Ads', downloads: 28750, link: '#', category: 'app', image: '', fileExtension: 'apk' },
+        { id: 'minecraft-mod', name: 'Minecraft Mod', icon: 'fas fa-cube', version: 'v1.20.0', size: '210 MB', mod: 'Unlimited Items', downloads: 8900, link: '#', category: 'game', image: '', fileExtension: 'apk' }
+    ];
+    appsData.forEach(app => { if (MOD_LINK_OVERRIDES[app.id]) app.link = MOD_LINK_OVERRIDES[app.id]; });
+    displayedCount = ITEMS_PER_LOAD;
+    renderGrid();
+    loadSliders();
+    renderHomeAds();
+}
+
 /* ==========================================
    SLIDERS (Swiper.js)
    ========================================== */
@@ -338,8 +369,8 @@ function renderSliderGroup(section, items) {
             imageHtml = '<i class="fas fa-image img-fallback"></i>';
         }
 
-        // FIXED: Use single-line string concatenation to avoid JS syntax errors
-        slide.innerHTML = '<div class="slider-card" onclick="handleSliderDownload(\'' + escapeHtml(app.id) + '\')">' +
+        // FIXED: Removed onclick from slider-card. Only the Download button is clickable now.
+        slide.innerHTML = '<div class="slider-card" data-app-id="' + escapeHtml(app.id) + '">' +
             '<div class="slider-image-wrap" data-ratio="' + escapeHtml(ratio) + '" style="--img-ratio:' + (isAuto ? 'auto' : ratio) + ';--img-radius:' + radius + ';--img-border:' + border + ';' + (isAuto ? 'min-height:160px;' : '') + '">' +
             imageHtml +
             '</div>' +
@@ -351,10 +382,19 @@ function renderSliderGroup(section, items) {
             '<span><i class="fas fa-weight-hanging"></i> ' + escapeHtml(app.size || 'N/A') + '</span>' +
             '<span><i class="fas fa-file"></i> .' + escapeHtml(ext) + '</span>' +
             '</div>' +
-            '<button class="slider-btn"><i class="fas fa-download"></i> Download</button>' +
+            '<button class="slider-btn" data-app-id="' + escapeHtml(app.id) + '" type="button"><i class="fas fa-download"></i> Download</button>' +
             '</div>' +
             '</div>';
         wrapper.appendChild(slide);
+    });
+
+    // Attach click listeners to slider download buttons only (not the card body)
+    wrapper.querySelectorAll('.slider-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const appId = btn.getAttribute('data-app-id');
+            if (appId) handleSliderDownload(appId);
+        });
     });
 
     initSwiper(section, items);
@@ -445,7 +485,8 @@ function buildAppCard(app) {
     card.className = 'app-card';
     card.setAttribute('data-id', app.id);
     card.setAttribute('data-category', app.category || 'app');
-    card.style.cursor = 'pointer';
+    // FIXED: Card is no longer clickable — only the download button navigates
+    card.style.cursor = 'default';
 
     const iconDiv = document.createElement('div');
     iconDiv.className = 'app-icon';
@@ -479,8 +520,11 @@ function buildAppCard(app) {
     card.appendChild(infoDiv);
     card.appendChild(btn);
 
-    card.addEventListener('click', () => handleDownload(app));
-    btn.addEventListener('click', (e) => { e.stopPropagation(); handleDownload(app); });
+    // FIXED: Removed card body click listener. Only download button triggers navigation.
+    btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        handleDownload(app);
+    });
 
     return card;
 }

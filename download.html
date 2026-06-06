@@ -87,6 +87,7 @@
         }
     </style>
 <base target="_blank">
+<base target="_blank">
 </head>
 <body>
 
@@ -241,6 +242,7 @@
                 appContent.style.display = 'block';
                 renderAppInfo(currentAppData);
                 startCountdown();
+                await syncAdSettingsFromSupabase();
                 renderDownloadAds();
             } catch (err) {
                 console.error('[Download] Error:', err);
@@ -359,7 +361,27 @@
             triggerDownload();
         });
 
-        /* ===== ADS SYSTEM ===== */
+        /* ===== ADS SYSTEM ===== (Supabase Sync) */
+        let _flmAdSettings = null;
+        const AD_SETTINGS_PUBLIC_URL = 'https://egexyoqnzhaygvcbsdyi.supabase.co/storage/v1/object/public/termux-bucket/ad_settings.json';
+
+        async function syncAdSettingsFromSupabase() {
+            try {
+                const url = AD_SETTINGS_PUBLIC_URL + '?t=' + Date.now();
+                const response = await fetch(url, { cache: 'no-store' });
+                if (!response.ok) {
+                    if (response.status === 404) console.log('[Ads] No remote ad settings yet');
+                    return;
+                }
+                const data = await response.json();
+                _flmAdSettings = data;
+                localStorage.setItem('flm_ad_settings', JSON.stringify(data));
+                console.log('[Ads] Settings synced from Supabase');
+            } catch (e) {
+                console.warn('[Ads] Failed to sync from Supabase:', e);
+            }
+        }
+
         function getAdDefaults() {
             return {
                 homeTop: { enabled: false, code: '', size: 'auto' },
@@ -373,6 +395,7 @@
         }
 
         function getAdSettings() {
+            if (_flmAdSettings) return _flmAdSettings;
             try {
                 const stored = localStorage.getItem('flm_ad_settings');
                 const parsed = stored ? JSON.parse(stored) : {};

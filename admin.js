@@ -1,4 +1,4 @@
-// admin.js — FULLY FIXED (Edit saves all fields, no recursion) + ADS MANAGER (Script Support)
+// admin.js — FULLY FIXED (Edit saves all fields, no recursion) + ADS MANAGER (Supabase Sync)
 // ==========================================================================================
 
 const MOD_URL_TEMPLATES = {};
@@ -15,6 +15,58 @@ function getEl(id) { return document.getElementById(id); }
 
 // Hardcoded admin emails (bypass RLS issues)
 const ADMIN_EMAILS = ['parkjem45@gmail.com'];
+
+/* ==========================================
+   SUPABASE AD SYNC HELPERS
+   ========================================== */
+const AD_SETTINGS_BUCKET = 'termux-bucket';
+const AD_SETTINGS_PATH = 'ad_settings.json';
+const AD_SETTINGS_PUBLIC_URL = 'https://egexyoqnzhaygvcbsdyi.supabase.co/storage/v1/object/public/' + AD_SETTINGS_BUCKET + '/' + AD_SETTINGS_PATH;
+
+async function uploadAdSettingsToSupabase(settings) {
+    try {
+        if (typeof supabase === 'undefined') {
+            console.warn('[Ads] Supabase not available for upload');
+            return false;
+        }
+        const json = JSON.stringify(settings);
+        const blob = new Blob([json], { type: 'application/json' });
+        const { error } = await supabase.storage
+            .from(AD_SETTINGS_BUCKET)
+            .upload(AD_SETTINGS_PATH, blob, {
+                contentType: 'application/json',
+                upsert: true
+            });
+        if (error) {
+            console.warn('[Ads] Supabase upload error:', error);
+            return false;
+        }
+        console.log('[Ads] Settings synced to Supabase successfully');
+        return true;
+    } catch (e) {
+        console.warn('[Ads] Failed to upload to Supabase:', e);
+        return false;
+    }
+}
+
+async function fetchAdSettingsFromSupabase() {
+    try {
+        const url = AD_SETTINGS_PUBLIC_URL + '?t=' + Date.now();
+        const response = await fetch(url, { cache: 'no-store' });
+        if (!response.ok) {
+            if (response.status === 404) {
+                console.log('[Ads] No settings found on Supabase yet');
+            }
+            return null;
+        }
+        const data = await response.json();
+        console.log('[Ads] Settings loaded from Supabase');
+        return data;
+    } catch (e) {
+        console.warn('[Ads] Failed to fetch from Supabase:', e);
+        return null;
+    }
+}
 
 /* ==========================================
    SESSION MANAGEMENT
@@ -385,7 +437,7 @@ function buildTableRow(app) {
     const versionCell = document.createElement('td'); versionCell.textContent = escapeHtml(app.version || 'N/A');
     const sizeCell = document.createElement('td'); sizeCell.textContent = escapeHtml(app.size || 'N/A');
     const extCell = document.createElement('td'); extCell.innerHTML = '<span style="font-family:monospace;font-size:0.8rem">.' + escapeHtml(app.fileExtension || 'apk') + '</span>';
-    const sliderCell = document.createElement('td'); sliderCell.textContent = app.sliderSection ? 'Slider ' + app.sliderSection : '—';
+    const sliderCell = document.createElement('td'); sliderCell.textContent = app.sliderSection ? 'Slider ' + app.sliderSection : '\u2014';
     const linkCell = document.createElement('td'); linkCell.innerHTML = app.link && app.link.startsWith('https://') ? '<span style="color:var(--accent-success)"><i class="fas fa-check-circle"></i> Set</span>' : '<span style="color:var(--accent-danger)"><i class="fas fa-times-circle"></i> Invalid</span>';
     const actionsCell = document.createElement('td');
     const actionsDiv = document.createElement('div');
@@ -634,7 +686,7 @@ async function deleteApp(id) {
 }
 
 /* ==========================================
-   ADS MANAGER (Script Support) — Robust
+   ADS MANAGER (Supabase Sync) — Cross-Device
    ========================================== */
 function initAdsManager() {
     loadAdSettings();
@@ -652,13 +704,29 @@ function getAdDefaults() {
     };
 }
 
-function loadAdSettings() {
-    const defaults = getAdDefaults();
-    const stored = localStorage.getItem('flm_ad_settings');
-    let parsed = {};
-    if (stored) {
-        try { parsed = JSON.parse(stored); } catch (e) { console.error('[Ads] Parse error', e); }
+async function loadAdSettings() {
+    // Try to fetch from Supabase first (for cross-device sync)
+    let remoteSettings = null;
+    try {
+        remoteSettings = await fetchAdSettingsFromSupabase();
+    } catch (e) {
+        console.warn('[Ads] Remote fetch failed, using localStorage fallback');
     }
+
+    const defaults = getAdDefaults();
+    let parsed = {};
+
+    if (remoteSettings && typeof remoteSettings === 'object') {
+        parsed = remoteSettings;
+        // Cache in localStorage for offline fallback
+        localStorage.setItem('flm_ad_settings', JSON.stringify(remoteSettings));
+    } else {
+        const stored = localStorage.getItem('flm_ad_settings');
+        if (stored) {
+            try { parsed = JSON.parse(stored); } catch (e) { console.error('[Ads] Parse error', e); }
+        }
+    }
+
     // Deep merge per slot
     const settings = {};
     for (const key of Object.keys(defaults)) {
@@ -698,7 +766,7 @@ function loadAdSettings() {
     setVal('adDownloadBottomCode', settings.downloadBottom.code);
 }
 
-function saveAdSettings() {
+async function saveAdSettings() {
     const getVal = (id) => { const el = getEl(id); return el ? el.value : ''; };
     const getBool = (id) => { const el = getEl(id); return el ? el.value === 'true' : false; };
 
@@ -741,8 +809,18 @@ function saveAdSettings() {
         }
     };
 
+    // Always save to localStorage for immediate local use
     localStorage.setItem('flm_ad_settings', JSON.stringify(settings));
-    showToast('Ad settings saved successfully!', 'success');
+
+    // Also sync to Supabase so all devices get the update
+    showToast('Syncing ad settings to cloud...', 'success');
+    const synced = await uploadAdSettingsToSupabase(settings);
+
+    if (synced) {
+        showToast('Ad settings saved & synced to all devices!', 'success');
+    } else {
+        showToast('Ad settings saved locally (cloud sync failed).', 'warning');
+    }
 }
 /* ==========================================
    STATS & UTILITIES
