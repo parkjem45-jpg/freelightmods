@@ -349,7 +349,7 @@ function renderTable() {
     if (q) filtered = appsData.filter(a => (a.name || '').toLowerCase().includes(q) || (a.mod || '').toLowerCase().includes(q));
     tb.innerHTML = '';
     if (filtered.length === 0) {
-        tb.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-secondary)">No items found</td></table>';
+        tb.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-secondary)">No items found</td></tr>';
         renderPagination(0);
         return;
     }
@@ -663,7 +663,7 @@ async function loadAdSettings() {
             .from('settings')
             .select('data')
             .eq('id', 'ads')
-            .single();
+            .maybeSingle();
         
         if (!error && data && data.data) {
             parsed = data.data;
