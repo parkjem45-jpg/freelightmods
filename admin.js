@@ -2,6 +2,7 @@
 // ==========================================================================================
 
 const MOD_URL_TEMPLATES = {};
+const AD_SETTINGS_PUBLIC_URL = 'https://egexyoqnzhaygvcbsdyi.supabase.co/storage/v1/object/public/termux-bucket/ad_settings.json';
 let appsData = [];
 let currentUser = null;
 let currentPage = 1;
@@ -634,7 +635,7 @@ async function deleteApp(id) {
 }
 
 /* ==========================================
-   ADS MANAGER (Database Sync) — Fixed & Working
+   ADS MANAGER (Database + Storage Sync) — Fixed & Working
    ========================================== */
 async function initAdsManager() {
     await loadAdSettings();
@@ -655,40 +656,44 @@ function getAdDefaults() {
 async function loadAdSettings() {
     const defaults = getAdDefaults();
     let parsed = {};
-    let source = 'local';
+    let source = 'defaults';
 
-    // Try Supabase database first (using 'settings' table)
+    // 1. Try Supabase Storage first (source of truth for public site)
     try {
-        const { data, error } = await supabase
-            .from('settings')
-            .select('data')
-            .eq('id', 'ads')
-            .maybeSingle();
-        
-        if (!error && data && data.data) {
-            parsed = data.data;
-            source = 'cloud';
-            // Cache in localStorage for offline fallback
-            localStorage.setItem('flm_ad_settings', JSON.stringify(data.data));
+        const url = AD_SETTINGS_PUBLIC_URL + '?t=' + Date.now();
+        const response = await fetch(url, { cache: 'no-store' });
+        if (response.ok) {
+            parsed = await response.json();
+            source = 'cloud-storage';
+            localStorage.setItem('flm_ad_settings', JSON.stringify(parsed));
         } else {
-            // Fallback to localStorage
+            throw new Error('Storage returned ' + response.status);
+        }
+    } catch (e) {
+        // 2. Fallback to Supabase database
+        try {
+            const { data, error } = await supabase
+                .from('settings')
+                .select('data')
+                .eq('id', 'ads')
+                .maybeSingle();
+            if (!error && data && data.data) {
+                parsed = data.data;
+                source = 'cloud-db';
+                localStorage.setItem('flm_ad_settings', JSON.stringify(data.data));
+            } else {
+                throw new Error('DB fallback failed');
+            }
+        } catch (e2) {
+            // 3. Fallback to localStorage
             const stored = localStorage.getItem('flm_ad_settings');
             if (stored) {
                 try { 
                     parsed = JSON.parse(stored); 
-                } catch (e2) { 
-                    console.error('[Ads] Parse error', e2); 
+                    source = 'local';
+                } catch (e3) { 
+                    console.error('[Ads] Parse error', e3); 
                 }
-            }
-        }
-    } catch (e) {
-        console.warn('[Ads] Cloud fetch failed, using localStorage:', e.message);
-        const stored = localStorage.getItem('flm_ad_settings');
-        if (stored) {
-            try { 
-                parsed = JSON.parse(stored); 
-            } catch (e2) { 
-                console.error('[Ads] Parse error', e2); 
             }
         }
     }
@@ -781,9 +786,34 @@ async function saveAdSettings() {
     // Always save to localStorage for immediate local use
     localStorage.setItem('flm_ad_settings', JSON.stringify(settings));
 
-    // Try to sync to Supabase database
+    let storageSuccess = false;
+    let dbSuccess = false;
+    let errors = [];
+
+    // 1. Try to upload JSON to Supabase Storage (public bucket)
     try {
-        const { error } = await supabase
+        const { error: storageError } = await supabase
+            .storage
+            .from('termux-bucket')
+            .upload('ad_settings.json', 
+                new Blob([JSON.stringify(settings)], { type: 'application/json' }), 
+                { upsert: true, contentType: 'application/json' }
+            );
+        if (storageError) {
+            errors.push('Storage: ' + storageError.message);
+            console.error('[Ads] Storage upload failed:', storageError);
+        } else {
+            storageSuccess = true;
+            console.log('[Ads] Settings uploaded to Storage successfully');
+        }
+    } catch (e) {
+        errors.push('Storage exception: ' + e.message);
+        console.error('[Ads] Storage exception:', e);
+    }
+
+    // 2. Try to save to DB table as backup
+    try {
+        const { error: dbError } = await supabase
             .from('settings')
             .upsert({ 
                 id: 'ads', 
@@ -793,11 +823,28 @@ async function saveAdSettings() {
                 onConflict: 'id' 
             });
         
-        if (error) throw error;
-        showToast('Ad settings saved & synced to cloud!', 'success');
+        if (dbError) {
+            errors.push('DB: ' + dbError.message);
+            console.error('[Ads] DB save failed:', dbError);
+        } else {
+            dbSuccess = true;
+            console.log('[Ads] Settings saved to DB successfully');
+        }
     } catch (e) {
-        console.error('[Ads] Supabase sync failed:', e);
-        showToast('Saved locally. Cloud sync failed — create a "settings" table in Supabase.', 'warning');
+        errors.push('DB exception: ' + e.message);
+        console.error('[Ads] DB exception:', e);
+    }
+
+    // Show appropriate message
+    if (storageSuccess && dbSuccess) {
+        showToast('✅ Ad settings saved & synced to cloud (Storage + DB)!', 'success');
+    } else if (storageSuccess) {
+        showToast('⚠️ Saved to Storage but DB failed: ' + errors.filter(e => e.startsWith('DB')).join(', '), 'warning');
+    } else if (dbSuccess) {
+        showToast('⚠️ Saved to DB but Storage failed: ' + errors.filter(e => e.startsWith('Storage')).join(', '), 'warning');
+    } else {
+        showToast('❌ Cloud sync failed: ' + errors.join(' | '), 'error');
+        console.error('[Ads] All sync methods failed:', errors);
     }
 }
 

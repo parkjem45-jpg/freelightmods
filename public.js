@@ -15,26 +15,53 @@ let _flmAdSettings = null;
 const AD_SETTINGS_PUBLIC_URL = 'https://egexyoqnzhaygvcbsdyi.supabase.co/storage/v1/object/public/termux-bucket/ad_settings.json';
 
 /* ==========================================
-   ADS SYSTEM — Supabase Storage Sync
+   ADS SYSTEM — Supabase Storage + DB Fallback
    ========================================== */
 async function syncAdSettingsFromSupabase() {
+    // 1. Try public storage bucket first (fast, no auth needed, works across domains)
     try {
         const url = AD_SETTINGS_PUBLIC_URL + '?t=' + Date.now();
         const response = await fetch(url, { cache: 'no-store' });
-        if (!response.ok) {
-            if (response.status === 404) {
-                console.log('[Ads] No remote ad settings found yet');
-            }
+        if (response.ok) {
+            const data = await response.json();
+            _flmAdSettings = data;
+            localStorage.setItem('flm_ad_settings', JSON.stringify(data));
+            console.log('[Ads] Settings synced from Supabase Storage');
             return;
         }
-        const data = await response.json();
-        _flmAdSettings = data;
-        // Cache in localStorage for offline fallback
-        localStorage.setItem('flm_ad_settings', JSON.stringify(data));
-        console.log('[Ads] Settings synced from Supabase');
+        console.warn('[Ads] Storage returned status', response.status);
     } catch (e) {
-        console.warn('[Ads] Failed to sync from Supabase:', e);
-        // Will fall back to localStorage in getAdSettings()
+        console.warn('[Ads] Storage fetch failed:', e);
+    }
+
+    // 2. Fallback to Supabase DB table
+    try {
+        if (typeof supabase !== 'undefined') {
+            const { data, error } = await supabase
+                .from('settings')
+                .select('data')
+                .eq('id', 'ads')
+                .maybeSingle();
+            if (!error && data && data.data) {
+                _flmAdSettings = data.data;
+                localStorage.setItem('flm_ad_settings', JSON.stringify(data.data));
+                console.log('[Ads] Settings synced from Supabase DB');
+                return;
+            }
+        }
+    } catch (e2) {
+        console.warn('[Ads] DB fetch failed:', e2);
+    }
+
+    // 3. Final fallback to localStorage
+    try {
+        const stored = localStorage.getItem('flm_ad_settings');
+        if (stored) {
+            _flmAdSettings = JSON.parse(stored);
+            console.log('[Ads] Using localStorage fallback');
+        }
+    } catch (e3) {
+        console.error('[Ads] localStorage parse error:', e3);
     }
 }
 
@@ -361,9 +388,9 @@ function renderSliderGroup(section, items) {
         let imageHtml = '';
         if (imgUrl) {
             if (isAuto) {
-                imageHtml = '<img src="' + escapeHtml(imgUrl) + '" alt="' + escapeHtml(app.name) + '" loading="lazy" style="object-fit:contain;max-height:220px;width:auto;max-width:100%;" onerror="this.style.display=\'none\';this.parentElement.innerHTML=\'<i class=\\\'fas fa-image img-fallback\\\'></i>\';">';
+                imageHtml = '<img src="' + escapeHtml(imgUrl) + '" alt="' + escapeHtml(app.name) + '" loading="lazy" style="object-fit:contain;max-height:220px;width:auto;max-width:100%;" onerror="this.style.display=\'none\';this.parentElement.innerHTML=\'<<i class=\\\'fas fa-image img-fallback\\\'></i>\';">';
             } else {
-                imageHtml = '<img src="' + escapeHtml(imgUrl) + '" alt="' + escapeHtml(app.name) + '" loading="lazy" onerror="this.style.display=\'none\';this.parentElement.innerHTML=\'<i class=\\\'fas fa-image img-fallback\\\'></i>\';">';
+                imageHtml = '<img src="' + escapeHtml(imgUrl) + '" alt="' + escapeHtml(app.name) + '" loading="lazy" onerror="this.style.display=\'none\';this.parentElement.innerHTML=\'<<i class=\\\'fas fa-image img-fallback\\\'></i>\';">';
             }
         } else {
             imageHtml = '<i class="fas fa-image img-fallback"></i>';
