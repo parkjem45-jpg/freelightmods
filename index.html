@@ -16,6 +16,157 @@
     <!-- Swiper CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <link rel="stylesheet" href="style.css">
+    
+    <!-- INLINE STYLE FOR RGB SEARCH BAR (Lightweight, no external CSS, only for the search component) -->
+    <style>
+        /* RGB animated border & glow for search container - completely isolated,不影响原有CSS */
+        @keyframes rgbFlow {
+            0% {
+                border-color: #ff0066;
+                box-shadow: 0 0 5px rgba(255, 0, 102, 0.4), 0 0 8px rgba(255, 0, 102, 0.2);
+            }
+            20% {
+                border-color: #ff6600;
+                box-shadow: 0 0 5px rgba(255, 102, 0, 0.4), 0 0 8px rgba(255, 102, 0, 0.2);
+            }
+            40% {
+                border-color: #ffcc00;
+                box-shadow: 0 0 5px rgba(255, 204, 0, 0.4), 0 0 8px rgba(255, 204, 0, 0.2);
+            }
+            60% {
+                border-color: #00ff66;
+                box-shadow: 0 0 5px rgba(0, 255, 102, 0.4), 0 0 8px rgba(0, 255, 102, 0.2);
+            }
+            80% {
+                border-color: #0066ff;
+                box-shadow: 0 0 5px rgba(0, 102, 255, 0.4), 0 0 8px rgba(0, 102, 255, 0.2);
+            }
+            100% {
+                border-color: #ff0066;
+                box-shadow: 0 0 5px rgba(255, 0, 102, 0.4), 0 0 8px rgba(255, 0, 102, 0.2);
+            }
+        }
+        
+        .rgb-search-container {
+            position: relative;
+            margin-left: auto;
+            margin-right: 1rem;
+            animation: rgbFlow 3s infinite ease-in-out;
+            border-radius: 48px;
+            background: transparent;
+            transition: all 0.2s;
+        }
+        
+        .rgb-search-container:hover {
+            animation: rgbFlow 1.5s infinite ease-in-out;
+            transform: scale(1.02);
+        }
+        
+        .rgb-search-input {
+            padding: 0.55rem 1rem 0.55rem 2.5rem;
+            border-radius: 48px;
+            border: 2px solid;
+            background: var(--bg-primary, #f8fafc);
+            color: var(--text-primary, #0f172a);
+            outline: none;
+            font-size: 0.9rem;
+            width: 240px;
+            font-weight: 500;
+            transition: all 0.2s;
+            backdrop-filter: blur(2px);
+        }
+        
+        .rgb-search-input:focus {
+            width: 260px;
+            background: var(--bg-secondary, #ffffff);
+            animation: rgbFlow 1s infinite ease-in-out;
+        }
+        
+        .search-icon-rgb {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--accent, #3b82f6);
+            pointer-events: none;
+            font-size: 0.9rem;
+            text-shadow: 0 0 2px rgba(0,0,0,0.1);
+        }
+        
+        .clear-rgb-btn {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            color: var(--text-secondary, #475569);
+            cursor: pointer;
+            font-size: 1rem;
+            display: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .clear-rgb-btn:hover {
+            background: rgba(0,0,0,0.1);
+            color: #ff4444;
+        }
+        
+        /* Suggestions dropdown with subtle rgb accent */
+        .rgb-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--bg-secondary, #ffffff);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px -10px rgba(0,0,0,0.2);
+            margin-top: 10px;
+            z-index: 1000;
+            max-height: 320px;
+            overflow-y: auto;
+            border: 1px solid var(--border, #e2e8f0);
+            backdrop-filter: blur(8px);
+        }
+        
+        .rgb-suggestion-item {
+            padding: 10px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border, #e2e8f0);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.15s;
+        }
+        
+        .rgb-suggestion-item:last-child {
+            border-bottom: none;
+        }
+        
+        .rgb-suggestion-item:hover {
+            background: linear-gradient(90deg, rgba(255,0,102,0.08), rgba(0,102,255,0.08));
+            padding-left: 20px;
+        }
+        
+        /* Scrollbar for suggestions */
+        .rgb-suggestions::-webkit-scrollbar {
+            width: 6px;
+        }
+        .rgb-suggestions::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+            border-radius: 10px;
+        }
+        .rgb-suggestions::-webkit-scrollbar-thumb {
+            background: var(--accent, #3b82f6);
+            border-radius: 10px;
+        }
+    </style>
 </head>
 <body>
 
@@ -39,6 +190,14 @@
                 <a href="#how">How it Works</a>
                 <a href="admin.html" id="adminLink" class="admin-nav-link" style="display:none"><i class="fas fa-lock"></i> Admin</a>
             </nav>
+
+            <!-- ===== ATTRACTIVE RGB SEARCH BAR (Lightweight, animated border) ===== -->
+            <div class="rgb-search-container">
+                <input type="text" id="headerSearchInput" class="rgb-search-input" placeholder="✨ Search mods..." autocomplete="off">
+                <i class="fas fa-search search-icon-rgb"></i>
+                <button id="clearHeaderSearch" class="clear-rgb-btn" aria-label="Clear search">✕</button>
+                <div id="headerSuggestions" class="rgb-suggestions" style="display: none;"></div>
+            </div>
 
             <button class="mobile-menu-toggle" id="mobileToggle" aria-label="Open Menu">
                 <i class="fas fa-bars"></i>
@@ -111,7 +270,7 @@
                 <div class="section-header slider-header">
                     <div>
                         <h2><i class="fas fa-fire" style="color:var(--accent-orange)"></i> Popular Mod APKs</h2>
-                        <p class="section-subtitle">Hand-picked by admin, auto-rotating showcase</p>
+                        <p class="section-subtitle"></p>
                     </div>
                 </div>
                 <div class="swiper swiper-slider-1" id="swiper1">
@@ -309,5 +468,139 @@
         <div id="adHomeStickyInner" class="ad-inner"></div>
         <button class="ad-sticky-close" id="adHomeStickyClose" aria-label="Close ad"><i class="fas fa-times"></i></button>
     </div>
+
+    <!-- Search Suggestions + RGB Search Logic (fully dynamic) -->
+    <script>
+        (function() {
+            let availableModNames = [];
+            const searchInput = document.getElementById('headerSearchInput');
+            const suggestionsBox = document.getElementById('headerSuggestions');
+            const clearBtn = document.getElementById('clearHeaderSearch');
+            const mainSearch = document.getElementById('searchInput');
+            
+            // Extract mod names from page (cards, swiper slides, etc)
+            function fetchModNames() {
+                const namesSet = new Set();
+                const appGrid = document.getElementById('appGrid');
+                if (appGrid) {
+                    const cards = appGrid.querySelectorAll('.app-card, .mod-card, [class*="app-card"]');
+                    cards.forEach(card => {
+                        const title = card.querySelector('h3, .mod-title, .app-title');
+                        if (title && title.innerText.trim()) namesSet.add(title.innerText.trim());
+                        const dataName = card.getAttribute('data-name');
+                        if (dataName) namesSet.add(dataName);
+                    });
+                }
+                // sliders
+                document.querySelectorAll('.swiper-slide').forEach(slide => {
+                    const title = slide.querySelector('h3, .mod-title, .slide-title');
+                    if (title && title.innerText.trim()) namesSet.add(title.innerText.trim());
+                });
+                // also from trending grid items
+                const trendingItems = document.querySelectorAll('#appGrid [class*="title"], #appGrid h3');
+                trendingItems.forEach(el => {
+                    if (el.innerText.trim()) namesSet.add(el.innerText.trim());
+                });
+                return Array.from(namesSet);
+            }
+            
+            function updateSuggestions() {
+                const query = searchInput.value.trim().toLowerCase();
+                if (!query) {
+                    suggestionsBox.style.display = 'none';
+                    if (clearBtn) clearBtn.style.display = 'none';
+                    return;
+                }
+                if (clearBtn) clearBtn.style.display = 'flex';
+                const matches = availableModNames.filter(name => name.toLowerCase().includes(query));
+                const unique = [...new Set(matches)].slice(0, 10);
+                if (unique.length === 0) {
+                    suggestionsBox.style.display = 'none';
+                    return;
+                }
+                suggestionsBox.innerHTML = '';
+                unique.forEach(mod => {
+                    const div = document.createElement('div');
+                    div.className = 'rgb-suggestion-item';
+                    div.innerHTML = `<i class="fas fa-gem" style="color: #ff66cc; font-size: 12px;"></i> <span style="flex:1;">${escapeHtml(mod)}</span> <i class="fas fa-arrow-right" style="font-size: 10px; opacity:0.7;"></i>`;
+                    div.addEventListener('click', () => {
+                        searchInput.value = mod;
+                        suggestionsBox.style.display = 'none';
+                        if (mainSearch) {
+                            mainSearch.value = mod;
+                            mainSearch.dispatchEvent(new Event('input', { bubbles: true }));
+                        }
+                        const appsSection = document.getElementById('apps');
+                        if (appsSection) appsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        if (clearBtn) clearBtn.style.display = 'flex';
+                    });
+                    suggestionsBox.appendChild(div);
+                });
+                suggestionsBox.style.display = 'block';
+            }
+            
+            function escapeHtml(str) {
+                return str.replace(/[&<>]/g, function(m) {
+                    if (m === '&') return '&amp;';
+                    if (m === '<') return '&lt;';
+                    if (m === '>') return '&gt;';
+                    return m;
+                });
+            }
+            
+            function refreshModList() {
+                const newNames = fetchModNames();
+                if (JSON.stringify(newNames) !== JSON.stringify(availableModNames)) {
+                    availableModNames = newNames;
+                    if (searchInput.value.trim() !== '') updateSuggestions();
+                }
+            }
+            
+            if (searchInput) {
+                searchInput.addEventListener('input', updateSuggestions);
+                searchInput.addEventListener('focus', () => {
+                    if (searchInput.value.trim() !== '') updateSuggestions();
+                });
+            }
+            
+            if (clearBtn) {
+                clearBtn.addEventListener('click', () => {
+                    searchInput.value = '';
+                    suggestionsBox.style.display = 'none';
+                    clearBtn.style.display = 'none';
+                    if (mainSearch) {
+                        mainSearch.value = '';
+                        mainSearch.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                });
+            }
+            
+            document.addEventListener('click', (e) => {
+                if (searchInput && suggestionsBox && !searchInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
+                    suggestionsBox.style.display = 'none';
+                }
+            });
+            
+            // Observe dynamic content loading
+            const observer = new MutationObserver(() => refreshModList());
+            const targetGrid = document.getElementById('appGrid');
+            if (targetGrid) observer.observe(targetGrid, { childList: true, subtree: true });
+            const sliderWraps = document.querySelectorAll('.swiper-wrapper');
+            sliderWraps.forEach(wrap => observer.observe(wrap, { childList: true, subtree: true }));
+            
+            setInterval(refreshModList, 2000);
+            setTimeout(() => { refreshModList(); }, 1000);
+            
+            // Also sync with main search input if user types manually
+            if (mainSearch && searchInput) {
+                mainSearch.addEventListener('input', (e) => {
+                    if (searchInput.value !== e.target.value) {
+                        searchInput.value = e.target.value;
+                        updateSuggestions();
+                    }
+                });
+            }
+        })();
+    </script>
 </body>
 </html>
