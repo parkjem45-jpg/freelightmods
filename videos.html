@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <meta name="description" content="Watch curated videos — tutorials, reviews, gaming and more.">
+    <title>Videos • Free Lite Mods</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text: #0f172a;
+            --text-secondary: #475569;
+            --border: #e2e8f0;
+            --primary: #3b82f6;
+            --primary-light: #dbeafe;
+            --accent-purple: #8b5cf6;
+            --shadow: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.02);
+            --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.08), 0 10px 10px -5px rgba(0,0,0,0.02);
+            --radius: 18px;
+            --transition: all 0.2s ease;
+        }
+        [data-theme="dark"] {
+            --bg: #0b1120;
+            --surface: #1e293b;
+            --text: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border: #334155;
+            --primary: #60a5fa;
+            --primary-light: #1e3a5f;
+            --accent-purple: #a78bfa;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            transition: background 0.3s, color 0.3s;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; width: 100%; }
+
+        .header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            box-shadow: var(--shadow);
+        }
+        .nav-container { display: flex; align-items: center; justify-content: space-between; height: 70px; }
+        .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 700; font-size: 1.4rem; color: var(--text); }
+        .logo i { color: var(--primary); font-size: 1.8rem; }
+        .logo-highlight { color: var(--primary); }
+        .nav-links { display: flex; gap: 8px; flex-wrap: wrap; }
+        .nav-links a {
+            text-decoration: none; color: var(--text-secondary); font-weight: 500;
+            padding: 8px 14px; border-radius: 30px; transition: var(--transition); font-size: 0.95rem;
+        }
+        .nav-links a:hover, .nav-links a.active { background: var(--primary-light); color: var(--primary); }
+        .theme-toggle {
+            background: var(--surface); border: 1px solid var(--border); color: var(--text);
+            width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center;
+            justify-content: center; cursor: pointer; font-size: 1.2rem; position: fixed;
+            bottom: 24px; right: 24px; z-index: 50; box-shadow: var(--shadow-lg); transition: var(--transition);
+        }
+        .theme-toggle:hover { background: var(--primary-light); color: var(--primary); }
+
+        .mobile-menu-toggle { display: none; background: none; border: none; color: var(--text); font-size: 1.6rem; cursor: pointer; }
+        .mobile-menu-overlay, .mobile-menu-sidebar { display: none; }
+
+        @media (max-width: 850px) {
+            .nav-links { display: none; }
+            .mobile-menu-toggle { display: block; }
+            .mobile-menu-overlay {
+                display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 45;
+                opacity: 0; pointer-events: none; transition: opacity 0.3s;
+            }
+            .mobile-menu-sidebar {
+                display: flex; flex-direction: column; position: fixed; top: 0; right: 0; width: 280px;
+                height: 100%; background: var(--surface); z-index: 46; transform: translateX(100%);
+                transition: transform 0.3s ease; box-shadow: -5px 0 20px rgba(0,0,0,0.2);
+            }
+            body.mobile-menu-open .mobile-menu-overlay { opacity: 1; pointer-events: auto; }
+            body.mobile-menu-open .mobile-menu-sidebar { transform: translateX(0); }
+            .mobile-menu-header { display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid var(--border); }
+            .mobile-nav-links { display: flex; flex-direction: column; padding: 16px; gap: 8px; }
+            .mobile-nav-links a { padding: 12px 16px; border-radius: 12px; color: var(--text); text-decoration: none; font-weight: 500; }
+            .mobile-nav-links a.active { background: var(--primary-light); color: var(--primary); }
+        }
+
+        .subpage-header { background: var(--surface); padding: 28px 0; margin-bottom: 32px; border-bottom: 1px solid var(--border); }
+        .back-btn {
+            background: var(--primary-light); color: var(--primary); border: none; padding: 8px 18px;
+            border-radius: 30px; font-weight: 600; margin-bottom: 16px; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 6px; transition: var(--transition);
+        }
+        .back-btn:hover { background: var(--primary); color: white; }
+
+        .search-bar-container {
+            display: flex; align-items: center; background: var(--surface); border: 1px solid var(--border);
+            border-radius: 40px; padding: 0 20px; gap: 10px; box-shadow: var(--shadow);
+        }
+        .search-bar-container i { color: var(--text-secondary); }
+        .search-bar-container input {
+            width: 100%; padding: 14px 0; border: none; background: transparent;
+            font-size: 1rem; outline: none; color: var(--text);
+        }
+        .category-bar { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0; }
+        .category-pill {
+            background: var(--surface); border: 1px solid var(--border); padding: 8px 20px;
+            border-radius: 30px; font-weight: 600; color: var(--text-secondary); cursor: pointer; transition: var(--transition);
+        }
+        .category-pill.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+        .videos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; margin-top: 16px; }
+        .video-card {
+            background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+            overflow: hidden; transition: var(--transition); box-shadow: var(--shadow); cursor: pointer;
+        }
+        .video-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+        .video-embed {
+            position: relative; width: 100%; padding-top: 56.25%; background: #0a0a0a; overflow: hidden;
+        }
+        .video-embed iframe, .video-embed video {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;
+        }
+        .video-placeholder {
+            position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(145deg, #1e2a3a, #141c28); color: white; font-size: 3rem;
+        }
+        .video-card-content { padding: 16px; }
+        .video-card-content h3 { font-size: 1.1rem; margin-bottom: 6px; }
+        .video-card-content p { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 12px; }
+        .video-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+        .video-tag { background: var(--primary-light); color: var(--primary); padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+
+        /* Simple modal with iframe */
+        .video-modal {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(8px); align-items: center; justify-content: center; z-index: 100; padding: 20px;
+        }
+        .video-modal.active { display: flex; }
+        .modal-content {
+            background: var(--surface); border-radius: var(--radius); max-width: 800px; width: 100%;
+            overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+        }
+        .modal-video-wrapper {
+            position: relative; width: 100%; padding-top: 56.25%; background: #000;
+        }
+        .modal-video-wrapper iframe {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;
+        }
+        .modal-info { padding: 16px; }
+        .modal-info h3 { margin-bottom: 4px; }
+        .modal-close {
+            position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.6); color: white;
+            border: none; width: 36px; height: 36px; border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; cursor: pointer; z-index: 10;
+        }
+        .loading-state { text-align: center; padding: 40px; color: var(--text-secondary); }
+        footer { margin-top: auto; padding: 24px 0; text-align: center; color: var(--text-secondary); border-top: 1px solid var(--border); }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle Theme"><i class="fas fa-moon"></i></button>
+
+    <header class="header">
+        <div class="container nav-container">
+            <a href="index.html" class="logo"><i class="fas fa-bolt"></i><span class="logo-text">Free Lite <span class="logo-highlight">Mods</span></span></a>
+            <nav class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="news.html">News</a>
+                <a href="videos.html" class="active">Videos</a>
+                <a href="gallery.html">Images</a>
+                <a href="stories.html">Stories</a>
+                <a href="music.html">Music</a>
+                <a href="books.html">Books</a>
+                <a href="guides.html">Guides</a>
+            </nav>
+            <button class="mobile-menu-toggle" id="mobileToggle" aria-label="Open Menu"><i class="fas fa-bars"></i></button>
+        </div>
+    </header>
+
+    <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+    <div class="mobile-menu-sidebar" id="mobileMenuSidebar">
+        <div class="mobile-menu-header"><span class="logo-text">Menu</span><button id="closeMobileMenu"><i class="fas fa-times"></i></button></div>
+        <nav class="mobile-nav-links">
+            <a href="index.html"><i class="fas fa-home"></i> Home</a>
+            <a href="news.html"><i class="fas fa-newspaper"></i> News</a>
+            <a href="videos.html" class="active"><i class="fas fa-play-circle"></i> Videos</a>
+            <a href="gallery.html"><i class="fas fa-images"></i> Images</a>
+            <a href="stories.html"><i class="fas fa-laugh-beam"></i> Stories</a>
+            <a href="music.html"><i class="fas fa-music"></i> Music</a>
+            <a href="books.html"><i class="fas fa-book"></i> Books</a>
+            <a href="guides.html"><i class="fas fa-question-circle"></i> Guides</a>
+        </nav>
+    </div>
+
+    <section class="subpage-header">
+        <div class="container">
+            <button class="back-btn" onclick="window.location.href='index.html'"><i class="fas fa-arrow-left"></i> Back to Home</button>
+            <h1><i class="fas fa-play-circle" style="color:var(--accent-purple)"></i> Video Library</h1>
+            <p>Curated videos — tutorials, reviews, gameplay and more.</p>
+        </div>
+    </section>
+
+    <div class="container">
+        <div class="search-bar-container" style="max-width:600px;margin:0 auto 20px;">
+            <i class="fas fa-search"></i>
+            <input type="text" id="videoSearch" placeholder="Search videos..." autocomplete="off">
+        </div>
+        <div class="category-bar" id="videoCategories">
+            <button class="category-pill active" data-cat="all">All</button>
+            <button class="category-pill" data-cat="tutorial">Tutorials</button>
+            <button class="category-pill" data-cat="review">Reviews</button>
+            <button class="category-pill" data-cat="gameplay">Gameplay</button>
+            <button class="category-pill" data-cat="news">News</button>
+            <button class="category-pill" data-cat="entertainment">Entertainment</button>
+        </div>
+        <div class="videos-grid" id="videosGrid"><div class="loading-state"><i class="fas fa-spinner fa-spin"></i><p>Loading videos...</p></div></div>
+    </div>
+
+    <!-- Simple video modal -->
+    <div class="video-modal" id="videoModal">
+        <div class="modal-content" style="position:relative;">
+            <button class="modal-close" id="closeModalBtn"><i class="fas fa-times"></i></button>
+            <div class="modal-video-wrapper" id="modalVideoWrapper"></div>
+            <div class="modal-info">
+                <h3 id="modalTitle"></h3>
+                <p id="modalDesc" style="color:var(--text-secondary);"></p>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer" style="margin-top:40px;">
+        <div class="container footer-bottom">
+            <p>&copy; <span id="footerYear">2026</span> Free Lite Mods. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="supabase.js"></script>
+    <script>
+    (function() {
+        let allVideos = [];
+        let currentCat = 'all';
+        let searchQ = '';
+
+        function escapeHtml(str) { if (str == null) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+        function getYouTubeId(url) {
+            if (!url) return null;
+            const patterns = [
+                /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([^&]+)/,
+                /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([^/?]+)/,
+                /(?:https?:\/\/)?(?:www\.)?youtube\.com\/v\/([^/?]+)/,
+                /(?:https?:\/\/)?youtu\.be\/([^/?]+)/
+            ];
+            for (const p of patterns) {
+                const match = url.match(p);
+                if (match && match[1]) return match[1].split('?')[0].split('#')[0];
+            }
+            return null;
+        }
+
+        function renderEmbed(url) {
+            const ytId = getYouTubeId(url);
+            if (ytId) {
+                return `<iframe src="https://www.youtube.com/embed/${ytId}" allowfullscreen loading="lazy"></iframe>`;
+            } else if (/\.(mp4|webm|ogg)$/i.test(url)) {
+                return `<video controls preload="metadata"><source src="${escapeHtml(url)}" type="video/mp4"></video>`;
+            } else {
+                return `<div class="video-placeholder" onclick="window.open('${escapeHtml(url)}','_blank')"><i class="fas fa-play-circle" style="font-size:3rem;"></i></div>`;
+            }
+        }
+
+        // Fallback videos if Supabase fails or returns empty
+        function getFallbackVideos() {
+            return [
+                { id: 101, title: 'Nyan Cat [original]', category: 'entertainment', description: 'The classic Nyan Cat video.', video_url: 'https://www.youtube.com/watch?v=QH2-TGUlwu4', tags: 'funny,classic' },
+                { id: 102, title: 'Big Buck Bunny', category: 'entertainment', description: 'Open movie by Blender Foundation.', video_url: 'https://www.youtube.com/watch?v=aqz-KE-bpKQ', tags: 'animation' },
+                { id: 103, title: 'HTML in 100 Seconds', category: 'tutorial', description: 'Quick intro to HTML.', video_url: 'https://www.youtube.com/watch?v=ok-plXXHlWw', tags: 'web,beginner' },
+                { id: 104, title: 'Never Gonna Give You Up', category: 'entertainment', description: 'Rick Astley official video.', video_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', tags: 'music' }
+            ];
+        }
+
+        async function loadVideos() {
+            const grid = document.getElementById('videosGrid');
+            try {
+                // Try Supabase first
+                if (typeof supabase !== 'undefined' && supabase.from) {
+                    const { data, error } = await supabase.from('flm_videos').select('*').order('created_at', { ascending: false });
+                    if (!error && data && data.length > 0) {
+                        allVideos = data;
+                        filterAndRender();
+                        return;
+                    }
+                }
+            } catch (e) {
+                console.warn('Supabase connection issue, loading fallback videos.');
+            }
+            // Use fallback videos
+            allVideos = getFallbackVideos();
+            filterAndRender();
+        }
+
+        function filterAndRender() {
+            const grid = document.getElementById('videosGrid');
+            let filtered = allVideos.filter(v => {
+                const matchCat = currentCat === 'all' || (v.category || '').toLowerCase() === currentCat;
+                const matchSearch = !searchQ || (v.title || '').toLowerCase().includes(searchQ) || (v.description || '').toLowerCase().includes(searchQ);
+                return matchCat && matchSearch;
+            });
+            if (filtered.length === 0) {
+                grid.innerHTML = '<div class="loading-state"><i class="fas fa-search"></i><h3>No videos found</h3></div>';
+                return;
+            }
+            grid.innerHTML = '';
+            filtered.forEach(video => {
+                const card = document.createElement('div');
+                card.className = 'video-card';
+                let tagsHtml = '';
+                if (video.tags) {
+                    video.tags.split(',').forEach(tag => { tagsHtml += '<span class="video-tag">' + escapeHtml(tag.trim()) + '</span>'; });
+                }
+                card.innerHTML = `
+                    <div class="video-embed">${renderEmbed(video.video_url)}</div>
+                    <div class="video-card-content">
+                        <h3>${escapeHtml(video.title)}</h3>
+                        <p>${escapeHtml(video.description || '')}</p>
+                        <div class="video-tags">
+                            ${video.category ? '<span class="video-tag">' + escapeHtml(video.category) + '</span>' : ''}
+                            ${tagsHtml}
+                        </div>
+                    </div>
+                `;
+                card.addEventListener('click', (e) => {
+                    if (e.target.closest('.video-placeholder')) return;
+                    openModal(video);
+                });
+                grid.appendChild(card);
+            });
+        }
+
+        // ── Simple modal ─────────────────────────
+        const modal = document.getElementById('videoModal');
+        const closeModal = document.getElementById('closeModalBtn');
+        const wrapper = document.getElementById('modalVideoWrapper');
+
+        function openModal(video) {
+            document.getElementById('modalTitle').textContent = video.title;
+            document.getElementById('modalDesc').textContent = video.description || '';
+            const ytId = getYouTubeId(video.video_url);
+            if (ytId) {
+                wrapper.innerHTML = `<iframe src="https://www.youtube.com/embed/${ytId}" allowfullscreen></iframe>`;
+            } else if (/\.(mp4|webm|ogg)$/i.test(video.video_url)) {
+                wrapper.innerHTML = `<video controls autoplay style="position:absolute;top:0;left:0;width:100%;height:100%;"><source src="${escapeHtml(video.video_url)}" type="video/mp4"></video>`;
+            } else {
+                window.open(video.video_url, '_blank');
+                return;
+            }
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModalFunc() {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+            wrapper.innerHTML = '';
+        }
+
+        closeModal.addEventListener('click', closeModalFunc);
+        modal.addEventListener('click', (e) => { if (e.target === modal) closeModalFunc(); });
+
+        // ── Search & categories ─────────────────
+        document.getElementById('videoSearch').addEventListener('input', (e) => {
+            searchQ = e.target.value.trim().toLowerCase();
+            filterAndRender();
+        });
+        document.getElementById('videoCategories').addEventListener('click', (e) => {
+            const pill = e.target.closest('.category-pill');
+            if (!pill) return;
+            document.querySelectorAll('#videoCategories .category-pill').forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+            currentCat = pill.getAttribute('data-cat');
+            filterAndRender();
+        });
+
+        // ── Theme & mobile menu ─────────────────
+        (function() {
+            const toggle = document.getElementById('themeToggle');
+            if (toggle) {
+                const html = document.documentElement;
+                const saved = localStorage.getItem('theme') || 'dark';
+                html.setAttribute('data-theme', saved);
+                toggle.innerHTML = saved === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+                toggle.addEventListener('click', () => {
+                    const isDark = html.getAttribute('data-theme') === 'dark';
+                    const newTheme = isDark ? 'light' : 'dark';
+                    html.setAttribute('data-theme', newTheme);
+                    localStorage.setItem('theme', newTheme);
+                    toggle.innerHTML = newTheme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+                });
+            }
+            const body = document.body;
+            document.getElementById('mobileToggle').addEventListener('click', () => body.classList.add('mobile-menu-open'));
+            document.getElementById('closeMobileMenu').addEventListener('click', () => body.classList.remove('mobile-menu-open'));
+            document.getElementById('mobileMenuOverlay').addEventListener('click', () => body.classList.remove('mobile-menu-open'));
+        })();
+
+        document.getElementById('footerYear').textContent = new Date().getFullYear();
+        loadVideos();
+    })();
+    </script>
+</body>
+</html>

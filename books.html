@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <meta name="description" content="Free premium PDF books. Download covers, read descriptions, get direct links.">
+    <title>Free Premium PDF Books • Free Lite Mods</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text: #0f172a;
+            --text-secondary: #475569;
+            --border: #e2e8f0;
+            --primary: #3b82f6;
+            --primary-light: #dbeafe;
+            --accent-success: #10b981;
+            --accent-cyan: #06b6d4;
+            --shadow: 0 4px 12px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
+            --shadow-card: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.02);
+            --radius: 20px;
+            --radius-sm: 14px;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        [data-theme="dark"] {
+            --bg: #0b1120;
+            --surface: #1e293b;
+            --text: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border: #334155;
+            --primary: #60a5fa;
+            --primary-light: #1e3a5f;
+            --accent-success: #34d399;
+            --accent-cyan: #22d3ee;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            transition: background 0.35s, color 0.35s;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; width: 100%; }
+
+        /* Header & Nav (overrides to ensure consistency) */
+        .header {
+            background: var(--surface);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            box-shadow: var(--shadow);
+        }
+        .nav-container { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+        .logo { display: flex; align-items: center; gap: 8px; text-decoration: none; font-weight: 700; font-size: 1.3rem; color: var(--text); }
+        .logo i { color: var(--primary); font-size: 1.6rem; }
+        .logo-highlight { color: var(--primary); }
+        .nav-links { display: flex; gap: 6px; flex-wrap: wrap; }
+        .nav-links a {
+            text-decoration: none; color: var(--text-secondary); font-weight: 500;
+            padding: 7px 13px; border-radius: 28px; transition: var(--transition); font-size: 0.9rem;
+        }
+        .nav-links a:hover, .nav-links a.active { background: var(--primary-light); color: var(--primary); }
+        .theme-toggle {
+            background: var(--surface); border: 1px solid var(--border); color: var(--text);
+            width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center;
+            justify-content: center; cursor: pointer; font-size: 1.1rem; position: fixed;
+            bottom: 24px; right: 24px; z-index: 50;
+            box-shadow: var(--shadow-card); transition: var(--transition);
+        }
+        .theme-toggle:hover { background: var(--primary-light); color: var(--primary); }
+
+        .mobile-menu-toggle { display: none; background: none; border: none; color: var(--text); font-size: 1.4rem; cursor: pointer; }
+        .mobile-menu-overlay, .mobile-menu-sidebar { display: none; }
+
+        @media (max-width: 850px) {
+            .nav-links { display: none; }
+            .mobile-menu-toggle { display: block; }
+            .mobile-menu-overlay {
+                display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 45;
+                opacity: 0; pointer-events: none; transition: opacity 0.3s;
+            }
+            .mobile-menu-sidebar {
+                display: flex; flex-direction: column; position: fixed; top: 0; right: 0; width: 270px;
+                height: 100%; background: var(--surface); z-index: 46; transform: translateX(100%);
+                transition: transform 0.3s ease; box-shadow: -5px 0 24px rgba(0,0,0,0.25);
+            }
+            body.mobile-menu-open .mobile-menu-overlay { opacity: 1; pointer-events: auto; }
+            body.mobile-menu-open .mobile-menu-sidebar { transform: translateX(0); }
+            .mobile-menu-header { display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; border-bottom: 1px solid var(--border); }
+            .mobile-nav-links { display: flex; flex-direction: column; padding: 12px; gap: 4px; }
+            .mobile-nav-links a { padding: 11px 16px; border-radius: 12px; color: var(--text); text-decoration: none; font-weight: 500; }
+            .mobile-nav-links a.active { background: var(--primary-light); color: var(--primary); }
+        }
+
+        /* Subpage header */
+        .subpage-header { padding: 28px 0 8px; text-align: center; }
+        .back-btn {
+            background: var(--primary-light); color: var(--primary); border: none; padding: 8px 18px;
+            border-radius: 28px; font-weight: 600; margin-bottom: 16px; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 6px; transition: var(--transition); font-size: 0.9rem;
+        }
+        .back-btn:hover { background: var(--primary); color: white; }
+        .subpage-header h1 { font-size: 2rem; margin-bottom: 6px; display: flex; align-items: center; justify-content: center; gap: 12px; }
+        .subpage-header p { color: var(--text-secondary); font-size: 0.95rem; }
+
+        /* Search & Categories */
+        .search-bar-container {
+            display: flex; align-items: center; background: var(--surface); border: 1px solid var(--border);
+            border-radius: 40px; padding: 0 20px; gap: 12px; max-width: 600px; margin: 24px auto;
+            box-shadow: var(--shadow); transition: box-shadow 0.3s;
+        }
+        .search-bar-container:focus-within { box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
+        .search-bar-container i { color: var(--text-secondary); font-size: 1rem; }
+        .search-bar-container input {
+            width: 100%; padding: 14px 0; border: none; background: transparent;
+            font-size: 1rem; outline: none; color: var(--text);
+        }
+        .category-bar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 24px; justify-content: center; }
+        .category-pill {
+            background: var(--surface); border: 1px solid var(--border); padding: 8px 20px;
+            border-radius: 28px; font-weight: 600; color: var(--text-secondary); cursor: pointer;
+            transition: var(--transition); font-size: 0.85rem; white-space: nowrap;
+        }
+        .category-pill.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .category-pill:active { transform: scale(0.95); }
+
+        /* Books Grid */
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 24px;
+            margin-top: 8px;
+        }
+        .book-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+        }
+        .book-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 30px -10px rgba(0,0,0,0.1);
+        }
+        .book-cover {
+            position: relative;
+            width: 100%;
+            padding-top: 140%; /* 5:7 aspect ratio */
+            background: var(--primary-light);
+            overflow: hidden;
+            cursor: pointer;
+        }
+        .book-cover img {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+        .book-card:hover .book-cover img { transform: scale(1.04); }
+        .book-cover-placeholder {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary-light), var(--surface));
+        }
+        .book-cover-placeholder i {
+            font-size: 3.5rem;
+            color: var(--primary);
+            opacity: 0.5;
+        }
+        .book-card-content {
+            padding: 18px 20px 20px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+        .book-card-content h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .book-card-content .meta {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+        .book-card-content .description {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 18px;
+            flex: 1;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .book-card-footer {
+            margin-top: auto;
+        }
+        .book-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 10px 18px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+        }
+        .book-btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        .book-btn-primary:hover { background: #2563eb; }
+        .book-btn:disabled {
+            background: var(--border);
+            color: var(--text-secondary);
+            cursor: not-allowed;
+        }
+
+        .loading-state, .no-results { text-align: center; padding: 40px; color: var(--text-secondary); }
+        footer { margin-top: auto; padding: 24px 0; text-align: center; color: var(--text-secondary); border-top: 1px solid var(--border); font-size: 0.8rem; }
+
+        @media (max-width: 600px) {
+            .books-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; }
+            .book-card-content { padding: 14px 16px 16px; }
+            .book-card-content h3 { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle Theme"><i class="fas fa-moon"></i></button>
+
+    <header class="header">
+        <div class="container nav-container">
+            <a href="index.html" class="logo"><i class="fas fa-bolt"></i><span class="logo-text">Free Lite <span class="logo-highlight">Mods</span></span></a>
+            <nav class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="news.html">News</a>
+                <a href="videos.html">Videos</a>
+                <a href="gallery.html">Images</a>
+                <a href="stories.html">Stories</a>
+                <a href="music.html">Music</a>
+                <a href="books.html" class="active">Books</a>
+                <a href="guides.html">Guides</a>
+            </nav>
+            <button class="mobile-menu-toggle" id="mobileToggle" aria-label="Open Menu"><i class="fas fa-bars"></i></button>
+        </div>
+    </header>
+
+    <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+    <div class="mobile-menu-sidebar" id="mobileMenuSidebar">
+        <div class="mobile-menu-header"><span class="logo-text">Menu</span><button id="closeMobileMenu"><i class="fas fa-times"></i></button></div>
+        <nav class="mobile-nav-links">
+            <a href="index.html"><i class="fas fa-home"></i> Home</a>
+            <a href="news.html"><i class="fas fa-newspaper"></i> News</a>
+            <a href="videos.html"><i class="fas fa-play-circle"></i> Videos</a>
+            <a href="gallery.html"><i class="fas fa-images"></i> Images</a>
+            <a href="stories.html"><i class="fas fa-laugh-beam"></i> Stories</a>
+            <a href="music.html"><i class="fas fa-music"></i> Music</a>
+            <a href="books.html" class="active"><i class="fas fa-book"></i> Books</a>
+            <a href="guides.html"><i class="fas fa-question-circle"></i> Guides</a>
+        </nav>
+    </div>
+
+    <section class="subpage-header">
+        <div class="container">
+            <button class="back-btn" onclick="window.location.href='index.html'"><i class="fas fa-arrow-left"></i> Back to Home</button>
+            <h1><i class="fas fa-book" style="color:var(--accent-success)"></i> Free Premium PDF Books</h1>
+            <p>Download premium books across various categories — all free.</p>
+        </div>
+    </section>
+
+    <div class="container">
+        <div class="search-bar-container">
+            <i class="fas fa-search"></i>
+            <input type="text" id="bookSearch" placeholder="Search books by title or author..." autocomplete="off">
+        </div>
+        <div class="category-bar" id="bookCategories">
+            <button class="category-pill active" data-cat="all">All</button>
+            <button class="category-pill" data-cat="fiction">Fiction</button>
+            <button class="category-pill" data-cat="tech">Tech</button>
+            <button class="category-pill" data-cat="programming">Programming</button>
+            <button class="category-pill" data-cat="self-help">Self Help</button>
+            <button class="category-pill" data-cat="science">Science</button>
+        </div>
+        <div class="books-grid" id="booksGrid"><div class="loading-state"><i class="fas fa-spinner fa-spin"></i><p>Loading books...</p></div></div>
+    </div>
+
+    <footer class="footer" style="margin-top:40px;">
+        <div class="container footer-bottom">
+            <p>&copy; <span id="footerYear">2026</span> Free Lite Mods. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="supabase.js"></script>
+    <script>
+    (function() {
+        let allBooks = [];
+        let currentCat = 'all';
+        let searchQ = '';
+
+        function escapeHtml(str) { if (str == null) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+        // Fallback books if Supabase is empty or unreachable
+        function getFallbackBooks() {
+            return [
+                { id: 101, title: 'Atomic Habits', author: 'James Clear', category: 'self-help', description: 'An Easy & Proven Way to Build Good Habits & Break Bad Ones. Tiny changes, remarkable results.', cover_url: 'https://covers.openlibrary.org/b/id/10541270-L.jpg', pdf_url: '#' },
+                { id: 102, title: 'Clean Code', author: 'Robert C. Martin', category: 'programming', description: 'A Handbook of Agile Software Craftsmanship. Even bad code can function, but if code isn\'t clean, it can bring a development organization to its knees.', cover_url: 'https://covers.openlibrary.org/b/id/10541271-L.jpg', pdf_url: '#' },
+                { id: 103, title: 'Sapiens', author: 'Yuval Noah Harari', category: 'science', description: 'A Brief History of Humankind. How did our species succeed in the battle for dominance?', cover_url: 'https://covers.openlibrary.org/b/id/10541272-L.jpg', pdf_url: '#' },
+                { id: 104, title: 'The Pragmatic Programmer', author: 'David Thomas', category: 'programming', description: 'Your Journey to Mastery. Covers personal responsibility, career development, and architectural techniques.', cover_url: 'https://covers.openlibrary.org/b/id/10541273-L.jpg', pdf_url: '#' },
+                { id: 105, title: 'Hooked', author: 'Nir Eyal', category: 'tech', description: 'How to Build Habit-Forming Products. A guide to building products people love and use every day.', cover_url: 'https://covers.openlibrary.org/b/id/10541274-L.jpg', pdf_url: '#' },
+                { id: 106, title: 'The Alchemist', author: 'Paulo Coelho', category: 'fiction', description: 'A magical fable about following your dream. The story of Santiago, an Andalusian shepherd boy.', cover_url: 'https://covers.openlibrary.org/b/id/10541275-L.jpg', pdf_url: '#' }
+            ];
+        }
+
+        async function loadBooks() {
+            const grid = document.getElementById('booksGrid');
+            try {
+                if (typeof supabase !== 'undefined' && supabase.from) {
+                    const { data, error } = await supabase.from('flm_books').select('*').order('created_at', { ascending: false });
+                    if (!error && data && data.length > 0) {
+                        allBooks = data;
+                        filterAndRender();
+                        return;
+                    }
+                }
+            } catch (e) { console.warn('Supabase connection issue, loading fallback books.'); }
+            allBooks = getFallbackBooks();
+            filterAndRender();
+        }
+
+        function filterAndRender() {
+            const grid = document.getElementById('booksGrid');
+            let filtered = allBooks.filter(b => {
+                const matchCat = currentCat === 'all' || (b.category || '').toLowerCase() === currentCat;
+                const matchSearch = !searchQ || (b.title || '').toLowerCase().includes(searchQ) || (b.author || '').toLowerCase().includes(searchQ);
+                return matchCat && matchSearch;
+            });
+            if (filtered.length === 0) {
+                grid.innerHTML = '<div class="no-results"><i class="fas fa-search"></i><h3>No books found</h3></div>';
+                return;
+            }
+            grid.innerHTML = '';
+            filtered.forEach(book => {
+                const coverHtml = book.cover_url
+                    ? `<img src="${escapeHtml(book.cover_url)}" alt="Cover" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">`
+                    : '';
+                const placeholderHtml = !book.cover_url
+                    ? `<div class="book-cover-placeholder"><i class="fas fa-book-open"></i></div>`
+                    : `<div class="book-cover-placeholder" style="display:none;"><i class="fas fa-book-open"></i></div>`;
+
+                const card = document.createElement('div');
+                card.className = 'book-card';
+                card.innerHTML = `
+                    <div class="book-cover">
+                        ${coverHtml}
+                        ${placeholderHtml}
+                    </div>
+                    <div class="book-card-content">
+                        <h3>${escapeHtml(book.title)}</h3>
+                        <div class="meta">
+                            <span><i class="fas fa-user-edit"></i> ${escapeHtml(book.author || 'Unknown Author')}</span>
+                            <span style="margin-left:auto;"><i class="fas fa-tag"></i> ${escapeHtml(book.category || 'General')}</span>
+                        </div>
+                        <p class="description">${escapeHtml(book.description || 'No description available.')}</p>
+                        <div class="book-card-footer">
+                            ${book.pdf_url
+                                ? `<a href="${escapeHtml(book.pdf_url)}" target="_blank" class="book-btn book-btn-primary"><i class="fas fa-download"></i> Download PDF</a>`
+                                : `<button class="book-btn book-btn-primary" disabled><i class="fas fa-clock"></i> Coming Soon</button>`}
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        document.getElementById('bookSearch').addEventListener('input', (e) => {
+            searchQ = e.target.value.trim().toLowerCase();
+            filterAndRender();
+        });
+        document.getElementById('bookCategories').addEventListener('click', (e) => {
+            const pill = e.target.closest('.category-pill');
+            if (!pill) return;
+            document.querySelectorAll('#bookCategories .category-pill').forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+            currentCat = pill.getAttribute('data-cat');
+            filterAndRender();
+        });
+
+        // Theme + mobile menu
+        (function() {
+            const toggle = document.getElementById('themeToggle');
+            if (toggle) {
+                const html = document.documentElement;
+                const saved = localStorage.getItem('theme') || 'dark';
+                html.setAttribute('data-theme', saved);
+                toggle.innerHTML = saved === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+                toggle.addEventListener('click', () => {
+                    const isDark = html.getAttribute('data-theme') === 'dark';
+                    const newTheme = isDark ? 'light' : 'dark';
+                    html.setAttribute('data-theme', newTheme);
+                    localStorage.setItem('theme', newTheme);
+                    toggle.innerHTML = newTheme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+                });
+            }
+            const body = document.body;
+            document.getElementById('mobileToggle').addEventListener('click', () => body.classList.add('mobile-menu-open'));
+            document.getElementById('closeMobileMenu').addEventListener('click', () => body.classList.remove('mobile-menu-open'));
+            document.getElementById('mobileMenuOverlay').addEventListener('click', () => body.classList.remove('mobile-menu-open'));
+        })();
+
+        document.getElementById('footerYear').textContent = new Date().getFullYear();
+        loadBooks();
+    })();
+    </script>
+</body>
+</html>

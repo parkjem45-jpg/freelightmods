@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Browse our curated image gallery — AI art, wallpapers, and more.">
+    <title>Image Gallery • Free Lite Mods</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle Theme"><i class="fas fa-moon"></i></button>
+
+    <header class="header">
+        <div class="container nav-container">
+            <a href="index.html" class="logo"><i class="fas fa-bolt"></i><span class="logo-text">Free Lite <span class="logo-highlight">Mods</span></span></a>
+            <nav class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="news.html">News</a>
+                <a href="videos.html">Videos</a>
+                <a href="gallery.html" class="active">Images</a>
+                <a href="stories.html">Stories</a>
+                <a href="music.html">Music</a>
+                <a href="books.html">Books</a>
+                <a href="guides.html">Guides</a>
+            </nav>
+            <button class="mobile-menu-toggle" id="mobileToggle" aria-label="Open Menu"><i class="fas fa-bars"></i></button>
+        </div>
+    </header>
+
+    <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+    <div class="mobile-menu-sidebar" id="mobileMenuSidebar">
+        <div class="mobile-menu-header"><span class="logo-text">Menu</span><button id="closeMobileMenu"><i class="fas fa-times"></i></button></div>
+        <nav class="mobile-nav-links">
+            <a href="index.html"><i class="fas fa-home"></i> Home</a>
+            <a href="news.html"><i class="fas fa-newspaper"></i> News</a>
+            <a href="videos.html"><i class="fas fa-play-circle"></i> Videos</a>
+            <a href="gallery.html" class="active"><i class="fas fa-images"></i> Images</a>
+            <a href="stories.html"><i class="fas fa-laugh-beam"></i> Stories</a>
+            <a href="music.html"><i class="fas fa-music"></i> Music</a>
+            <a href="books.html"><i class="fas fa-book"></i> Books</a>
+            <a href="guides.html"><i class="fas fa-question-circle"></i> Guides</a>
+        </nav>
+    </div>
+
+    <section class="subpage-header">
+        <div class="container">
+            <button class="back-btn" onclick="window.location.href='index.html'"><i class="fas fa-arrow-left"></i> Back to Home</button>
+            <h1><i class="fas fa-images" style="color:var(--accent-pink)"></i> Image Gallery</h1>
+            <p>Curated collection of AI art, wallpapers, screenshots and more.</p>
+        </div>
+    </section>
+
+    <div class="container">
+        <div class="category-bar" id="galleryCategories">
+            <button class="category-pill active" data-cat="all">All</button>
+            <button class="category-pill" data-cat="ai-art">AI Art</button>
+            <button class="category-pill" data-cat="wallpaper">Wallpapers</button>
+            <button class="category-pill" data-cat="screenshot">Screenshots</button>
+            <button class="category-pill" data-cat="meme">Memes</button>
+            <button class="category-pill" data-cat="other">Other</button>
+        </div>
+        <div class="gallery-masonry" id="galleryGrid"><div class="loading-state" style="grid-column:1/-1;"><i class="fas fa-spinner fa-spin"></i><p>Loading gallery...</p></div></div>
+    </div>
+
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox">
+        <button class="lightbox-close" onclick="closeLightbox()"><i class="fas fa-times"></i></button>
+        <button class="lightbox-nav lightbox-prev" onclick="navLightbox(-1)"><i class="fas fa-chevron-left"></i></button>
+        <img id="lightboxImg" src="" alt="">
+        <button class="lightbox-nav lightbox-next" onclick="navLightbox(1)"><i class="fas fa-chevron-right"></i></button>
+    </div>
+
+    <footer class="footer" style="margin-top:40px;">
+        <div class="container footer-bottom">
+            <p>&copy; <span id="footerYear">2026</span> Free Lite Mods. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="supabase.js"></script>
+    <script>
+    (function() {
+        let allImages = [];
+        let filteredImages = [];
+        let currentCat = 'all';
+        let lightboxIndex = 0;
+
+        function escapeHtml(str) { if (str == null) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+        async function loadGallery() {
+            const grid = document.getElementById('galleryGrid');
+            try {
+                if (typeof supabase === 'undefined') throw new Error('Supabase not loaded');
+                const { data, error } = await supabase.from('flm_gallery').select('*').order('created_at', { ascending: false });
+                if (error) throw error;
+                allImages = data || [];
+                if (allImages.length === 0) {
+                    grid.innerHTML = '<div class="no-results" style="grid-column:1/-1;"><i class="fas fa-images"></i><h3>No images yet</h3><p>Admin can upload images from the panel.</p></div>';
+                    return;
+                }
+                filterAndRender();
+            } catch (e) {
+                grid.innerHTML = '<div class="no-results" style="grid-column:1/-1;"><i class="fas fa-images"></i><h3>No images yet</h3><p>Admin can upload images from the panel.</p></div>';
+            }
+        }
+
+        function filterAndRender() {
+            const grid = document.getElementById('galleryGrid');
+            filteredImages = allImages.filter(img => currentCat === 'all' || (img.category || '').toLowerCase() === currentCat);
+            if (filteredImages.length === 0) {
+                grid.innerHTML = '<div class="no-results" style="grid-column:1/-1;"><i class="fas fa-search"></i><h3>No images in this category</h3></div>';
+                return;
+            }
+            grid.innerHTML = '';
+            filteredImages.forEach((item, idx) => {
+                const div = document.createElement('div');
+                div.className = 'gallery-item';
+                div.onclick = () => openLightbox(idx);
+                div.innerHTML =
+                    '<img src="' + escapeHtml(item.image_url) + '" alt="' + escapeHtml(item.title || '') + '" loading="lazy" onerror="this.style.display=\'none\';this.parentElement.innerHTML=\'<div style=\\'padding:40px;text-align:center;color:var(--text-secondary)\\'><i class=\\'fas fa-image\\' style=\\'font-size:2rem\\'></i></div>\';">' +
+                    '<div class="gallery-item-overlay"><h4>' + escapeHtml(item.title || 'Untitled') + '</h4>' + (item.category ? '<span>' + escapeHtml(item.category) + '</span>' : '') + '</div>';
+                grid.appendChild(div);
+            });
+        }
+
+        window.openLightbox = function(idx) {
+            lightboxIndex = idx;
+            document.getElementById('lightboxImg').src = filteredImages[idx].image_url;
+            document.getElementById('lightbox').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        };
+
+        window.closeLightbox = function() {
+            document.getElementById('lightbox').classList.remove('active');
+            document.body.style.overflow = '';
+        };
+
+        window.navLightbox = function(dir) {
+            lightboxIndex += dir;
+            if (lightboxIndex < 0) lightboxIndex = filteredImages.length - 1;
+            if (lightboxIndex >= filteredImages.length) lightboxIndex = 0;
+            document.getElementById('lightboxImg').src = filteredImages[lightboxIndex].image_url;
+        };
+
+        document.getElementById('lightbox').addEventListener('click', (e) => { if (e.target.id === 'lightbox') closeLightbox(); });
+        document.addEventListener('keydown', (e) => {
+            const lb = document.getElementById('lightbox');
+            if (!lb.classList.contains('active')) return;
+            if (e.key === 'Escape') closeLightbox();
+            if (e.key === 'ArrowLeft') navLightbox(-1);
+            if (e.key === 'ArrowRight') navLightbox(1);
+        });
+
+        document.getElementById('galleryCategories').addEventListener('click', (e) => {
+            const pill = e.target.closest('.category-pill');
+            if (!pill) return;
+            document.querySelectorAll('#galleryCategories .category-pill').forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+            currentCat = pill.getAttribute('data-cat');
+            filterAndRender();
+        });
+
+        (function() {
+            const toggle = document.getElementById('themeToggle');
+            if (toggle) {
+                const html = document.documentElement;
+                const saved = localStorage.getItem('theme') || 'dark';
+                html.setAttribute('data-theme', saved);
+                toggle.innerHTML = saved === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+                toggle.addEventListener('click', () => {
+                    const isDark = html.getAttribute('data-theme') === 'dark';
+                    const newTheme = isDark ? 'light' : 'dark';
+                    html.setAttribute('data-theme', newTheme);
+                    localStorage.setItem('theme', newTheme);
+                    toggle.innerHTML = newTheme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+                });
+            }
+            const body = document.body;
+            document.getElementById('mobileToggle').addEventListener('click', () => body.classList.add('mobile-menu-open'));
+            document.getElementById('closeMobileMenu').addEventListener('click', () => body.classList.remove('mobile-menu-open'));
+            document.getElementById('mobileMenuOverlay').addEventListener('click', () => body.classList.remove('mobile-menu-open'));
+        })();
+
+        document.getElementById('footerYear').textContent = new Date().getFullYear();
+        loadGallery();
+    })();
+    </script>
+</body>
+</html>

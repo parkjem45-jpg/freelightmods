@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <meta name="description" content="Question Guides — Categorized Q&A to help you navigate mods, apps, and more.">
+    <title>Question Guides • Free Lite Mods</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text: #0f172a;
+            --text-secondary: #475569;
+            --border: #e2e8f0;
+            --primary: #3b82f6;
+            --primary-light: #dbeafe;
+            --accent-cyan: #06b6d4;
+            --accent-purple: #8b5cf6;
+            --shadow: 0 4px 12px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-card: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.02);
+            --radius: 18px;
+            --radius-sm: 12px;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        [data-theme="dark"] {
+            --bg: #0b1120;
+            --surface: #1e293b;
+            --text: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border: #334155;
+            --primary: #60a5fa;
+            --primary-light: #1e3a5f;
+            --accent-cyan: #22d3ee;
+            --accent-purple: #a78bfa;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            transition: background 0.35s, color 0.35s;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 0 20px; width: 100%; }
+
+        /* Header & Navigation */
+        .header {
+            background: var(--surface);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            box-shadow: var(--shadow);
+        }
+        .nav-container { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+        .logo { display: flex; align-items: center; gap: 8px; text-decoration: none; font-weight: 700; font-size: 1.3rem; color: var(--text); }
+        .logo i { color: var(--primary); font-size: 1.6rem; }
+        .logo-highlight { color: var(--primary); }
+        .nav-links { display: flex; gap: 6px; flex-wrap: wrap; }
+        .nav-links a {
+            text-decoration: none; color: var(--text-secondary); font-weight: 500;
+            padding: 7px 13px; border-radius: 28px; transition: var(--transition); font-size: 0.9rem;
+        }
+        .nav-links a:hover, .nav-links a.active { background: var(--primary-light); color: var(--primary); }
+        .theme-toggle {
+            background: var(--surface); border: 1px solid var(--border); color: var(--text);
+            width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center;
+            justify-content: center; cursor: pointer; font-size: 1.1rem; position: fixed;
+            bottom: 24px; right: 24px; z-index: 50;
+            box-shadow: var(--shadow-card); transition: var(--transition);
+        }
+        .theme-toggle:hover { background: var(--primary-light); color: var(--primary); }
+
+        .mobile-menu-toggle { display: none; background: none; border: none; color: var(--text); font-size: 1.4rem; cursor: pointer; }
+        .mobile-menu-overlay, .mobile-menu-sidebar { display: none; }
+
+        @media (max-width: 850px) {
+            .nav-links { display: none; }
+            .mobile-menu-toggle { display: block; }
+            .mobile-menu-overlay {
+                display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 45;
+                opacity: 0; pointer-events: none; transition: opacity 0.3s;
+            }
+            .mobile-menu-sidebar {
+                display: flex; flex-direction: column; position: fixed; top: 0; right: 0; width: 270px;
+                height: 100%; background: var(--surface); z-index: 46; transform: translateX(100%);
+                transition: transform 0.3s ease; box-shadow: -5px 0 24px rgba(0,0,0,0.25);
+            }
+            body.mobile-menu-open .mobile-menu-overlay { opacity: 1; pointer-events: auto; }
+            body.mobile-menu-open .mobile-menu-sidebar { transform: translateX(0); }
+            .mobile-menu-header { display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; border-bottom: 1px solid var(--border); }
+            .mobile-nav-links { display: flex; flex-direction: column; padding: 12px; gap: 4px; }
+            .mobile-nav-links a { padding: 11px 16px; border-radius: 12px; color: var(--text); text-decoration: none; font-weight: 500; }
+            .mobile-nav-links a.active { background: var(--primary-light); color: var(--primary); }
+        }
+
+        /* Subpage header */
+        .subpage-header { padding: 28px 0 8px; text-align: center; }
+        .back-btn {
+            background: var(--primary-light); color: var(--primary); border: none; padding: 8px 18px;
+            border-radius: 28px; font-weight: 600; margin-bottom: 16px; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 6px; transition: var(--transition); font-size: 0.9rem;
+        }
+        .back-btn:hover { background: var(--primary); color: white; }
+        .subpage-header h1 { font-size: 2rem; margin-bottom: 6px; display: flex; align-items: center; justify-content: center; gap: 12px; }
+        .subpage-header p { color: var(--text-secondary); font-size: 0.95rem; }
+
+        /* Search bar */
+        .guides-search {
+            display: flex; align-items: center; background: var(--surface); border: 1px solid var(--border);
+            border-radius: 40px; padding: 0 20px; gap: 12px; max-width: 600px; margin: 24px auto;
+            box-shadow: var(--shadow); transition: box-shadow 0.3s;
+        }
+        .guides-search:focus-within { box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
+        .guides-search i { color: var(--text-secondary); font-size: 1rem; }
+        .guides-search input {
+            width: 100%; padding: 14px 0; border: none; background: transparent;
+            font-size: 1rem; outline: none; color: var(--text);
+        }
+
+        /* Category grouping */
+        .guide-category {
+            margin-bottom: 28px;
+        }
+        .guide-category h2 {
+            font-size: 1.3rem; font-weight: 700; margin-bottom: 14px;
+            display: flex; align-items: center; gap: 10px;
+            background: linear-gradient(135deg, var(--primary), var(--accent-purple));
+            -webkit-background-clip: text; background-clip: text;
+            color: transparent;
+        }
+        .guide-category h2 i { color: var(--accent-cyan); font-size: 1.2rem; }
+
+        /* Guide item (accordion) */
+        .guide-item {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            margin-bottom: 10px;
+            overflow: hidden;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+        }
+        .guide-item:hover { border-color: var(--primary); }
+        .guide-question {
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--text);
+            transition: background 0.2s;
+        }
+        .guide-question:hover { background: var(--primary-light); }
+        .guide-question span { flex: 1; }
+        .guide-question i {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            transition: transform 0.3s ease;
+        }
+        .guide-item.open .guide-question i { transform: rotate(180deg); color: var(--primary); }
+        .guide-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s;
+            background: var(--bg);
+            border-top: 0px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.7;
+        }
+        .guide-item.open .guide-answer {
+            max-height: 300px; /* enough for most answers */
+            padding: 16px 20px;
+            border-top: 1px solid var(--border);
+        }
+        .guide-answer p { margin: 0; }
+
+        .loading-state, .no-results { text-align: center; padding: 40px; color: var(--text-secondary); }
+        footer { margin-top: auto; padding: 24px 0; text-align: center; color: var(--text-secondary); border-top: 1px solid var(--border); font-size: 0.8rem; }
+
+        @media (max-width: 500px) {
+            .subpage-header h1 { font-size: 1.6rem; }
+            .guide-question { padding: 14px 16px; font-size: 0.95rem; }
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle Theme"><i class="fas fa-moon"></i></button>
+
+    <header class="header">
+        <div class="container nav-container">
+            <a href="index.html" class="logo"><i class="fas fa-bolt"></i><span class="logo-text">Free Lite <span class="logo-highlight">Mods</span></span></a>
+            <nav class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="news.html">News</a>
+                <a href="videos.html">Videos</a>
+                <a href="gallery.html">Images</a>
+                <a href="stories.html">Stories</a>
+                <a href="music.html">Music</a>
+                <a href="books.html">Books</a>
+                <a href="guides.html" class="active">Guides</a>
+            </nav>
+            <button class="mobile-menu-toggle" id="mobileToggle" aria-label="Open Menu"><i class="fas fa-bars"></i></button>
+        </div>
+    </header>
+
+    <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+    <div class="mobile-menu-sidebar" id="mobileMenuSidebar">
+        <div class="mobile-menu-header"><span class="logo-text">Menu</span><button id="closeMobileMenu"><i class="fas fa-times"></i></button></div>
+        <nav class="mobile-nav-links">
+            <a href="index.html"><i class="fas fa-home"></i> Home</a>
+            <a href="news.html"><i class="fas fa-newspaper"></i> News</a>
+            <a href="videos.html"><i class="fas fa-play-circle"></i> Videos</a>
+            <a href="gallery.html"><i class="fas fa-images"></i> Images</a>
+            <a href="stories.html"><i class="fas fa-laugh-beam"></i> Stories</a>
+            <a href="music.html"><i class="fas fa-music"></i> Music</a>
+            <a href="books.html"><i class="fas fa-book"></i> Books</a>
+            <a href="guides.html" class="active"><i class="fas fa-question-circle"></i> Guides</a>
+        </nav>
+    </div>
+
+    <section class="subpage-header">
+        <div class="container">
+            <button class="back-btn" onclick="window.location.href='index.html'"><i class="fas fa-arrow-left"></i> Back to Home</button>
+            <h1><i class="fas fa-question-circle" style="color:var(--accent-cyan)"></i> Question Guides</h1>
+            <p>Find answers to common questions about mods, apps, and using our platform.</p>
+        </div>
+    </section>
+
+    <div class="container">
+        <div class="guides-search">
+            <i class="fas fa-search"></i>
+            <input type="text" id="guidesSearch" placeholder="Search questions and answers..." autocomplete="off">
+        </div>
+        <div class="guides-list" id="guidesList"><div class="loading-state"><i class="fas fa-spinner fa-spin"></i><p>Loading guides...</p></div></div>
+    </div>
+
+    <footer class="footer">
+        <div class="container footer-bottom">
+            <p>&copy; <span id="footerYear">2026</span> Free Lite Mods. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="supabase.js"></script>
+    <script>
+    (function() {
+        let allGuides = [];
+        let searchQ = '';
+
+        function escapeHtml(str) { if (str == null) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+        async function loadGuides() {
+            try {
+                if (typeof supabase !== 'undefined' && supabase.from) {
+                    const { data, error } = await supabase.from('flm_guides').select('*').order('sort_order', { ascending: true });
+                    if (!error && data && data.length > 0) {
+                        allGuides = data;
+                        renderGuides();
+                        return;
+                    }
+                }
+            } catch (e) { console.warn('Supabase connection issue, loading fallback guides.'); }
+            // Fallback guides if Supabase fails or returns empty
+            allGuides = [
+                { id:1, category:'Getting Started', question:'How do I download a mod?', answer:'Click the Download button on any mod card. You will be taken to a download page with a countdown timer. Once the timer finishes, click the download button to start your download.', sort_order:1 },
+                { id:2, category:'Getting Started', question:'Is it safe to install modded APKs?', answer:'All mods on Free Lite Mods are scanned before publishing. However, you should always enable "Unknown Sources" in your Android settings carefully and only download from trusted sources like ours.', sort_order:2 },
+                { id:3, category:'Getting Started', question:'What is "Unknown Sources"?', answer:'It is an Android security setting that allows installation of apps from sources other than the Google Play Store. Go to Settings > Security > Unknown Sources to enable it.', sort_order:3 },
+                { id:4, category:'Troubleshooting', question:'The download link is not working', answer:'If a download link is broken, the admin may need to update it. Try again later or contact support. You can also try refreshing the page.', sort_order:4 },
+                { id:5, category:'Troubleshooting', question:'The app crashes after installing', answer:'Make sure you uninstall the original app first before installing the modded version. Also check that your device meets the minimum requirements.', sort_order:5 },
+                { id:6, category:'Account', question:'Do I need an account to download?', answer:'No, all downloads are completely free and do not require any account registration.', sort_order:6 }
+            ];
+            renderGuides();
+        }
+
+        function renderGuides() {
+            const container = document.getElementById('guidesList');
+            let guides = allGuides;
+            if (searchQ) {
+                const q = searchQ.toLowerCase();
+                guides = allGuides.filter(g =>
+                    (g.question || '').toLowerCase().includes(q) ||
+                    (g.answer || '').toLowerCase().includes(q) ||
+                    (g.category || '').toLowerCase().includes(q)
+                );
+            }
+            if (guides.length === 0) {
+                container.innerHTML = '<div class="no-results"><i class="fas fa-search"></i><h3>No results found</h3></div>';
+                return;
+            }
+            // Group by category
+            const grouped = {};
+            guides.forEach(g => {
+                const cat = g.category || 'General';
+                if (!grouped[cat]) grouped[cat] = [];
+                grouped[cat].push(g);
+            });
+            let html = '';
+            for (const [cat, items] of Object.entries(grouped)) {
+                html += '<div class="guide-category">';
+                html += '<h2><i class="fas fa-folder-open"></i> ' + escapeHtml(cat) + '</h2>';
+                items.forEach(item => {
+                    html += `
+                    <div class="guide-item" data-id="${item.id}">
+                        <div class="guide-question" onclick="toggleGuide(${item.id})">
+                            <span>${escapeHtml(item.question)}</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="guide-answer"><p>${escapeHtml(item.answer).replace(/\n/g, '<br>')}</p></div>
+                    </div>`;
+                });
+                html += '</div>';
+            }
+            container.innerHTML = html;
+        }
+
+        window.toggleGuide = function(id) {
+            const item = document.querySelector(`.guide-item[data-id="${id}"]`);
+            if (!item) return;
+            item.classList.toggle('open');
+        };
+
+        document.getElementById('guidesSearch').addEventListener('input', (e) => {
+            searchQ = e.target.value.trim().toLowerCase();
+            renderGuides();
+        });
+
+        // Theme + mobile menu
+        (function() {
+            const toggle = document.getElementById('themeToggle');
+            if (toggle) {
+                const html = document.documentElement;
+                const saved = localStorage.getItem('theme') || 'dark';
+                html.setAttribute('data-theme', saved);
+                toggle.innerHTML = saved === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+                toggle.addEventListener('click', () => {
+                    const isDark = html.getAttribute('data-theme') === 'dark';
+                    const newTheme = isDark ? 'light' : 'dark';
+                    html.setAttribute('data-theme', newTheme);
+                    localStorage.setItem('theme', newTheme);
+                    toggle.innerHTML = newTheme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+                });
+            }
+            const body = document.body;
+            document.getElementById('mobileToggle').addEventListener('click', () => body.classList.add('mobile-menu-open'));
+            document.getElementById('closeMobileMenu').addEventListener('click', () => body.classList.remove('mobile-menu-open'));
+            document.getElementById('mobileMenuOverlay').addEventListener('click', () => body.classList.remove('mobile-menu-open'));
+        })();
+
+        document.getElementById('footerYear').textContent = new Date().getFullYear();
+        loadGuides();
+    })();
+    </script>
+</body>
+</html>
