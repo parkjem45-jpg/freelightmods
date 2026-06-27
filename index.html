@@ -16,7 +16,7 @@
     <!-- Swiper CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <link rel="stylesheet" href="style.css">
-    
+
     <!-- INLINE STYLE FOR RGB SEARCH BAR (Lightweight, no external CSS, only for the search component) -->
     <style>
         /* RGB animated border & glow for search container - completely isolated,不影响原有CSS */
@@ -46,7 +46,7 @@
                 box-shadow: 0 0 5px rgba(255, 0, 102, 0.4), 0 0 8px rgba(255, 0, 102, 0.2);
             }
         }
-        
+
         .rgb-search-container {
             position: relative;
             margin-left: auto;
@@ -56,12 +56,12 @@
             background: transparent;
             transition: all 0.2s;
         }
-        
+
         .rgb-search-container:hover {
             animation: rgbFlow 1.5s infinite ease-in-out;
             transform: scale(1.02);
         }
-        
+
         .rgb-search-input {
             padding: 0.55rem 1rem 0.55rem 2.5rem;
             border-radius: 48px;
@@ -75,13 +75,13 @@
             transition: all 0.2s;
             backdrop-filter: blur(2px);
         }
-        
+
         .rgb-search-input:focus {
             width: 260px;
             background: var(--bg-secondary, #ffffff);
             animation: rgbFlow 1s infinite ease-in-out;
         }
-        
+
         .search-icon-rgb {
             position: absolute;
             left: 12px;
@@ -92,7 +92,7 @@
             font-size: 0.9rem;
             text-shadow: 0 0 2px rgba(0,0,0,0.1);
         }
-        
+
         .clear-rgb-btn {
             position: absolute;
             right: 12px;
@@ -111,12 +111,12 @@
             justify-content: center;
             transition: all 0.2s;
         }
-        
+
         .clear-rgb-btn:hover {
             background: rgba(0,0,0,0.1);
             color: #ff4444;
         }
-        
+
         /* Suggestions dropdown with subtle rgb accent */
         .rgb-suggestions {
             position: absolute;
@@ -133,7 +133,7 @@
             border: 1px solid var(--border, #e2e8f0);
             backdrop-filter: blur(8px);
         }
-        
+
         .rgb-suggestion-item {
             padding: 10px 16px;
             cursor: pointer;
@@ -144,16 +144,16 @@
             gap: 10px;
             transition: all 0.15s;
         }
-        
+
         .rgb-suggestion-item:last-child {
             border-bottom: none;
         }
-        
+
         .rgb-suggestion-item:hover {
             background: linear-gradient(90deg, rgba(255,0,102,0.08), rgba(0,102,255,0.08));
             padding-left: 20px;
         }
-        
+
         /* Scrollbar for suggestions */
         .rgb-suggestions::-webkit-scrollbar {
             width: 6px;
@@ -165,6 +165,115 @@
         .rgb-suggestions::-webkit-scrollbar-thumb {
             background: var(--accent, #3b82f6);
             border-radius: 10px;
+        }
+
+        /* ============================================================
+           ===== RGB NAV CATEGORY TAGS — PLACED IN HERO SECTION =====
+           ============================================================ */
+
+        /* Smooth HSL hue rotation — GPU accelerated, extremely lightweight */
+        @keyframes rgbHueShift {
+            0%   { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
+
+        @keyframes rgbGlowPulse {
+            0%, 100% { 
+                box-shadow: 0 0 8px  hsla(var(--tag-hue, 210), 90%, 60%, 0.5),
+                            0 0 20px hsla(var(--tag-hue, 210), 90%, 60%, 0.3),
+                            0 0 40px hsla(var(--tag-hue, 210), 90%, 60%, 0.15);
+            }
+            50% { 
+                box-shadow: 0 0 12px hsla(var(--tag-hue, 210), 90%, 65%, 0.7),
+                            0 0 28px hsla(var(--tag-hue, 210), 90%, 65%, 0.45),
+                            0 0 50px hsla(var(--tag-hue, 210), 90%, 65%, 0.25);
+            }
+        }
+
+        /* Container for hero RGB tags */
+        .hero-nav-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.65rem;
+            justify-content: center;
+            margin: 1.5rem 0 2rem 0;
+            padding: 0 0.5rem;
+        }
+
+        .hero-nav-tag {
+            position: relative;
+            padding: 0.55rem 1.2rem;
+            border-radius: 999px;
+            border: 1.5px solid hsla(var(--tag-hue, 210), 80%, 70%, 0.6);
+            background: hsla(var(--tag-hue, 210), 70%, 50%, 0.15);
+            color: #fff;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                        box-shadow 0.25s ease,
+                        background 0.2s ease;
+            /* Each tag gets its own base hue via inline style --tag-hue */
+            animation: rgbHueShift 5s linear infinite;
+            /* Stagger animation so they don't all sync — rainbow wave effect */
+            animation-delay: calc(var(--tag-index, 0) * -0.5s);
+            will-change: filter;
+            /* Neon text glow for dark hero background */
+            text-shadow: 0 0 6px hsla(var(--tag-hue, 210), 100%, 70%, 0.8),
+                        0 0 12px hsla(var(--tag-hue, 210), 100%, 60%, 0.5);
+            backdrop-filter: blur(4px);
+        }
+
+        .hero-nav-tag:hover {
+            transform: translateY(-4px) scale(1.08);
+            animation-play-state: paused;
+            filter: hue-rotate(0deg) brightness(1.2) saturate(1.4);
+            background: hsla(var(--tag-hue, 210), 80%, 55%, 0.35);
+            border-color: hsla(var(--tag-hue, 210), 90%, 75%, 0.9);
+            box-shadow: 0 8px 25px -5px hsla(var(--tag-hue, 210), 90%, 55%, 0.6),
+                        0 0 15px hsla(var(--tag-hue, 210), 100%, 65%, 0.5);
+            text-shadow: 0 0 8px hsla(var(--tag-hue, 210), 100%, 75%, 1),
+                        0 0 16px hsla(var(--tag-hue, 210), 100%, 65%, 0.7);
+        }
+
+        .hero-nav-tag.active {
+            background: hsla(var(--tag-hue, 210), 85%, 50%, 0.45);
+            border-color: hsla(var(--tag-hue, 210), 100%, 80%, 0.95);
+            animation: rgbHueShift 5s linear infinite, rgbGlowPulse 2.5s ease-in-out infinite;
+            text-shadow: 0 0 10px hsla(var(--tag-hue, 210), 100%, 80%, 1),
+                        0 0 20px hsla(var(--tag-hue, 210), 100%, 70%, 0.8);
+        }
+
+        .hero-nav-tag i {
+            font-size: 0.8rem;
+            filter: drop-shadow(0 0 3px currentColor);
+        }
+
+        /* Light mode adjustments */
+        :root:not([data-theme="dark"]) .hero-nav-tag {
+            color: #fff;
+            background: hsla(var(--tag-hue, 210), 75%, 45%, 0.25);
+            border-color: hsla(var(--tag-hue, 210), 80%, 60%, 0.5);
+        }
+
+        :root:not([data-theme="dark"]) .hero-nav-tag:hover {
+            background: hsla(var(--tag-hue, 210), 80%, 50%, 0.4);
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .hero-nav-tags {
+                gap: 0.5rem;
+                margin: 1rem 0 1.5rem 0;
+            }
+            .hero-nav-tag {
+                padding: 0.45rem 0.9rem;
+                font-size: 0.78rem;
+            }
         }
     </style>
 </head>
@@ -239,24 +348,41 @@
     <!-- Top Ad Banner (Smart Position - Above Hero) -->
     <div id="adHomeTop" class="ad-container ad-home-top" style="display:none;"></div>
 
-    <!-- Hero -->
+    <!-- ===== HERO (Text removed — RGB Nav Tags + Stats placed here) ===== -->
     <section class="hero">
         <div class="hero-glow"></div>
         <div class="container hero-content">
-            <div class="hero-badge"><i class="fas fa-check-circle"></i> Verified & Safe</div>
-            <h1 class="hero-title">
-                Premium Mods,<br>
-                <span class="animated-gradient-text">Zero Compromise</span>
-            </h1>
-            <p class="hero-description">
-                Discover a curated collection of modded APKs and games. 
-                Fast downloads, no bloatware, just pure performance.
-            </p>
-            <div class="hero-actions">
-                <a href="#apps" class="btn btn-primary"><i class="fas fa-rocket"></i> Explore Mods</a>
-                <a href="#how" class="btn btn-outline"><i class="fas fa-question-circle"></i> How it works</a>
+
+            <!-- ===== RGB NAV CATEGORY TAGS — IN HERO (marked position) ===== -->
+            <div class="hero-nav-tags" id="heroNavTags">
+                <a href="news.html" class="hero-nav-tag" style="--tag-hue: 0;   --tag-index: 0;" data-cat="news">
+                    <i class="fas fa-newspaper"></i> News
+                </a>
+                <a href="videos.html" class="hero-nav-tag" style="--tag-hue: 35;  --tag-index: 1;" data-cat="videos">
+                    <i class="fas fa-play-circle"></i> Videos
+                </a>
+                <a href="gallery.html" class="hero-nav-tag" style="--tag-hue: 70;  --tag-index: 2;" data-cat="gallery">
+                    <i class="fas fa-images"></i> Gallery
+                </a>
+                <a href="stories.html" class="hero-nav-tag" style="--tag-hue: 120; --tag-index: 3;" data-cat="stories">
+                    <i class="fas fa-laugh-beam"></i> Stories
+                </a>
+                <a href="music.html" class="hero-nav-tag" style="--tag-hue: 170; --tag-index: 4;" data-cat="music">
+                    <i class="fas fa-music"></i> Music
+                </a>
+                <a href="books.html" class="hero-nav-tag" style="--tag-hue: 220; --tag-index: 5;" data-cat="books">
+                    <i class="fas fa-book"></i> Books
+                </a>
+                <a href="guides.html" class="hero-nav-tag" style="--tag-hue: 270; --tag-index: 6;" data-cat="guides">
+                    <i class="fas fa-question-circle"></i> Guides
+                </a>
+                <a href="#how" class="hero-nav-tag" style="--tag-hue: 320; --tag-index: 7;" data-cat="how">
+                    <i class="fas fa-info-circle"></i> How it Works
+                </a>
             </div>
-            <div class="hero-stats">
+            <!-- ===== END RGB NAV TAGS ===== -->
+
+            <div class="hero-stats" style="margin-top: 0.5rem;">
                 <div class="stat-item">
                     <span class="stat-number" id="totalModsCount">0+</span>
                     <span class="stat-label">Mods Available</span>
@@ -495,7 +621,7 @@
             const suggestionsBox = document.getElementById('headerSuggestions');
             const clearBtn = document.getElementById('clearHeaderSearch');
             const mainSearch = document.getElementById('searchInput');
-            
+
             // Extract mod names from page (cards, swiper slides, etc)
             function fetchModNames() {
                 const namesSet = new Set();
@@ -521,7 +647,7 @@
                 });
                 return Array.from(namesSet);
             }
-            
+
             function updateSuggestions() {
                 const query = searchInput.value.trim().toLowerCase();
                 if (!query) {
@@ -556,7 +682,7 @@
                 });
                 suggestionsBox.style.display = 'block';
             }
-            
+
             function escapeHtml(str) {
                 return str.replace(/[&<>]/g, function(m) {
                     if (m === '&') return '&amp;';
@@ -565,7 +691,7 @@
                     return m;
                 });
             }
-            
+
             function refreshModList() {
                 const newNames = fetchModNames();
                 if (JSON.stringify(newNames) !== JSON.stringify(availableModNames)) {
@@ -573,14 +699,14 @@
                     if (searchInput.value.trim() !== '') updateSuggestions();
                 }
             }
-            
+
             if (searchInput) {
                 searchInput.addEventListener('input', updateSuggestions);
                 searchInput.addEventListener('focus', () => {
                     if (searchInput.value.trim() !== '') updateSuggestions();
                 });
             }
-            
+
             if (clearBtn) {
                 clearBtn.addEventListener('click', () => {
                     searchInput.value = '';
@@ -592,23 +718,23 @@
                     }
                 });
             }
-            
+
             document.addEventListener('click', (e) => {
                 if (searchInput && suggestionsBox && !searchInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
                     suggestionsBox.style.display = 'none';
                 }
             });
-            
+
             // Observe dynamic content loading
             const observer = new MutationObserver(() => refreshModList());
             const targetGrid = document.getElementById('appGrid');
             if (targetGrid) observer.observe(targetGrid, { childList: true, subtree: true });
             const sliderWraps = document.querySelectorAll('.swiper-wrapper');
             sliderWraps.forEach(wrap => observer.observe(wrap, { childList: true, subtree: true }));
-            
+
             setInterval(refreshModList, 2000);
             setTimeout(() => { refreshModList(); }, 1000);
-            
+
             // Also sync with main search input if user types manually
             if (mainSearch && searchInput) {
                 mainSearch.addEventListener('input', (e) => {
@@ -618,6 +744,15 @@
                     }
                 });
             }
+
+            /* ---------- Hero RGB Nav Tag Active State Toggle ---------- */
+            const heroTags = document.querySelectorAll('.hero-nav-tag');
+            heroTags.forEach(tag => {
+                tag.addEventListener('click', function() {
+                    heroTags.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
         })();
     </script>
 </body>
