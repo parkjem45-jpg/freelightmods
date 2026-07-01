@@ -1,25 +1,72 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Free Lite Mods — Premium modded APKs and games. Safe, fast, and verified.">
     <title>Free Lite Mods • Premium Modded APKs</title>
 
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-    <link rel="preconnect" href="https://www.gstatic.com">
-
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <!-- Swiper CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
+    <!-- FLM AI Dependencies (for markdown, code, math, charts) -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js">
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js">
+    </script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js">
+    </script>
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js">
+    </script>
+
+    <!-- Original style.css (unchanged) -->
     <link rel="stylesheet" href="style.css">
 
-    <!-- INLINE STYLE FOR RGB SEARCH BAR (Lightweight, no external CSS, only for the search component) -->
     <style>
-        /* RGB animated border & glow for search container - completely isolated,不影响原有CSS */
+        /* ============================================================
+           RGB NAV CATEGORY TAGS — PLACED IN HERO SECTION
+           ============================================================ */
+        @keyframes rgbHueShift {
+            0% {
+                filter: hue-rotate(0deg);
+            }
+            100% {
+                filter: hue-rotate(360deg);
+            }
+        }
+
+        @keyframes rgbGlowPulse {
+            0%,
+            100% {
+                box-shadow: 0 0 8px hsla(var(--tag-hue, 210), 90%, 60%, 0.5),
+                    0 0 20px hsla(var(--tag-hue, 210), 90%, 60%, 0.3),
+                    0 0 40px hsla(var(--tag-hue, 210), 90%, 60%, 0.15);
+            }
+            50% {
+                box-shadow: 0 0 12px hsla(var(--tag-hue, 210), 90%, 65%, 0.7),
+                    0 0 28px hsla(var(--tag-hue, 210), 90%, 65%, 0.45),
+                    0 0 50px hsla(var(--tag-hue, 210), 90%, 65%, 0.25);
+            }
+        }
+
         @keyframes rgbFlow {
             0% {
                 border-color: #ff0066;
@@ -47,6 +94,87 @@
             }
         }
 
+        .hero-nav-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.65rem;
+            justify-content: center;
+            margin: 1.5rem 0 2rem 0;
+            padding: 0 0.5rem;
+        }
+
+        .hero-nav-tag {
+            position: relative;
+            padding: 0.55rem 1.2rem;
+            border-radius: 999px;
+            border: 1.5px solid hsla(var(--tag-hue, 210), 80%, 70%, 0.6);
+            background: hsla(var(--tag-hue, 210), 70%, 50%, 0.15);
+            color: #fff;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.25s ease,
+                background 0.2s ease;
+            animation: rgbHueShift 5s linear infinite;
+            animation-delay: calc(var(--tag-index, 0) * -0.5s);
+            will-change: filter;
+            text-shadow: 0 0 6px hsla(var(--tag-hue, 210), 100%, 70%, 0.8),
+                0 0 12px hsla(var(--tag-hue, 210), 100%, 60%, 0.5);
+            backdrop-filter: blur(4px);
+        }
+
+        .hero-nav-tag:hover {
+            transform: translateY(-4px) scale(1.08);
+            animation-play-state: paused;
+            filter: hue-rotate(0deg) brightness(1.2) saturate(1.4);
+            background: hsla(var(--tag-hue, 210), 80%, 55%, 0.35);
+            border-color: hsla(var(--tag-hue, 210), 90%, 75%, 0.9);
+            box-shadow: 0 8px 25px -5px hsla(var(--tag-hue, 210), 90%, 55%, 0.6),
+                0 0 15px hsla(var(--tag-hue, 210), 100%, 65%, 0.5);
+            text-shadow: 0 0 8px hsla(var(--tag-hue, 210), 100%, 75%, 1),
+                0 0 16px hsla(var(--tag-hue, 210), 100%, 65%, 0.7);
+        }
+
+        .hero-nav-tag.active {
+            background: hsla(var(--tag-hue, 210), 85%, 50%, 0.45);
+            border-color: hsla(var(--tag-hue, 210), 100%, 80%, 0.95);
+            animation: rgbHueShift 5s linear infinite, rgbGlowPulse 2.5s ease-in-out infinite;
+            text-shadow: 0 0 10px hsla(var(--tag-hue, 210), 100%, 80%, 1),
+                0 0 20px hsla(var(--tag-hue, 210), 100%, 70%, 0.8);
+        }
+
+        .hero-nav-tag i {
+            font-size: 0.8rem;
+            filter: drop-shadow(0 0 3px currentColor);
+        }
+
+        :root:not([data-theme="dark"]) .hero-nav-tag {
+            color: #fff;
+            background: hsla(var(--tag-hue, 210), 75%, 45%, 0.25);
+            border-color: hsla(var(--tag-hue, 210), 80%, 60%, 0.5);
+        }
+
+        :root:not([data-theme="dark"]) .hero-nav-tag:hover {
+            background: hsla(var(--tag-hue, 210), 80%, 50%, 0.4);
+        }
+
+        @media (max-width: 640px) {
+            .hero-nav-tags {
+                gap: 0.5rem;
+                margin: 1rem 0 1.5rem 0;
+            }
+            .hero-nav-tag {
+                padding: 0.45rem 0.9rem;
+                font-size: 0.78rem;
+            }
+        }
+
+        /* RGB Search Bar Styles */
         .rgb-search-container {
             position: relative;
             margin-left: auto;
@@ -90,7 +218,7 @@
             color: var(--accent, #3b82f6);
             pointer-events: none;
             font-size: 0.9rem;
-            text-shadow: 0 0 2px rgba(0,0,0,0.1);
+            text-shadow: 0 0 2px rgba(0, 0, 0, 0.1);
         }
 
         .clear-rgb-btn {
@@ -113,11 +241,10 @@
         }
 
         .clear-rgb-btn:hover {
-            background: rgba(0,0,0,0.1);
+            background: rgba(0, 0, 0, 0.1);
             color: #ff4444;
         }
 
-        /* Suggestions dropdown with subtle rgb accent */
         .rgb-suggestions {
             position: absolute;
             top: 100%;
@@ -125,7 +252,7 @@
             right: 0;
             background: var(--bg-secondary, #ffffff);
             border-radius: 20px;
-            box-shadow: 0 15px 35px -10px rgba(0,0,0,0.2);
+            box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.2);
             margin-top: 10px;
             z-index: 1000;
             max-height: 320px;
@@ -150,11 +277,10 @@
         }
 
         .rgb-suggestion-item:hover {
-            background: linear-gradient(90deg, rgba(255,0,102,0.08), rgba(0,102,255,0.08));
+            background: linear-gradient(90deg, rgba(255, 0, 102, 0.08), rgba(0, 102, 255, 0.08));
             padding-left: 20px;
         }
 
-        /* Scrollbar for suggestions */
         .rgb-suggestions::-webkit-scrollbar {
             width: 6px;
         }
@@ -167,119 +293,622 @@
             border-radius: 10px;
         }
 
-        /* ============================================================
-           ===== RGB NAV CATEGORY TAGS — PLACED IN HERO SECTION =====
-           ============================================================ */
-
-        /* Smooth HSL hue rotation — GPU accelerated, extremely lightweight */
-        @keyframes rgbHueShift {
-            0%   { filter: hue-rotate(0deg); }
-            100% { filter: hue-rotate(360deg); }
+        /* FLM Chatbot — Floating popup (like Messenger) */
+        .flm-chatbot *,
+        .flm-chatbot *::before,
+        .flm-chatbot *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
+        .flm-chatbot {
+            --flm-bg: #f8fafc;
+            --flm-bg-elevated: #ffffff;
+            --flm-bg-card: #ffffff;
+            --flm-border: rgba(0, 0, 0, 0.08);
+            --flm-text: #0f172a;
+            --flm-text-secondary: #475569;
+            --flm-text-muted: #94a3b8;
+            --flm-accent: #6d28d9;
+            --flm-accent-light: #7c3aed;
+            --flm-error: #dc2626;
+            --flm-success: #16a34a;
+            --flm-warning: #d97706;
+            --flm-code-bg: #f1f5f9;
+            --flm-radius: 20px;
+            --flm-radius-sm: 12px;
+            --flm-radius-xs: 8px;
+            --flm-font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --flm-font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
-        @keyframes rgbGlowPulse {
-            0%, 100% { 
-                box-shadow: 0 0 8px  hsla(var(--tag-hue, 210), 90%, 60%, 0.5),
-                            0 0 20px hsla(var(--tag-hue, 210), 90%, 60%, 0.3),
-                            0 0 40px hsla(var(--tag-hue, 210), 90%, 60%, 0.15);
-            }
-            50% { 
-                box-shadow: 0 0 12px hsla(var(--tag-hue, 210), 90%, 65%, 0.7),
-                            0 0 28px hsla(var(--tag-hue, 210), 90%, 65%, 0.45),
-                            0 0 50px hsla(var(--tag-hue, 210), 90%, 65%, 0.25);
-            }
-        }
-
-        /* Container for hero RGB tags */
-        .hero-nav-tags {
+            font-family: var(--flm-font);
+            color: var(--flm-text);
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+            width: 400px;
+            max-width: 92vw;
+            height: 560px;
+            max-height: 80vh;
             display: flex;
-            flex-wrap: wrap;
-            gap: 0.65rem;
-            justify-content: center;
-            margin: 1.5rem 0 2rem 0;
-            padding: 0 0.5rem;
+            flex-direction: column;
+            border-radius: var(--flm-radius);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
+            background: var(--flm-bg-elevated);
+            border: 1px solid var(--flm-border);
+            overflow: hidden;
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+            transform: scale(0.92) translateY(20px);
+            opacity: 0;
+            pointer-events: none;
+            backdrop-filter: blur(2px);
+        }
+        .flm-chatbot.flm-open {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+            pointer-events: all;
+        }
+        .flm-chatbot ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        .flm-chatbot ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .flm-chatbot ::-webkit-scrollbar-thumb {
+            background: var(--flm-border);
+            border-radius: 10px;
         }
 
-        .hero-nav-tag {
-            position: relative;
-            padding: 0.55rem 1.2rem;
-            border-radius: 999px;
-            border: 1.5px solid hsla(var(--tag-hue, 210), 80%, 70%, 0.6);
-            background: hsla(var(--tag-hue, 210), 70%, 50%, 0.15);
-            color: #fff;
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.45rem;
-            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), 
-                        box-shadow 0.25s ease,
-                        background 0.2s ease;
-            /* Each tag gets its own base hue via inline style --tag-hue */
-            animation: rgbHueShift 5s linear infinite;
-            /* Stagger animation so they don't all sync — rainbow wave effect */
-            animation-delay: calc(var(--tag-index, 0) * -0.5s);
-            will-change: filter;
-            /* Neon text glow for dark hero background */
-            text-shadow: 0 0 6px hsla(var(--tag-hue, 210), 100%, 70%, 0.8),
-                        0 0 12px hsla(var(--tag-hue, 210), 100%, 60%, 0.5);
-            backdrop-filter: blur(4px);
-        }
-
-        .hero-nav-tag:hover {
-            transform: translateY(-4px) scale(1.08);
-            animation-play-state: paused;
-            filter: hue-rotate(0deg) brightness(1.2) saturate(1.4);
-            background: hsla(var(--tag-hue, 210), 80%, 55%, 0.35);
-            border-color: hsla(var(--tag-hue, 210), 90%, 75%, 0.9);
-            box-shadow: 0 8px 25px -5px hsla(var(--tag-hue, 210), 90%, 55%, 0.6),
-                        0 0 15px hsla(var(--tag-hue, 210), 100%, 65%, 0.5);
-            text-shadow: 0 0 8px hsla(var(--tag-hue, 210), 100%, 75%, 1),
-                        0 0 16px hsla(var(--tag-hue, 210), 100%, 65%, 0.7);
-        }
-
-        .hero-nav-tag.active {
-            background: hsla(var(--tag-hue, 210), 85%, 50%, 0.45);
-            border-color: hsla(var(--tag-hue, 210), 100%, 80%, 0.95);
-            animation: rgbHueShift 5s linear infinite, rgbGlowPulse 2.5s ease-in-out infinite;
-            text-shadow: 0 0 10px hsla(var(--tag-hue, 210), 100%, 80%, 1),
-                        0 0 20px hsla(var(--tag-hue, 210), 100%, 70%, 0.8);
-        }
-
-        .hero-nav-tag i {
-            font-size: 0.8rem;
-            filter: drop-shadow(0 0 3px currentColor);
-        }
-
-        /* Light mode adjustments */
-        :root:not([data-theme="dark"]) .hero-nav-tag {
-            color: #fff;
-            background: hsla(var(--tag-hue, 210), 75%, 45%, 0.25);
-            border-color: hsla(var(--tag-hue, 210), 80%, 60%, 0.5);
-        }
-
-        :root:not([data-theme="dark"]) .hero-nav-tag:hover {
-            background: hsla(var(--tag-hue, 210), 80%, 50%, 0.4);
-        }
-
-        /* Responsive */
-        @media (max-width: 640px) {
-            .hero-nav-tags {
-                gap: 0.5rem;
-                margin: 1rem 0 1.5rem 0;
+        @keyframes flm-fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
             }
-            .hero-nav-tag {
-                padding: 0.45rem 0.9rem;
-                font-size: 0.78rem;
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes flm-typingBounce {
+            0%,
+            60%,
+            100% {
+                transform: translateY(0);
+                opacity: 0.4;
+            }
+            30% {
+                transform: translateY(-6px);
+                opacity: 1;
+            }
+        }
+        @keyframes flm-cursorBlink {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0;
+            }
+        }
+        @keyframes flm-toastSlide {
+            from {
+                transform: translate3d(-50%, 20px, 0);
+                opacity: 0;
+            }
+            to {
+                transform: translate3d(-50%, 0, 0);
+                opacity: 1;
+            }
+        }
+        @keyframes flm-slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-16px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .flm-toggle-btn {
+            position: fixed;
+            bottom: 80px !important;
+            right: 24px;
+            z-index: 9998;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #6d28d9, #6366f1);
+            color: #ffffff;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 8px 30px rgba(109, 40, 217, 0.4);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        .flm-toggle-btn:hover {
+            transform: scale(1.08) rotate(4deg);
+            box-shadow: 0 10px 40px rgba(109, 40, 217, 0.5);
+        }
+
+        .flm-toggle-btn.flm-hidden {
+            transform: scale(0);
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        .flm-chatbot .flm-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+            background: linear-gradient(135deg, var(--flm-accent), #6366f1);
+            color: #fff;
+            flex-shrink: 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--flm-radius) var(--flm-radius) 0 0;
+        }
+        .flm-chatbot .flm-header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 16px;
+        }
+        .flm-chatbot .flm-header-left i {
+            font-size: 18px;
+        }
+        .flm-chatbot .flm-header-actions {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+        .flm-chatbot .flm-header-actions button {
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            color: #fff;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--flm-font);
+        }
+        .flm-chatbot .flm-header-actions button:hover {
+            background: rgba(255, 255, 255, 0.28);
+        }
+
+        .flm-chatbot .flm-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            background: var(--flm-bg);
+            scroll-behavior: smooth;
+            min-height: 0;
+        }
+        .flm-chatbot .flm-welcome {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            margin: auto;
+            padding: 20px 16px;
+            animation: flm-fadeInUp 0.6s ease;
+        }
+        .flm-chatbot .flm-welcome h2 {
+            font-size: 22px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            color: var(--flm-text);
+        }
+        .flm-chatbot .flm-welcome p {
+            color: var(--flm-text-secondary);
+            font-size: 14px;
+            max-width: 320px;
+            line-height: 1.6;
+        }
+        .flm-chatbot .flm-welcome p strong {
+            color: var(--flm-accent-light);
+            font-weight: 600;
+        }
+
+        .flm-chatbot .flm-msg {
+            display: flex;
+            flex-direction: column;
+            max-width: 88%;
+            animation: flm-fadeInUp 0.35s ease;
+            gap: 4px;
+        }
+        .flm-chatbot .flm-msg.user {
+            align-self: flex-end;
+            align-items: flex-end;
+        }
+        .flm-chatbot .flm-msg.assistant {
+            align-self: flex-start;
+            align-items: flex-start;
+            animation: flm-slideInLeft 0.4s ease;
+        }
+        .flm-chatbot .flm-msg-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            color: var(--flm-text-muted);
+            font-weight: 600;
+        }
+        .flm-chatbot .flm-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+        .flm-chatbot .flm-avatar.user-av {
+            background: linear-gradient(135deg, var(--flm-accent), #6366f1);
+            color: #fff;
+        }
+        .flm-chatbot .flm-avatar.ai-av {
+            background: linear-gradient(135deg, #0ea5e9, #7c3aed);
+            color: #fff;
+            font-size: 10px;
+        }
+        .flm-chatbot .flm-bubble {
+            padding: 12px 16px;
+            border-radius: var(--flm-radius-sm);
+            line-height: 1.65;
+            word-wrap: break-word;
+            font-size: 14px;
+        }
+        .flm-chatbot .flm-msg.user .flm-bubble {
+            background: linear-gradient(135deg, var(--flm-accent), #6366f1);
+            color: #fff;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 4px 16px rgba(109, 40, 217, 0.2);
+        }
+        .flm-chatbot .flm-msg.assistant .flm-bubble {
+            background: var(--flm-bg-card);
+            color: var(--flm-text);
+            border: 1.5px solid var(--flm-border);
+            border-bottom-left-radius: 4px;
+        }
+        .flm-chatbot .flm-timestamp {
+            font-size: 10px;
+            color: var(--flm-text-muted);
+            padding: 0 6px;
+            margin-top: 2px;
+        }
+        .flm-chatbot .flm-msg.user .flm-timestamp {
+            text-align: right;
+        }
+
+        .flm-chatbot .flm-typing {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 12px 16px;
+            background: var(--flm-bg-card);
+            border: 1.5px solid var(--flm-border);
+            border-radius: var(--flm-radius-sm);
+            border-bottom-left-radius: 4px;
+            width: fit-content;
+        }
+        .flm-chatbot .flm-typing-dot {
+            width: 6px;
+            height: 6px;
+            background: linear-gradient(135deg, var(--flm-accent), #6366f1);
+            border-radius: 50%;
+            animation: flm-typingBounce 1.5s infinite ease-in-out;
+        }
+        .flm-chatbot .flm-typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        .flm-chatbot .flm-typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        .flm-chatbot .flm-input-area {
+            border-top: 1.5px solid var(--flm-border);
+            padding: 10px 14px 14px;
+            background: var(--flm-bg-elevated);
+            flex-shrink: 0;
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+            border-radius: 0 0 var(--flm-radius) var(--flm-radius);
+        }
+        .flm-chatbot .flm-input-area textarea {
+            flex: 1;
+            background: var(--flm-bg);
+            border: 1.5px solid var(--flm-border);
+            border-radius: var(--flm-radius-xs);
+            padding: 10px 14px;
+            font-size: 14px;
+            font-family: var(--flm-font);
+            color: var(--flm-text);
+            resize: none;
+            outline: none;
+            line-height: 1.5;
+            max-height: 100px;
+            min-height: 42px;
+            transition: border-color 0.2s;
+        }
+        .flm-chatbot .flm-input-area textarea:focus {
+            border-color: var(--flm-accent);
+            box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.08);
+        }
+        .flm-chatbot .flm-input-area textarea::placeholder {
+            color: var(--flm-text-muted);
+        }
+        .flm-chatbot .flm-btn-send {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, var(--flm-accent), #6366f1);
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 16px rgba(109, 40, 217, 0.3);
+            font-family: var(--flm-font);
+        }
+        .flm-chatbot .flm-btn-send:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(109, 40, 217, 0.4);
+        }
+        .flm-chatbot .flm-btn-send:active:not(:disabled) {
+            transform: scale(0.94);
+        }
+        .flm-chatbot .flm-btn-send:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .flm-chatbot .flm-btn-stop {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: none;
+            background: var(--flm-error);
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            flex-shrink: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 16px rgba(220, 38, 38, 0.3);
+            transition: background 0.2s, transform 0.2s;
+            font-family: var(--flm-font);
+        }
+        .flm-chatbot .flm-btn-stop:hover {
+            background: #ef4444;
+        }
+
+        .flm-chatbot .flm-bubble h1,
+        .flm-chatbot .flm-bubble h2,
+        .flm-chatbot .flm-bubble h3 {
+            margin: 12px 0 6px;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+        .flm-chatbot .flm-bubble h1 {
+            font-size: 1.3em;
+        }
+        .flm-chatbot .flm-bubble h2 {
+            font-size: 1.15em;
+        }
+        .flm-chatbot .flm-bubble h3 {
+            font-size: 1em;
+        }
+        .flm-chatbot .flm-bubble p {
+            margin-bottom: 8px;
+        }
+        .flm-chatbot .flm-bubble code {
+            background: var(--flm-code-bg);
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.86em;
+            font-family: var(--flm-font-mono);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            color: #be185d;
+        }
+        .flm-chatbot .flm-bubble pre {
+            background: var(--flm-code-bg);
+            border: 1.5px solid var(--flm-border);
+            border-radius: var(--flm-radius-xs);
+            padding: 0;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        .flm-chatbot .flm-bubble pre code {
+            background: none;
+            padding: 12px 16px;
+            display: block;
+            color: var(--flm-text);
+            font-size: 0.82em;
+            line-height: 1.6;
+            border: none;
+        }
+        .flm-chatbot .flm-bubble ul,
+        .flm-chatbot .flm-bubble ol {
+            padding-left: 22px;
+            margin: 8px 0;
+        }
+        .flm-chatbot .flm-bubble li {
+            margin-bottom: 4px;
+        }
+        .flm-chatbot .flm-bubble blockquote {
+            border-left: 3px solid var(--flm-accent);
+            padding-left: 14px;
+            margin: 8px 0;
+            color: var(--flm-text-secondary);
+            font-style: italic;
+        }
+        .flm-chatbot .flm-bubble a {
+            color: var(--flm-accent-light);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .flm-chatbot .flm-bubble a:hover {
+            text-decoration: underline;
+        }
+        .flm-chatbot .flm-bubble img {
+            max-width: 100%;
+            border-radius: var(--flm-radius-xs);
+            margin: 8px 0;
+            cursor: pointer;
+        }
+
+        .flm-chatbot .flm-thinking {
+            border: 1.5px solid var(--flm-border);
+            border-left: 3px solid var(--flm-warning);
+            border-radius: var(--flm-radius-xs);
+            margin: 8px 0;
+            overflow: hidden;
+            background: rgba(217, 119, 6, 0.03);
+        }
+        .flm-chatbot .flm-thinking-summary {
+            width: 100%;
+            padding: 8px 14px;
+            cursor: pointer;
+            font-size: 12px;
+            color: var(--flm-warning);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: none;
+            border: none;
+            font-family: var(--flm-font);
+            text-align: left;
+        }
+        .flm-chatbot .flm-thinking-summary:hover {
+            background: rgba(217, 119, 6, 0.04);
+        }
+        .flm-chatbot .flm-thinking-summary .flm-chevron {
+            transition: transform 0.3s ease;
+            font-size: 9px;
+            display: inline-block;
+        }
+        .flm-chatbot .flm-thinking.open .flm-thinking-summary .flm-chevron {
+            transform: rotate(90deg);
+        }
+        .flm-chatbot .flm-thinking-content {
+            padding: 0 14px 10px;
+            font-size: 12px;
+            color: var(--flm-text-secondary);
+            display: none;
+            line-height: 1.6;
+            border-top: 1px solid var(--flm-border);
+            padding-top: 8px;
+            font-family: var(--flm-font-mono);
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        .flm-chatbot .flm-thinking.open .flm-thinking-content {
+            display: block;
+            animation: flm-fadeInUp 0.25s ease;
+        }
+
+        .flm-chatbot .flm-toast {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translate3d(-50%, 100%, 0);
+            padding: 10px 20px;
+            border-radius: var(--flm-radius-sm);
+            background: var(--flm-bg-card);
+            color: var(--flm-text);
+            border: 1.5px solid var(--flm-border);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+            font-size: 13px;
+            z-index: 100;
+            opacity: 0;
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            max-width: 90%;
+            white-space: nowrap;
+        }
+        .flm-chatbot .flm-toast.flm-show {
+            transform: translate3d(-50%, 0, 0);
+            opacity: 1;
+            animation: flm-toastSlide 0.35s ease;
+        }
+        .flm-chatbot .flm-toast.flm-success {
+            border-left: 4px solid var(--flm-success);
+        }
+        .flm-chatbot .flm-toast.flm-error {
+            border-left: 4px solid var(--flm-error);
+        }
+        .flm-chatbot .flm-toast.flm-info {
+            border-left: 4px solid var(--flm-accent);
+        }
+
+        @media (max-width: 640px) {
+            .flm-chatbot {
+                width: 92vw;
+                height: 70vh;
+                max-height: 70vh;
+                bottom: 16px;
+                right: 16px;
+                border-radius: var(--flm-radius);
+            }
+            .flm-toggle-btn {
+                bottom: 16px;
+                right: 16px;
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+        }
+        @media (max-width: 400px) {
+            .flm-chatbot .flm-messages {
+                padding: 12px;
+            }
+            .flm-chatbot .flm-bubble {
+                font-size: 13px;
+                padding: 10px 14px;
+            }
+            .flm-chatbot .flm-input-area textarea {
+                font-size: 13px;
+                padding: 8px 12px;
             }
         }
     </style>
 </head>
 <body>
 
-    <!-- Theme Toggle -->
+    <!-- Theme Toggle (website) -->
     <button class="theme-toggle" id="themeToggle" aria-label="Toggle Theme">
         <i class="fas fa-moon"></i>
     </button>
@@ -304,9 +933,10 @@
                 <a href="books.html">Books</a>
                 <a href="guides.html">Guides</a>
                 <a href="#how">How it Works</a>
+           
             </nav>
 
-            <!-- ===== ATTRACTIVE RGB SEARCH BAR (Lightweight, animated border) ===== -->
+            <!-- RGB Search Bar -->
             <div class="rgb-search-container">
                 <input type="text" id="headerSearchInput" class="rgb-search-input" placeholder="✨ Search mods..." autocomplete="off">
                 <i class="fas fa-search search-icon-rgb"></i>
@@ -339,121 +969,91 @@
             <a href="books.html"><i class="fas fa-book"></i> Books</a>
             <a href="guides.html"><i class="fas fa-question-circle"></i> Guides</a>
             <a href="#how"><i class="fas fa-info-circle"></i> How it Works</a>
+            <a href="admin.html" id="mobileAdminLink" style="display:none;"><i class="fas fa-crown"></i> Admin</a>
         </nav>
         <div class="mobile-menu-footer">
             <p>© <span id="currentYear">2026</span> Free Lite Mods</p>
         </div>
     </div>
 
-    <!-- Top Ad Banner (Smart Position - Above Hero) -->
+    <!-- Top Ad Banner -->
     <div id="adHomeTop" class="ad-container ad-home-top" style="display:none;"></div>
 
-    <!-- ===== HERO (Text removed — RGB Nav Tags + Stats placed here) ===== -->
+    <!-- Hero -->
     <section class="hero">
         <div class="hero-glow"></div>
         <div class="container hero-content">
-
-            <!-- ===== RGB NAV CATEGORY TAGS — IN HERO (marked position) ===== -->
             <div class="hero-nav-tags" id="heroNavTags">
-                <a href="news.html" class="hero-nav-tag" style="--tag-hue: 0;   --tag-index: 0;" data-cat="news">
-                    <i class="fas fa-newspaper"></i> News
-                </a>
-                <a href="videos.html" class="hero-nav-tag" style="--tag-hue: 35;  --tag-index: 1;" data-cat="videos">
-                    <i class="fas fa-play-circle"></i> Videos
-                </a>
-                <a href="gallery.html" class="hero-nav-tag" style="--tag-hue: 70;  --tag-index: 2;" data-cat="gallery">
-                    <i class="fas fa-images"></i> Gallery
-                </a>
-                <a href="stories.html" class="hero-nav-tag" style="--tag-hue: 120; --tag-index: 3;" data-cat="stories">
-                    <i class="fas fa-laugh-beam"></i> Stories
-                </a>
-                <a href="music.html" class="hero-nav-tag" style="--tag-hue: 170; --tag-index: 4;" data-cat="music">
-                    <i class="fas fa-music"></i> Music
-                </a>
-                <a href="books.html" class="hero-nav-tag" style="--tag-hue: 220; --tag-index: 5;" data-cat="books">
-                    <i class="fas fa-book"></i> Books
-                </a>
-                <a href="guides.html" class="hero-nav-tag" style="--tag-hue: 270; --tag-index: 6;" data-cat="guides">
-                    <i class="fas fa-question-circle"></i> Guides
-                </a>
-                <a href="#how" class="hero-nav-tag" style="--tag-hue: 320; --tag-index: 7;" data-cat="how">
-                    <i class="fas fa-info-circle"></i> How it Works
-                </a>
+                <a href="news.html" class="hero-nav-tag" style="--tag-hue:0;--tag-index:0;" data-cat="news"><i class="fas fa-newspaper"></i> News</a>
+                <a href="videos.html" class="hero-nav-tag" style="--tag-hue:35;--tag-index:1;" data-cat="videos"><i class="fas fa-play-circle"></i> Videos</a>
+                <a href="gallery.html" class="hero-nav-tag" style="--tag-hue:70;--tag-index:2;" data-cat="gallery"><i class="fas fa-images"></i> Gallery</a>
+                <a href="stories.html" class="hero-nav-tag" style="--tag-hue:120;--tag-index:3;" data-cat="stories"><i class="fas fa-laugh-beam"></i> Stories</a>
+                <a href="music.html" class="hero-nav-tag" style="--tag-hue:170;--tag-index:4;" data-cat="music"><i class="fas fa-music"></i> Music</a>
+                <a href="books.html" class="hero-nav-tag" style="--tag-hue:220;--tag-index:5;" data-cat="books"><i class="fas fa-book"></i> Books</a>
+                <a href="guides.html" class="hero-nav-tag" style="--tag-hue:270;--tag-index:6;" data-cat="guides"><i class="fas fa-question-circle"></i> Guides</a>
+                <a href="#how" class="hero-nav-tag" style="--tag-hue:320;--tag-index:7;" data-cat="how"><i class="fas fa-info-circle"></i> How it Works</a>
             </div>
-            <!-- ===== END RGB NAV TAGS ===== -->
-
-            
+            <div style="text-align:center;margin-top:1.5rem;">
+                <span class="hero-badge"><i class="fas fa-shield-alt"></i> 100% Safe & Verified</span>
+                <h1>Premium <span class="animated-gradient-text">Modded APKs</span><br>For Everyone</h1>
+                <p class="hero-description">Download the best modded apps and games with unlimited features, all tested for safety and performance.</p>
+                <div class="hero-actions" style="justify-content:center;">
+                    <a href="#apps" class="btn btn-primary"><i class="fas fa-download"></i> Browse Mods</a>
+                    <a href="#how" class="btn btn-outline"><i class="fas fa-info-circle"></i> How it Works</a>
+                </div>
+                <div class="hero-stats" style="justify-content:center;gap:40px;">
+                    <div class="stat-item"><span class="stat-number" id="totalModsCount">0+</span><span class="stat-label">Total Mods</span></div>
+                    <div class="stat-item"><span class="stat-number">100%</span><span class="stat-label">Virus Free</span></div>
+                    <div class="stat-item"><span class="stat-number">24/7</span><span class="stat-label">Support</span></div>
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- ===== SWIPER SLIDERS SECTION ===== -->
+    <!-- Sliders -->
     <section class="sliders-wrapper" id="sliders">
         <div class="container">
-
-            <!-- Slider 1: Popular Mod APKs -->
             <div class="slider-block">
                 <div class="section-header slider-header">
-                    <div>
-                        <h2><i class="fas fa-fire" style="color:var(--accent-orange)"></i> Popular Mod APKs</h2>
-                        <p class="section-subtitle"></p>
-                    </div>
+                    <div><h2><i class="fas fa-fire" style="color:var(--accent-orange)"></i> Popular Mod APKs</h2></div>
                 </div>
                 <div class="swiper swiper-slider-1" id="swiper1">
                     <div class="swiper-wrapper" id="sliderWrapper1">
-                        <div class="swiper-slide">
-                            <div class="slider-loading"><i class="fas fa-spinner fa-spin"></i> Loading mods...</div>
-                        </div>
+                        <div class="swiper-slide"><div class="slider-loading"><i class="fas fa-spinner fa-spin"></i> Loading mods...</div></div>
                     </div>
                     <div class="swiper-pagination swiper-pagination-1"></div>
                     <div class="swiper-button-next swiper-btn-next-1"></div>
                     <div class="swiper-button-prev swiper-btn-prev-1"></div>
                 </div>
             </div>
-
-            <!-- Slider 2: AI Images -->
             <div class="slider-block">
                 <div class="section-header slider-header">
-                    <div>
-                        <h2><i class="fas fa-robot" style="color:var(--accent-purple)"></i> AI Images</h2>
-                        <p class="section-subtitle">Curated AI-generated wallpapers, art & assets</p>
-                    </div>
+                    <div><h2><i class="fas fa-robot" style="color:var(--accent-purple)"></i> AI Images</h2></div>
                 </div>
                 <div class="swiper swiper-slider-2" id="swiper2">
                     <div class="swiper-wrapper" id="sliderWrapper2">
-                        <div class="swiper-slide">
-                            <div class="slider-loading"><i class="fas fa-spinner fa-spin"></i> Loading AI images...</div>
-                        </div>
+                        <div class="swiper-slide"><div class="slider-loading"><i class="fas fa-spinner fa-spin"></i> Loading AI images...</div></div>
                     </div>
                     <div class="swiper-pagination swiper-pagination-2"></div>
                     <div class="swiper-button-next swiper-btn-next-2"></div>
                     <div class="swiper-button-prev swiper-btn-prev-2"></div>
                 </div>
             </div>
-
-            <!-- Slider 3: Best Free PC Games -->
             <div class="slider-block">
                 <div class="section-header slider-header">
-                    <div>
-                        <h2><i class="fas fa-desktop" style="color:var(--accent-cyan)"></i> Best Free PC Games</h2>
-                        <p class="section-subtitle">Top rated PC game mods, repacks & pre-installs</p>
-                    </div>
+                    <div><h2><i class="fas fa-desktop" style="color:var(--accent-cyan)"></i> Best Free PC Games</h2></div>
                 </div>
                 <div class="swiper swiper-slider-3" id="swiper3">
                     <div class="swiper-wrapper" id="sliderWrapper3">
-                        <div class="swiper-slide">
-                            <div class="slider-loading"><i class="fas fa-spinner fa-spin"></i> Loading PC games...</div>
-                        </div>
+                        <div class="swiper-slide"><div class="slider-loading"><i class="fas fa-spinner fa-spin"></i> Loading PC games...</div></div>
                     </div>
                     <div class="swiper-pagination swiper-pagination-3"></div>
                     <div class="swiper-button-next swiper-btn-next-3"></div>
                     <div class="swiper-button-prev swiper-btn-prev-3"></div>
                 </div>
             </div>
-
         </div>
     </section>
-    <!-- ===== END SLIDERS ===== -->
 
     <!-- Search & Filter -->
     <section class="search-section" id="apps">
@@ -482,10 +1082,7 @@
                 <a href="#" class="view-all">View all <i class="fas fa-arrow-right"></i></a>
             </div>
             <div class="app-grid" id="appGrid">
-                <div class="loading-state">
-                    <i class="fas fa-spinner fa-spin"></i>
-                    <p>Loading mods...</p>
-                </div>
+                <div class="loading-state"><i class="fas fa-spinner fa-spin"></i><p>Loading mods...</p></div>
             </div>
             <div class="load-more-wrap" id="loadMoreWrap" style="display:none">
                 <button class="btn btn-outline" id="loadMoreBtn"><i class="fas fa-chevron-down"></i> Load More</button>
@@ -527,10 +1124,7 @@
     <footer class="footer">
         <div class="container footer-container">
             <div class="footer-brand">
-                <a href="#" class="logo">
-                    <i class="fas fa-bolt"></i>
-                    <span class="logo-text">Free Lite <span class="logo-highlight">Mods</span></span>
-                </a>
+                <a href="#" class="logo"><i class="fas fa-bolt"></i><span class="logo-text">Free Lite <span class="logo-highlight">Mods</span></span></a>
                 <p>Premium modded APKs, crafted for performance and safety.</p>
                 <div class="social-links">
                     <a href="#" aria-label="Telegram"><i class="fab fa-telegram"></i></a>
@@ -566,42 +1160,606 @@
         </div>
     </footer>
 
-    <!-- AI Assistant -->
-    <div class="ai-assistant" id="aiAssistant">
-        <button class="ai-toggle" id="aiToggle" aria-label="Open AI Chat">
-            <i class="fas fa-robot"></i>
-        </button>
-        <div class="ai-chat-window" id="aiChatWindow" style="display:none;">
-            <div class="ai-header">
-                <span><i class="fas fa-robot"></i> AI Assistant</span>
-                <button class="ai-close" id="aiClose" aria-label="Close chat">&times;</button>
+    <!-- ============================================================
+         FLM CHATBOT – Floating popup (replaces old AI assistant)
+         ============================================================ -->
+
+    <!-- Toggle Button -->
+    <button class="flm-toggle-btn" id="flmToggle" aria-label="Open AI Chat">
+        <i class="fas fa-robot"></i>
+    </button>
+
+    <!-- Chatbot Container -->
+    <div class="flm-chatbot" id="flmChatbot">
+        <div class="flm-header">
+            <div class="flm-header-left">
+                <i class="fas fa-brain"></i>
+                <span>FLM AI</span>
             </div>
-            <div class="ai-messages" id="aiMessages">
-                <div class="ai-message bot">
-                    <i class="fas fa-robot"></i>
-                    <div>Hello! I am here to help you find the best mods. Ask me anything!</div>
-                </div>
+            <div class="flm-header-actions">
+                <button id="flmNewChat" title="New conversation"><i class="fas fa-plus"></i></button>
+                <button id="flmClose" title="Close"><i class="fas fa-times"></i></button>
             </div>
-            <div class="ai-input-area">
-                <input type="text" id="aiInput" placeholder="Type a message..." autocomplete="off">
-                <button id="aiSend" aria-label="Send message"><i class="fas fa-paper-plane"></i></button>
+        </div>
+        <div class="flm-messages" id="flmMessages">
+            <div class="flm-welcome" id="flmWelcome">
+                <h2>🤖 How can I help?</h2>
+                <p>Ask me about mods, apps, games, or website help. <strong>FLM Fast</strong> is active.</p>
             </div>
+        </div>
+        <div class="flm-toast" id="flmToast"></div>
+        <div class="flm-input-area">
+            <textarea id="flmInput" rows="1" placeholder="Message FLM AI..." autocomplete="off"></textarea>
+            <button class="flm-btn-send" id="flmSend" title="Send"><i class="fas fa-paper-plane"></i></button>
+            <button class="flm-btn-stop" id="flmStop" title="Stop"><i class="fas fa-stop"></i></button>
         </div>
     </div>
 
-    <!-- Swiper JS -->
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-    <!-- Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-    <script src="supabase.js"></script>
-    <script src="public.js"></script>
-    <!-- Home Sticky Footer Ad -->
+    <!-- Sticky Ad container -->
     <div id="adHomeSticky" class="ad-container ad-home-sticky" style="display:none;">
         <div id="adHomeStickyInner" class="ad-inner"></div>
         <button class="ad-sticky-close" id="adHomeStickyClose" aria-label="Close ad"><i class="fas fa-times"></i></button>
     </div>
 
-    <!-- Search Suggestions + RGB Search Logic (fully dynamic) -->
+    <!-- ============================================================
+         SCRIPTS
+         ============================================================ -->
+
+    <!-- Swiper JS -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js">
+    </script>
+
+    <!-- Supabase config (MUST be loaded before public.js) -->
+    <script src="supabase.js">
+    </script>
+
+    <!-- Main public.js – contains all data fetching, grid, sliders, theme, mobile menu etc. -->
+    <script src="public.js">
+    </script>
+
+    <!-- ====== FLM CHATBOT JAVASCRIPT (self‑contained) ====== -->
+    <script>
+        (function() {
+            'use strict';
+
+            const CONFIG = {
+                API_BASE: 'https://openrouter.ai/api/v1',
+                DEFAULT_API_KEY: null, // Loaded from Supabase at runtime
+                DEFAULT_MODEL: 'deepseek/deepseek-chat',
+                DEFAULT_TEMP: 0.7,
+                DEFAULT_MAX_TOKENS: 4096,
+                STORAGE_PREFIX: 'flm_ai_v7_',
+                AUTO_SAVE_INTERVAL: 4000,
+            };
+
+            // Load API key from Supabase securely
+            async function loadApiKey() {
+                if (CONFIG.DEFAULT_API_KEY) return CONFIG.DEFAULT_API_KEY;
+                if (typeof fetchSecret === 'function') {
+                    const key = await fetchSecret('openrouter_api_key');
+                    if (key) {
+                        CONFIG.DEFAULT_API_KEY = key;
+                        return key;
+                    }
+                }
+                return null;
+            }
+
+            const MODEL_NAMES = {
+                'deepseek/deepseek-chat': 'FLM Fast',
+                'deepseek/deepseek-r1': 'FLM Pro'
+            };
+
+            const state = {
+                messages: [],
+                isProcessing: false,
+                isStreaming: false,
+                abortController: null,
+                settings: {
+                    model: CONFIG.DEFAULT_MODEL,
+                    temperature: CONFIG.DEFAULT_TEMP,
+                    maxTokens: CONFIG.DEFAULT_MAX_TOKENS,
+                    systemPrompt: ''
+                },
+                memories: [],
+                isOpen: false,
+            };
+
+            const dom = {};
+            const ids = [
+                'flmToggle', 'flmChatbot', 'flmMessages', 'flmWelcome',
+                'flmInput', 'flmSend', 'flmStop', 'flmClose', 'flmNewChat',
+                'flmToast'
+            ];
+            ids.forEach(id => { dom[id] = document.getElementById(id); });
+
+            function generateId() { return 'flm_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(
+                    2, 9); }
+
+            function escapeHtml(str) {
+                if (!str) return '';
+                return String(str).replace(/[&<>]/g, function(m) {
+                    if (m === '&') return '&amp;';
+                    if (m === '<') return '&lt;';
+                    if (m === '>') return '&gt;';
+                    return m;
+                });
+            }
+
+            function formatTime(iso) {
+                const d = new Date(iso);
+                const now = new Date();
+                const diff = now - d;
+                if (diff < 60000) return 'Just now';
+                if (diff < 3600000) return Math.floor(diff / 60000) + 'm ago';
+                if (diff < 86400000) return Math.floor(diff / 3600000) + 'h ago';
+                if (diff < 604800000) return Math.floor(diff / 86400000) + 'd ago';
+                return d.toLocaleDateString();
+            }
+
+            function truncate(str, len) { return str && str.length > len ? str.slice(0, len) + '…' : (str || ''); }
+
+            function scrollToBottom() {
+                if (dom.flmMessages) {
+                    dom.flmMessages.scrollTo({ top: dom.flmMessages.scrollHeight, behavior: 'smooth' });
+                }
+            }
+
+            function autoResize(textarea) {
+                if (!textarea) return;
+                textarea.style.height = 'auto';
+                textarea.style.height = Math.min(textarea.scrollHeight, 100) + 'px';
+            }
+
+            function showToast(message, type) {
+                if (!dom.flmToast) return;
+                const t = dom.flmToast;
+                t.textContent = message;
+                t.className = 'flm-toast flm-' + (type || 'info') + ' flm-show';
+                clearTimeout(t._timeout);
+                t._timeout = setTimeout(() => { t.classList.remove('flm-show'); }, 2800);
+            }
+
+            function loadFromStorage() {
+                try {
+                    const settings = localStorage.getItem(CONFIG.STORAGE_PREFIX + 'settings');
+                    if (settings) {
+                        const parsed = JSON.parse(settings);
+                        state.settings.model = parsed.model || CONFIG.DEFAULT_MODEL;
+                        state.settings.temperature = parsed.temperature ?? CONFIG.DEFAULT_TEMP;
+                        state.settings.maxTokens = parsed.maxTokens || CONFIG.DEFAULT_MAX_TOKENS;
+                        state.settings.systemPrompt = parsed.systemPrompt || '';
+                    }
+                    const memories = localStorage.getItem(CONFIG.STORAGE_PREFIX + 'memories');
+                    if (memories) state.memories = JSON.parse(memories);
+                    const msgs = localStorage.getItem(CONFIG.STORAGE_PREFIX + 'messages');
+                    if (msgs) state.messages = JSON.parse(msgs);
+                } catch (e) { console.warn('[FLM] Storage load error:', e); }
+            }
+
+            function saveSettings() {
+                try { localStorage.setItem(CONFIG.STORAGE_PREFIX + 'settings', JSON.stringify(state.settings)); } catch
+                (e) {}
+            }
+
+            function saveMemories() {
+                try { localStorage.setItem(CONFIG.STORAGE_PREFIX + 'memories', JSON.stringify(state.memories)); } catch
+                (e) {}
+            }
+
+            function saveMessages() {
+                try { localStorage.setItem(CONFIG.STORAGE_PREFIX + 'messages', JSON.stringify(state.messages)); } catch
+                (e) {}
+            }
+
+            function renderMessages() {
+                if (!dom.flmMessages) return;
+                const container = dom.flmMessages;
+                const welcome = document.getElementById('flmWelcome');
+                if (welcome) welcome.remove();
+                const existing = container.querySelectorAll('.flm-msg, .flm-typing-indicator');
+                existing.forEach(el => el.remove());
+
+                if (!state.messages || state.messages.length === 0) {
+                    const w = document.createElement('div');
+                    w.className = 'flm-welcome';
+                    w.id = 'flmWelcome';
+                    w.innerHTML =
+                        '<h2>🤖 How can I help?</h2><p>Ask me anything about mods, apps, or games. <strong>FLM Fast</strong> &amp; <strong>FLM Pro</strong> ready.</p>';
+                    container.appendChild(w);
+                    scrollToBottom();
+                    return;
+                }
+
+                const fragment = document.createDocumentFragment();
+                state.messages.forEach(msg => {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'flm-msg ' + msg.role;
+                    if (msg.role === 'user') {
+                        wrapper.innerHTML =
+                            '<div class="flm-msg-row"><div class="flm-avatar user-av">U</div><span>You</span></div>' +
+                            '<div class="flm-bubble">' + formatMessageContent(msg.content) + '</div>' +
+                            '<div class="flm-timestamp">' + formatTime(msg.timestamp) + '</div>';
+                    } else {
+                        let bubble = '';
+                        if (msg.thinking) {
+                            bubble += '<div class="flm-thinking open">' +
+                                '<button class="flm-thinking-summary"><span class="flm-chevron">▶</span> 💭 Reasoning</button>' +
+                                '<div class="flm-thinking-content">' + escapeHtml(msg.thinking) + '</div>' +
+                                '</div>';
+                        }
+                        bubble += '<div class="flm-bubble">' + formatMessageContent(msg.content) + '</div>';
+                        wrapper.innerHTML =
+                            '<div class="flm-msg-row"><div class="flm-avatar ai-av">AI</div><span>FLM AI</span></div>' +
+                            bubble +
+                            '<div class="flm-timestamp">' + formatTime(msg.timestamp) + '</div>';
+                    }
+                    fragment.appendChild(wrapper);
+                });
+                container.appendChild(fragment);
+                attachMessageHandlers(container);
+                highlightAllCode();
+                renderAllMath();
+                scrollToBottom();
+            }
+
+            function formatMessageContent(content) {
+                if (!content) return '';
+                if (typeof content === 'string') return renderMarkdown(content);
+                if (Array.isArray(content)) {
+                    return content.map(part => {
+                        if (part.type === 'text') return renderMarkdown(part.text || '');
+                        if (part.type === 'image_url') {
+                            return '<img src="' + escapeHtml(part.image_url?.url || '') +
+                                '" alt="Image" style="max-width:100%;border-radius:12px;cursor:pointer;" loading="lazy" />';
+                        }
+                        return '';
+                    }).join('');
+                }
+                return String(content);
+            }
+
+            function renderMarkdown(text) {
+                if (!text) return '';
+                try {
+                    let html = marked.parse(text);
+                    html = html.replace(/<pre><code class="language-(\w+)">([\s\S]*?)<\/code><\/pre>/g, function(match,
+                        lang, code) {
+                        const decoded = code.trim();
+                        const escaped = escapeHtml(decoded);
+                        return '<div class="code-block-header" style="display:flex;justify-content:space-between;padding:6px 12px;background:var(--flm-code-bg);border-radius:6px 6px 0 0;font-size:11px;color:var(--flm-text-muted);font-weight:600;border-bottom:1px solid var(--flm-border);">' +
+                            '<span>' + (lang || 'text') + '</span>' +
+                            '<button class="flm-copy-btn" style="background:none;border:none;color:var(--flm-text-muted);cursor:pointer;font-size:12px;padding:2px 8px;border-radius:4px;" data-code="' +
+                            escapeHtml(decoded) + '">📋 Copy</button>' +
+                            '</div><pre><code class="language-' + (lang || 'text') + '">' + escaped +
+                            '</code></pre>';
+                    });
+                    return html;
+                } catch (e) {
+                    return escapeHtml(text);
+                }
+            }
+
+            function attachMessageHandlers(container) {
+                container.querySelectorAll('.flm-thinking-summary').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        this.closest('.flm-thinking').classList.toggle('open');
+                    });
+                });
+                container.querySelectorAll('.flm-copy-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const code = this.dataset.code || '';
+                        navigator.clipboard.writeText(code).then(() => {
+                            this.textContent = '✓ Copied';
+                            setTimeout(() => { this.textContent = '📋 Copy'; }, 2000);
+                        }).catch(() => showToast('Failed to copy', 'error'));
+                    });
+                });
+                container.querySelectorAll('.flm-bubble img').forEach(img => {
+                    img.addEventListener('click', function() {
+                        const win = window.open('', '_blank');
+                        if (win) {
+                            win.document.write(
+                                '<html><head><title>Image</title><style>body{margin:0;display:flex;align-items:center;justify-content:center;background:#0f0f0f;height:100vh;}img{max-width:90vw;max-height:90vh;border-radius:12px;}</style></head><body><img src="' +
+                                this.src + '" alt="Enlarged"></body></html>');
+                            win.document.close();
+                        }
+                    });
+                });
+            }
+
+            function highlightAllCode() {
+                document.querySelectorAll('.flm-bubble pre code').forEach(block => {
+                    try { hljs.highlightElement(block); } catch (e) {}
+                });
+            }
+
+            function renderAllMath() {
+                try {
+                    document.querySelectorAll('.flm-bubble').forEach(bubble => {
+                        renderMathInElement(bubble, {
+                            delimiters: [
+                                { left: '\\[', right: '\\]', display: true },
+                                { left: '\\(', right: '\\)', display: false },
+                                { left: '$$', right: '$$', display: true },
+                                { left: '$', right: '$', display: false }
+                            ],
+                            throwOnError: false
+                        });
+                    });
+                } catch (e) {}
+            }
+
+            function showTyping() {
+                hideTyping();
+                if (!dom.flmMessages) return;
+                const wrapper = document.createElement('div');
+                wrapper.className = 'flm-msg assistant flm-typing-indicator';
+                wrapper.id = 'flmTyping';
+                wrapper.innerHTML =
+                    '<div class="flm-msg-row"><div class="flm-avatar ai-av">AI</div><span>FLM AI</span></div><div class="flm-typing"><div class="flm-typing-dot"></div><div class="flm-typing-dot"></div><div class="flm-typing-dot"></div></div>';
+                dom.flmMessages.appendChild(wrapper);
+                scrollToBottom();
+            }
+
+            function hideTyping() {
+                const el = document.getElementById('flmTyping');
+                if (el) el.remove();
+            }
+
+            async function sendMessage() {
+                if (state.isProcessing || !dom.flmInput) return;
+                const input = dom.flmInput;
+                const text = input.value.trim();
+                if (!text) return;
+
+                const userMsg = { role: 'user', content: text, timestamp: new Date().toISOString() };
+                state.messages.push(userMsg);
+                input.value = '';
+                autoResize(input);
+                renderMessages();
+                saveMessages();
+
+                state.isProcessing = true;
+                state.isStreaming = true;
+                updateSendButton();
+                showTyping();
+
+                try {
+                    const apiMessages = buildApiMessages();
+                    const response = await callOpenRouter(apiMessages);
+                    hideTyping();
+                    const assistantMsg = {
+                        role: 'assistant',
+                        content: response.content || '',
+                        thinking: response.thinking || null,
+                        timestamp: new Date().toISOString()
+                    };
+                    state.messages.push(assistantMsg);
+                    renderMessages();
+                    saveMessages();
+                } catch (err) {
+                    hideTyping();
+                    if (err.name !== 'AbortError') {
+                        showToast('Error: ' + (err.message || 'Failed to get response'), 'error');
+                        state.messages.push({
+                            role: 'assistant',
+                            content: '❌ **Error**: ' + escapeHtml(err.message ||
+                                'Failed to get response'),
+                            timestamp: new Date().toISOString()
+                        });
+                        renderMessages();
+                        saveMessages();
+                    }
+                } finally {
+                    state.isProcessing = false;
+                    state.isStreaming = false;
+                    state.abortController = null;
+                    updateSendButton();
+                }
+            }
+
+            function buildApiMessages() {
+                const messages = [];
+                // STRICT SYSTEM PROMPT: Website help only
+                const strictSystemPrompt = "You are FLM AI, a helpful assistant for the Free Lite Mods website. You MUST ONLY answer questions related to: modded APKs, apps, games, website navigation, downloads, installation help, troubleshooting, account issues, and website features. If a user asks about anything unrelated (politics, personal life, general knowledge, math, science, coding, etc.), politely decline and say: 'I'm here to help with Free Lite Mods website topics only. Ask me about mods, apps, games, or website help!' Do not answer off-topic questions under any circumstances.";
+                
+                messages.push({ role: 'system', content: strictSystemPrompt });
+                
+                if (state.settings.systemPrompt && state.settings.systemPrompt.trim()) {
+                    messages.push({ role: 'system', content: state.settings.systemPrompt.trim() });
+                }
+                if (state.memories.length > 0) {
+                    const memText = state.memories.map(m => m.content).join('\n');
+                    messages.push({ role: 'system', content: 'User memories:\n' + memText });
+                }
+                state.messages.forEach(m => { if (m.content) messages.push({ role: m.role, content: m.content }); });
+                return messages;
+            }
+
+            async function callOpenRouter(messages) {
+                const apiKey = await loadApiKey();
+                if (!apiKey) {
+                    throw new Error('API key not available. Please check Supabase secrets table.');
+                }
+                const model = state.settings.model;
+                const temperature = parseFloat(state.settings.temperature) || CONFIG.DEFAULT_TEMP;
+                const maxTokens = parseInt(state.settings.maxTokens) || CONFIG.DEFAULT_MAX_TOKENS;
+                state.abortController = new AbortController();
+
+                const response = await fetch(CONFIG.API_BASE + '/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + apiKey,
+                        'Content-Type': 'application/json',
+                        'HTTP-Referer': window.location.origin,
+                        'X-Title': 'FLM AI'
+                    },
+                    body: JSON.stringify({ model, messages, temperature, max_tokens: maxTokens, stream: true }),
+                    signal: state.abortController.signal
+                });
+
+                if (!response.ok) {
+                    const errBody = await response.text();
+                    throw new Error('API error ' + response.status + ': ' + truncate(errBody, 200));
+                }
+
+                const reader = response.body?.getReader();
+                if (!reader) throw new Error('No response body');
+                const decoder = new TextDecoder();
+                let buffer = '',
+                    fullContent = '',
+                    fullThinking = '';
+                hideTyping();
+
+                if (!dom.flmMessages) return { content: '', thinking: null };
+                const wrapper = document.createElement('div');
+                wrapper.className = 'flm-msg assistant';
+                wrapper.id = 'flmStreaming';
+                wrapper.innerHTML =
+                    '<div class="flm-msg-row"><div class="flm-avatar ai-av">AI</div><span>FLM AI</span></div><div class="flm-bubble" id="flmStreamBubble"></div>';
+                dom.flmMessages.appendChild(wrapper);
+                const bubble = document.getElementById('flmStreamBubble');
+
+                try {
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+                        buffer += decoder.decode(value, { stream: true });
+                        const lines = buffer.split('\n');
+                        buffer = lines.pop() || '';
+                        for (const line of lines) {
+                            const trimmed = line.trim();
+                            if (!trimmed || !trimmed.startsWith('data: ')) continue;
+                            const data = trimmed.slice(6);
+                            if (data === '[DONE]') break;
+                            try {
+                                const parsed = JSON.parse(data);
+                                const delta = parsed.choices?.[0]?.delta;
+                                if (!delta) continue;
+                                if (delta.reasoning_content) fullThinking += delta.reasoning_content;
+                                if (delta.content) fullContent += delta.content;
+
+                                let html = '';
+                                if (fullThinking) {
+                                    html += '<div class="flm-thinking open">' +
+                                        '<button class="flm-thinking-summary"><span class="flm-chevron">▶</span> 💭 Reasoning</button>' +
+                                        '<div class="flm-thinking-content">' + escapeHtml(fullThinking) +
+                                        '</div>' +
+                                        '</div>';
+                                }
+                                html += renderMarkdown(fullContent);
+                                bubble.innerHTML = html +
+                                    '<span class="flm-cursor" style="animation:flm-cursorBlink 1s infinite;color:var(--flm-accent-light);font-weight:300;margin-left:1px;">|</span>';
+                                highlightAllCode();
+                                renderAllMath();
+                                attachMessageHandlers(wrapper);
+                                scrollToBottom();
+                            } catch (parseErr) { /* ignore */ }
+                        }
+                    }
+                } finally {
+                    reader.releaseLock();
+                }
+
+                const cursor = bubble?.querySelector('.flm-cursor');
+                if (cursor) cursor.remove();
+                const streamingEl = document.getElementById('flmStreaming');
+                if (streamingEl) streamingEl.remove();
+
+                return { content: fullContent, thinking: fullThinking || null };
+            }
+
+            function stopStreaming() {
+                if (state.abortController) {
+                    state.abortController.abort();
+                    state.abortController = null;
+                }
+                state.isProcessing = false;
+                state.isStreaming = false;
+                updateSendButton();
+                hideTyping();
+                const streamingEl = document.getElementById('flmStreaming');
+                if (streamingEl) streamingEl.remove();
+                showToast('Response stopped', 'info');
+            }
+
+            function updateSendButton() {
+                if (!dom.flmSend || !dom.flmStop) return;
+                if (state.isProcessing) {
+                    dom.flmSend.style.display = 'none';
+                    dom.flmStop.style.display = 'flex';
+                } else {
+                    dom.flmSend.style.display = 'flex';
+                    dom.flmStop.style.display = 'none';
+                }
+            }
+
+            function toggleChatbot(open) {
+                const isOpen = (open !== undefined) ? open : !state.isOpen;
+                state.isOpen = isOpen;
+                if (dom.flmChatbot) dom.flmChatbot.classList.toggle('flm-open', isOpen);
+                if (dom.flmToggle) dom.flmToggle.classList.toggle('flm-hidden', isOpen);
+                if (isOpen && dom.flmInput) setTimeout(() => dom.flmInput.focus(), 200);
+            }
+
+            function newConversation() {
+                if (state.messages.length > 0 && !confirm(
+                        'Start a new conversation? Current chat will be cleared.')) return;
+                state.messages = [];
+                renderMessages();
+                saveMessages();
+                if (dom.flmInput) { dom.flmInput.value = '';
+                    autoResize(dom.flmInput);
+                    dom.flmInput.focus(); }
+                showToast('New conversation started', 'info');
+            }
+
+            function bindEvents() {
+                if (dom.flmToggle) dom.flmToggle.addEventListener('click', () => toggleChatbot(true));
+                if (dom.flmClose) dom.flmClose.addEventListener('click', () => toggleChatbot(false));
+                if (dom.flmSend) dom.flmSend.addEventListener('click', sendMessage);
+                if (dom.flmStop) dom.flmStop.addEventListener('click', stopStreaming);
+                if (dom.flmInput) {
+                    dom.flmInput.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault();
+                            sendMessage(); }
+                    });
+                    dom.flmInput.addEventListener('input', function() { autoResize(this); });
+                }
+                if (dom.flmNewChat) dom.flmNewChat.addEventListener('click', newConversation);
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && state.isOpen) toggleChatbot(false);
+                });
+            }
+
+            function startAutoSave() {
+                setInterval(() => {
+                    saveMessages();
+                    saveSettings();
+                    saveMemories();
+                }, CONFIG.AUTO_SAVE_INTERVAL);
+            }
+
+            function initFLM() {
+                loadFromStorage();
+                renderMessages();
+                updateSendButton();
+                bindEvents();
+                if (state.messages.length === 0) renderMessages();
+                startAutoSave();
+                console.log('[FLM] Chatbot initialized');
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initFLM);
+            } else {
+                initFLM();
+            }
+        })();
+    </script>
+
+    <!-- ===== RGB SEARCH SUGGESTIONS + DYNAMIC MOD NAME EXTRACTION ===== -->
     <script>
         (function() {
             let availableModNames = [];
@@ -654,7 +1812,10 @@
                 unique.forEach(mod => {
                     const div = document.createElement('div');
                     div.className = 'rgb-suggestion-item';
-                    div.innerHTML = `<i class="fas fa-gem" style="color: #ff66cc; font-size: 12px;"></i> <span style="flex:1;">${escapeHtml(mod)}</span> <i class="fas fa-arrow-right" style="font-size: 10px; opacity:0.7;"></i>`;
+                    div.innerHTML =
+                        '<i class="fas fa-gem" style="color: #ff66cc; font-size: 12px;"></i> <span style="flex:1;">' +
+                        escapeHtml(mod) +
+                        '</span> <i class="fas fa-arrow-right" style="font-size: 10px; opacity:0.7;"></i>';
                     div.addEventListener('click', () => {
                         searchInput.value = mod;
                         suggestionsBox.style.display = 'none';
@@ -663,7 +1824,8 @@
                             mainSearch.dispatchEvent(new Event('input', { bubbles: true }));
                         }
                         const appsSection = document.getElementById('apps');
-                        if (appsSection) appsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        if (appsSection) appsSection.scrollIntoView({ behavior: 'smooth',
+                            block: 'start' });
                         if (clearBtn) clearBtn.style.display = 'flex';
                     });
                     suggestionsBox.appendChild(div);
@@ -708,7 +1870,8 @@
             }
 
             document.addEventListener('click', (e) => {
-                if (searchInput && suggestionsBox && !searchInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
+                if (searchInput && suggestionsBox && !searchInput.contains(e.target) && !suggestionsBox
+                    .contains(e.target)) {
                     suggestionsBox.style.display = 'none';
                 }
             });
@@ -743,5 +1906,6 @@
             });
         })();
     </script>
+
 </body>
 </html>
