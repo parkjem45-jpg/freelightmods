@@ -69,9 +69,29 @@ async function quickTest() {
     return result;
 }
 
+/* ==========================================
+   SECRETS / API KEY FETCHER
+   ========================================== */
+async function fetchSecret(key) {
+    try {
+        const { data, error } = await _client
+            .from('secrets')
+            .select('value')
+            .eq('key', key)
+            .single();
+        if (error) throw error;
+        return data?.value || null;
+    } catch (err) {
+        console.error('[Supabase] fetchSecret error:', err.message);
+        return null;
+    }
+}
+
+// Expose all helpers globally
 window.uploadTextFile = uploadTextFile;
 window.uploadFile = uploadFile;
 window.quickTest = quickTest;
 window.listFiles = listFiles;
+window.fetchSecret = fetchSecret;
 
 console.log('[Supabase] Client initialized');
