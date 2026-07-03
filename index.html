@@ -1332,8 +1332,8 @@
                     }
                     const memories = localStorage.getItem(CONFIG.STORAGE_PREFIX + 'memories');
                     if (memories) state.memories = JSON.parse(memories);
-                    const msgs = localStorage.getItem(CONFIG.STORAGE_PREFIX + 'messages');
-                    if (msgs) state.messages = JSON.parse(msgs);
+                    // CHAT CLEARED ON REFRESH - do not load messages from storage
+                    state.messages = [];
                 } catch (e) { console.warn('[FLM] Storage load error:', e); }
             }
 
@@ -1348,8 +1348,8 @@
             }
 
             function saveMessages() {
-                try { localStorage.setItem(CONFIG.STORAGE_PREFIX + 'messages', JSON.stringify(state.messages)); } catch
-                (e) {}
+                // Messages not saved - chat clears on refresh
+                return;
             }
 
             function renderMessages() {
@@ -1526,6 +1526,9 @@
                 showTyping();
 
                 try {
+                    // 3-second loading delay before AI responds
+                    await new Promise(resolve => setTimeout(resolve, 3000));
+                    
                     const apiMessages = buildApiMessages();
                     const response = await callOpenRouter(apiMessages);
                     hideTyping();
