@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>HSC English Final Suggestion 2026</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+    --primary: #6366f1;
+    --primary-dark: #4f46e5;
+    --secondary: #ec4899;
+    --accent: #06b6d4;
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface-light: #334155;
+    --text: #f1f5f9;
+    --text-muted: #94a3b8;
+    --success: #22c55e;
+    --warning: #f59e0b;
+    --glass: rgba(30, 41, 59, 0.85);
+    --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    --border: rgba(255,255,255,0.06);
+    --card-bg: rgba(255,255,255,0.03);
+    --card-hover: rgba(255,255,255,0.06);
+    --gradient-text: linear-gradient(135deg, #6366f1, #ec4899, #06b6d4);
+    --mesh-1: rgba(99, 102, 241, 0.15);
+    --mesh-2: rgba(236, 72, 153, 0.1);
+    --mesh-3: rgba(6, 182, 212, 0.05);
+}
+
+[data-theme="light"] {
+    --primary: #4f46e5;
+    --primary-dark: #4338ca;
+    --secondary: #db2777;
+    --accent: #0891b2;
+    --bg: #f8fafc;
+    --surface: #ffffff;
+    --surface-light: #f1f5f9;
+    --text: #0f172a;
+    --text-muted: #64748b;
+    --success: #16a34a;
+    --warning: #d97706;
+    --glass: rgba(255, 255, 255, 0.85);
+    --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.12);
+    --border: rgba(0,0,0,0.06);
+    --card-bg: rgba(0,0,0,0.02);
+    --card-hover: rgba(0,0,0,0.05);
+    --gradient-text: linear-gradient(135deg, #4f46e5, #db2777, #0891b2);
+    --mesh-1: rgba(99, 102, 241, 0.08);
+    --mesh-2: rgba(236, 72, 153, 0.06);
+    --mesh-3: rgba(6, 182, 212, 0.04);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { scroll-behavior: smooth; overflow-x: hidden; }
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    overflow-x: hidden;
+    min-height: 100vh;
+    transition: background 0.5s ease, color 0.5s ease;
+}
+
+.bg-mesh {
+    position: fixed; inset: 0; z-index: -1;
+    background: 
+        radial-gradient(circle at 20% 80%, var(--mesh-1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, var(--mesh-2) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, var(--mesh-3) 0%, transparent 50%);
+    animation: bgPulse 8s ease-in-out infinite alternate;
+    transition: background 0.8s ease;
+}
+@keyframes bgPulse {
+    0% { opacity: 0.5; transform: scale(1); }
+    100% { opacity: 1; transform: scale(1.1); }
+}
+
+.particles { position: fixed; inset: 0; pointer-events: none; z-index: -1; overflow: hidden; }
+.particle {
+    position: absolute; width: 4px; height: 4px;
+    background: var(--primary); border-radius: 50%; opacity: 0.3;
+    animation: floatUp linear infinite;
+}
+@keyframes floatUp {
+    0% { transform: translateY(100vh) scale(0); opacity: 0; }
+    10% { opacity: 0.3; } 90% { opacity: 0.3; }
+    100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+}
+
+/* Floating Buttons */
+.fab-group {
+    position: fixed;
+    top: 3.6rem;
+    right: 1rem;
+    z-index: 1001;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.fab {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow);
+    transition: all 0.35s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    color: var(--text);
+    font-size: 1.1rem;
+    position: relative;
+}
+.fab:hover { transform: scale(1.12); box-shadow: 0 0 20px var(--primary); }
+.fab:active { transform: scale(0.95); }
+
+.fab .tooltip {
+    position: absolute;
+    right: 56px;
+    top: 50%;
+    transform: translateY(-50%) translateX(8px);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 0.35rem 0.7rem;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.25s ease;
+}
+.fab:hover .tooltip { opacity: 1; transform: translateY(-50%) translateX(0); }
+
+.fab .sun-icon, .fab .moon-icon { position: absolute; transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55); }
+.fab .sun-icon { opacity: 0; transform: rotate(-90deg) scale(0); }
+.fab .moon-icon { opacity: 1; transform: rotate(0) scale(1); }
+[data-theme="light"] .fab .sun-icon { opacity: 1; transform: rotate(0) scale(1); }
+[data-theme="light"] .fab .moon-icon { opacity: 0; transform: rotate(90deg) scale(0); }
+
+/* View Counter */
+.view-counter {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 999;
+    background: var(--glass);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0.55rem 1rem;
+    display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+    font-size: 0.85rem; font-weight: 600;
+    transition: background 0.5s ease, border-color 0.5s ease;
+}
+.view-counter .live-dot {
+    width: 8px; height: 8px; background: #ef4444; border-radius: 50%;
+    animation: pulse 2s infinite; box-shadow: 0 0 10px #ef4444;
+}
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.2)} }
+.view-counter .count { color: var(--accent); font-variant-numeric: tabular-nums; min-width: 60px; text-align: center; }
+
+/* Header */
+.header {
+    text-align: center;
+    padding: 5.5rem 1.5rem 2rem;
+    position: relative;
+}
+.header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 6vw, 3.5rem); font-weight: 800;
+    background: var(--gradient-text);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    margin-bottom: 0.5rem;
+    animation: titleReveal 1s ease-out forwards;
+    opacity: 0; transform: translateY(20px);
+}
+.header h2 {
+    font-size: clamp(1rem, 3vw, 1.3rem); color: var(--text-muted);
+    font-weight: 400; letter-spacing: 0.1em; text-transform: uppercase;
+    animation: titleReveal 1s ease-out 0.2s forwards;
+    opacity: 0; transform: translateY(20px);
+}
+.header-badge {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    margin-top: 1.5rem; padding: 0.5rem 1.2rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 100px; font-size: 0.8rem; color: var(--primary);
+    animation: titleReveal 1s ease-out 0.4s forwards;
+    opacity: 0; transform: translateY(20px);
+    transition: background 0.5s ease, border-color 0.5s ease;
+}
+@keyframes titleReveal { to { opacity: 1; transform: translateY(0); } }
+
+/* Container */
+.container { max-width: 900px; margin: 0 auto; padding: 0 1rem 3rem; }
+
+/* Section Cards */
+.section {
+    margin-bottom: 2rem;
+    animation: fadeInUp 0.8s ease-out forwards;
+    opacity: 0; transform: translateY(30px);
+}
+.section:nth-child(1){animation-delay:0.1s}
+.section:nth-child(2){animation-delay:0.2s}
+.section:nth-child(3){animation-delay:0.3s}
+.section:nth-child(4){animation-delay:0.4s}
+
+.section-header {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    background: linear-gradient(135deg, var(--surface), var(--surface-light));
+    border-radius: 16px 16px 0 0;
+    border: 1px solid var(--border); border-bottom: none;
+    cursor: pointer; transition: all 0.3s ease;
+    position: relative; overflow: hidden;
+}
+.section-header::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+    width: 4px; background: linear-gradient(to bottom, var(--primary), var(--secondary));
+    transition: width 0.3s ease;
+}
+.section-header:hover::before { width: 6px; }
+.section-header:hover { background: linear-gradient(135deg, var(--surface-light), var(--surface)); }
+
+.section-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; flex-shrink: 0;
+}
+.section-title { font-size: 1.1rem; font-weight: 700; flex: 1; }
+.section-count {
+    font-size: 0.75rem; padding: 0.25rem 0.75rem;
+    background: rgba(99, 102, 241, 0.2); color: var(--primary);
+    border-radius: 100px; font-weight: 600;
+}
+.chevron {
+    width: 24px; height: 24px;
+    transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    opacity: 0.6;
+}
+.section.collapsed .chevron { transform: rotate(-90deg); }
+
+.section-content {
+    max-height: 3000px; overflow: hidden;
+    transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
+    opacity: 1;
+}
+.section.collapsed .section-content { max-height: 0; opacity: 0; }
+
+.card-grid {
+    display: grid; gap: 0.5rem; padding: 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border); border-top: none;
+    border-radius: 0 0 16px 16px;
+    transition: background 0.5s ease, border-color 0.5s ease;
+}
+
+/* Card Item */
+.card-item {
+    display: flex; align-items: center; gap: 1rem;
+    padding: 1rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer; position: relative; overflow: hidden;
+}
+.card-item::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, transparent, rgba(99, 102, 241, 0.06));
+    opacity: 0; transition: opacity 0.3s ease;
+}
+.card-item:hover::after { opacity: 1; }
+.card-item:hover {
+    transform: translateX(4px);
+    border-color: rgba(99, 102, 241, 0.35);
+    background: var(--card-hover);
+    box-shadow: 0 4px 20px rgba(99,102,241,0.1);
+}
+.card-item:active { transform: scale(0.98); }
+
+.card-number {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.8rem; font-weight: 700; flex-shrink: 0;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+}
+.card-text { flex: 1; font-size: 0.95rem; font-weight: 500; }
+.card-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem; }
+.card-arrow {
+    width: 20px; height: 20px; opacity: 0.4;
+    transition: all 0.3s ease; flex-shrink: 0;
+}
+.card-item:hover .card-arrow { opacity: 1; transform: translateX(3px); }
+
+/* ==========================================
+   READER MODAL
+   ========================================== */
+.modal-overlay {
+    position: fixed; inset: 0; z-index: 2000;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    display: flex; align-items: flex-end; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.35s ease;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+
+.modal-sheet {
+    width: 100%; max-width: 800px; max-height: 85vh;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 24px 24px 0 0;
+    display: flex; flex-direction: column;
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+    box-shadow: 0 -20px 60px rgba(0,0,0,0.4);
+}
+.modal-overlay.open .modal-sheet { transform: translateY(0); }
+
+@media (min-width: 640px) {
+    .modal-overlay { align-items: center; padding: 2rem; }
+    .modal-sheet { border-radius: 24px; max-height: 80vh; transform: translateY(40px) scale(0.95); }
+    .modal-overlay.open .modal-sheet { transform: translateY(0) scale(1); }
+}
+
+.modal-header {
+    display: flex; align-items: center; gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+}
+.modal-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+}
+.modal-title-wrap { flex: 1; min-width: 0; }
+.modal-title { font-size: 1.1rem; font-weight: 700; }
+.modal-subtitle { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.1rem; }
+
+.modal-close {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: var(--card-bg); border: 1px solid var(--border);
+    color: var(--text); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s ease; flex-shrink: 0;
+}
+.modal-close:hover { background: rgba(239,68,68,0.15); color: #ef4444; border-color: rgba(239,68,68,0.3); }
+
+.modal-body {
+    flex: 1; overflow-y: auto; padding: 1.5rem;
+    -webkit-overflow-scrolling: touch;
+}
+.modal-content-text {
+    font-size: 1rem; line-height: 1.9;
+    white-space: pre-wrap; word-wrap: break-word;
+    color: var(--text);
+}
+.modal-content-text p { margin-bottom: 1rem; }
+.modal-content-text strong { color: var(--primary); }
+
+/* Footer */
+.footer {
+    text-align: center; padding: 2rem 1rem;
+    color: var(--text-muted); font-size: 0.8rem;
+    border-top: 1px solid var(--border); margin-top: 2rem;
+    transition: border-color 0.5s ease;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); transition: background 0.5s ease; }
+::-webkit-scrollbar-thumb { background: var(--surface-light); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .fab { width: 44px; height: 44px; }
+    .fab-group { top: 3.4rem; right: 0.75rem; gap: 0.5rem; }
+    .fab .tooltip { display: none; }
+    .header { padding-top: 4.5rem; }
+    .modal-sheet { max-height: 88vh; border-radius: 20px 20px 0 0; }
+}
+
+@media (hover: none) {
+    .card-item:hover { transform: none; }
+    .card-item:active { transform: scale(0.98); background: rgba(99,102,241,0.08); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+</style>
+</head>
+<body>
+
+<div class="bg-mesh"></div>
+<div class="particles" id="particles"></div>
+
+<!-- Floating Buttons -->
+<div class="fab-group">
+    <button class="fab" id="themeToggle" aria-label="Toggle theme">
+        <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <span class="tooltip">Theme</span>
+    </button>
+</div>
+
+<!-- Live View Counter -->
+<div class="view-counter" id="viewCounter">
+    <span class="live-dot"></span>
+    <span>Live Viewers:</span>
+    <span class="count" id="viewCount">49,847</span>
+    <span>online</span>
+</div>
+
+<!-- Header -->
+<header class="header">
+    <h1>HSC English Final Suggestion 2026</h1>
+    <h2>English 1st Paper</h2>
+    <div class="header-badge">
+        <span>📚</span>
+        <span>4 Sections • 62 Topics</span>
+    </div>
+</header>
+
+<main class="container" id="mainContainer">
+
+    <!-- Paragraph -->
+    <div class="section" data-section="paragraph">
+        <div class="section-header" onclick="toggleSection(this)">
+            <div class="section-icon">📝</div>
+            <div class="section-title">Paragraph</div>
+            <div class="section-count">21</div>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="section-content"><div class="card-grid" id="grid-paragraph"></div></div>
+    </div>
+
+    <!-- Completing Story -->
+    <div class="section" data-section="story">
+        <div class="section-header" onclick="toggleSection(this)">
+            <div class="section-icon">📚</div>
+            <div class="section-title">Completing Story</div>
+            <div class="section-count">16</div>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="section-content"><div class="card-grid" id="grid-story"></div></div>
+    </div>
+
+    <!-- Graph/Chart -->
+    <div class="section" data-section="graph">
+        <div class="section-header" onclick="toggleSection(this)">
+            <div class="section-icon">📊</div>
+            <div class="section-title">Graph / Chart</div>
+            <div class="section-count">10</div>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="section-content"><div class="card-grid" id="grid-graph"></div></div>
+    </div>
+
+    <!-- Informal Letter -->
+    <div class="section" data-section="letter">
+        <div class="section-header" onclick="toggleSection(this)">
+            <div class="section-icon">✉️</div>
+            <div class="section-title">Informal Letter</div>
+            <div class="section-count">15</div>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="section-content"><div class="card-grid" id="grid-letter"></div></div>
+    </div>
+
+</main>
+
+<footer class="footer">
+    <p>HSC English Final Suggestion 2026 • Best of Luck! 🎯</p>
+</footer>
+
+<!-- Reader Modal -->
+<div class="modal-overlay" id="readerModal">
+    <div class="modal-sheet">
+        <div class="modal-header">
+            <div class="modal-icon" id="modalIcon">📝</div>
+            <div class="modal-title-wrap">
+                <div class="modal-title" id="modalTitle">Topic</div>
+                <div class="modal-subtitle" id="modalSubtitle">Section</div>
+            </div>
+            <button class="modal-close" onclick="closeModal()" aria-label="Close">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="modal-body" id="modalBody">
+            <div class="modal-content-text" id="modalContent"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+/* ==========================================
+   EMBEDDED CONTENT DATA
+   ========================================== */
+const contentData = {
+    paragraph: [
+`Food Adulteration
+
+Food adulteration is a serious crime in our society. It means mixing harmful substances with food items to increase profit. Adulterated food causes severe health hazards including cancer, kidney failure, and liver damage. Common adulterants include harmful chemicals in fruits, chalk powder in flour, and artificial colors in sweets. The government has enacted strict laws, but enforcement remains weak. Public awareness is crucial. We must buy food from trusted sources and check quality before consumption. Collective effort from consumers, sellers, and the government can eliminate this menace. A healthy nation depends on pure food.`,
+
+`Early Rising
+
+Early rising is a good habit that leads to success in life. The morning air is fresh and free from pollution. An early riser gets enough time to plan the day and complete tasks efficiently. Nature looks beautiful in the morning. The soft light of dawn refreshes the mind and body. Students who wake up early can study with full concentration. Many great men like Benjamin Franklin and Nelson Mandela were early risers. This habit improves health, increases productivity, and brings mental peace. We should practice early rising for a better life.`,
+
+`Price Hike
+
+Price hike means the unusual increase in the prices of essential commodities. It is a major problem in Bangladesh. The causes include shortage of supply, hoarding by dishonest traders, inflation, and global economic crisis. The poor and middle-class people suffer the most. They cannot afford basic needs like food, medicine, and education. The government should monitor markets strictly, increase production, and control inflation. Public awareness and honest business practices can also help reduce price hikes. A stable economy ensures a better life for all citizens.`,
+
+`A Wise Judge
+
+Once a greedy man stole a farmer's hen. The farmer caught him and took him to the village judge. The judge was known for his wisdom and fairness. The thief denied the accusation. The judge asked the farmer to describe the hen. The farmer said it had a red comb and laid an egg daily. The judge then asked the thief to describe the hen. The thief gave a different description. The judge immediately declared the farmer the true owner. The thief was punished. This story teaches us that truth always prevails before a wise judge.`,
+
+`Women Empowerment
+
+Women empowerment means giving women equal rights and opportunities in all spheres of life. In the past, women were confined to household chores. Today, they are contributing to education, politics, business, and science. Empowered women can change society. They bring new perspectives and balanced development. However, in rural areas, women still face discrimination, early marriage, and limited access to education. The government and NGOs are working to ensure women's rights. We must support gender equality for a prosperous and progressive nation.`,
+
+`Road Accident
+
+Road accidents have become a daily occurrence in Bangladesh. Reckless driving, over-speeding, overloading, and violation of traffic rules are the main causes. Many drivers do not have valid licenses. Unfit vehicles and poor road conditions also contribute to accidents. Every year, thousands of people lose their lives. It creates unbearable suffering for families. Strict enforcement of traffic laws, public awareness campaigns, and proper training for drivers can reduce accidents. We all must follow road safety rules to protect ourselves and others.`,
+
+`Dowry System
+
+The dowry system is a social curse in Bangladesh. It demands money or gifts from the bride's family to the groom's family during marriage. This practice turns marriage into a business transaction. Many families become bankrupt paying dowry. Women who cannot meet dowry demands face torture and even death. Although dowry is legally prohibited, it continues secretly in rural areas. Education, female empowerment, and strict legal action are necessary to eradicate this evil practice. We must promote dowry-free marriages for a civilized society.`,
+
+`Environment Pollution
+
+Environment pollution is one of the biggest threats to our planet. It includes air pollution, water pollution, soil pollution, and noise pollution. Industrial waste, vehicle emissions, plastic use, and deforestation are major causes. Pollution causes diseases like asthma, cancer, and skin problems. It also destroys ecosystems and wildlife. We must plant more trees, reduce plastic use, and use public transport. The government should enforce environmental laws strictly. Saving the environment means saving our future. Everyone has a responsibility to keep the earth clean and green.`,
+
+`Load Shedding
+
+Load shedding is the temporary disconnection of electricity supply. It has become a regular problem in Bangladesh, especially during summer. The main causes are insufficient power generation, outdated power plants, and system loss. Load shedding disrupts daily life. Students cannot study, hospitals face risks, and businesses suffer losses. Industries reduce production, affecting the economy. The government is working on power plant projects and renewable energy. We should also save electricity by using energy-efficient appliances. A reliable power supply is essential for national development.`,
+
+`Female Education
+
+Female education is the foundation of national development. Educated women can contribute to family, society, and the economy. They ensure better health and education for their children. In Bangladesh, female education has improved significantly. More girls are attending schools and universities now. However, child marriage, poverty, and social barriers still prevent many girls from getting educated. The government provides stipends and free education for girls. We must encourage and support female education to build a progressive and prosperous nation.`,
+
+`Facebook
+
+Facebook is the most popular social networking site in the world. It allows people to connect, share, and communicate easily. Users can post photos, videos, and thoughts. It helps businesses reach customers and promotes social causes. However, excessive use of Facebook has negative effects. It wastes valuable time, reduces productivity, and affects mental health. Cyberbullying and privacy issues are also serious concerns. We should use Facebook responsibly for learning, networking, and positive communication. Balance is the key to benefiting from social media.`,
+
+`Mobile Phone
+
+The mobile phone is a wonderful invention of modern science. It has changed the way we communicate. We can talk, send messages, browse the internet, and use apps from anywhere. It helps students learn, doctors treat patients remotely, and businesses operate efficiently. However, misuse of mobile phones causes problems. Excessive gaming, addiction, and using phones while driving are dangerous. Radiation from phones may also affect health. We should use mobile phones wisely for productive purposes and avoid addiction.`,
+
+`Eve-Teasing
+
+Eve-teasing is a social problem that harasses women in public places. It includes unwanted comments, gestures, and physical harassment. This evil practice makes women feel unsafe and restricts their freedom. Many girls stop going to school or college due to eve-teasing. It is a punishable offense under Bangladesh law. However, enforcement is weak. Public awareness, strict legal action, and moral education can reduce this problem. We must respect women and create a safe environment for them in every corner of society.`,
+
+`July Uprising
+
+The July Uprising of 2024 was a historic movement in Bangladesh. Students and youth led protests against discrimination and injustice. The movement started peacefully but faced brutal suppression. Despite violence, the protesters remained determined. Their courage inspired the entire nation. Eventually, the uprising brought significant political change. It proved that the power of the people is stronger than any authoritarian force. The July Uprising will be remembered as a turning point in Bangladesh's democratic history. The youth proved they are the future of the nation.`,
+
+`Artificial Intelligence
+
+Artificial Intelligence (AI) is a revolutionary technology that enables machines to think and learn like humans. It is used in healthcare, education, business, and daily life. AI-powered tools like ChatGPT help people write, research, and solve problems. Self-driving cars and medical diagnosis systems are examples of AI applications. However, AI also raises concerns about job displacement and privacy. We should embrace AI for progress while establishing ethical guidelines. The future belongs to those who can use AI responsibly and creatively.`,
+
+`Civic Engagement
+
+Civic engagement means actively participating in community and national development. It includes voting, volunteering, obeying laws, and raising social awareness. Responsible citizens contribute to a better society. They help the poor, protect the environment, and stand against injustice. In a democracy, civic engagement is essential for good governance. Young people should participate in community service and social movements. A nation develops when its citizens are aware, responsible, and engaged. We must fulfill our civic duties for a brighter Bangladesh.`,
+
+`Drug Addiction
+
+Drug addiction is a devastating problem among youth in Bangladesh. It destroys health, family, and future. Addicted persons lose their ability to work and study. Common drugs include yaba, heroin, and cannabis. Peer pressure, unemployment, and frustration lead young people to drugs. The government has established rehabilitation centers and strict laws. However, prevention is more important than cure. Parents, teachers, and society must guide youth toward positive activities. Sports, arts, and education can keep young people away from drugs. A drug-free society is essential for national progress.`,
+
+`Dengue Fever
+
+Dengue fever is a viral disease transmitted by Aedes mosquitoes. It has become a major health concern in Bangladesh, especially during the monsoon season. Symptoms include high fever, severe headache, joint pain, and rash. In severe cases, it can cause death. Preventing mosquito breeding is the most effective way to control dengue. We must keep our surroundings clean, remove stagnant water, and use mosquito nets. The government conducts awareness campaigns and fogging operations. Personal protection and community cleanliness can save lives from dengue.`,
+
+`Deforestation
+
+Deforestation means cutting down trees indiscriminately. It is a serious environmental threat in Bangladesh. Trees are cut for timber, agricultural land, and urban expansion. Deforestation causes soil erosion, climate change, loss of biodiversity, and reduced rainfall. It increases the risk of floods and droughts. The Sundarbans, our largest forest, is also under threat. We must stop illegal logging and promote afforestation. Planting trees and protecting forests is essential for ecological balance. Saving forests means saving our planet and future generations.`,
+
+`A Book Fair
+
+A book fair is a delightful gathering for book lovers. The Ekushey Boi Mela in Bangladesh is the largest book fair in the country. It is held every February to honor the Language Movement martyrs. Publishers, writers, and readers gather there. The fair offers a wide variety of books on literature, science, history, and children's stories. Cultural programs and discussions are also held. Visiting a book fair enriches our knowledge and love for reading. It inspires young minds to become writers and thinkers. A book fair is truly a festival of knowledge.`,
+
+`Climate Change
+
+Climate change is the long-term shift in global weather patterns. It is mainly caused by greenhouse gas emissions from burning fossil fuels. The effects include rising temperatures, melting glaciers, sea-level rise, and extreme weather events. Bangladesh is one of the most vulnerable countries to climate change. Coastal areas face frequent cyclones and flooding. Millions may become climate refugees. We must reduce carbon emissions, use renewable energy, and plant trees. International cooperation is also essential. Protecting the climate is protecting humanity's future.`
+    ],
+
+    story: [
+`The Dove and the Ant
+
+Once upon a time, an ant was very thirsty. It went to a river to drink water. While drinking, it slipped and fell into the water. It was struggling to save itself. A dove was sitting on a branch of a nearby tree. Seeing the ant in danger, the dove dropped a leaf into the water. The ant climbed onto the leaf and reached the shore safely. After a few days, a hunter came to the forest. He aimed his gun at the dove. The ant noticed this and bit the hunter's foot. The hunter cried out in pain and missed his aim. The dove flew away. The ant repaid the dove's kindness. Moral: A friend in need is a friend indeed.`,
+
+`An Honest Woodcutter
+
+Once there lived a poor woodcutter. He earned his living by cutting wood in the forest near a river. One day, while cutting wood, his axe slipped from his hand and fell into the river. The river was deep and he could not find his axe. He sat down by the river and began to weep. The god of the river heard his cry and appeared before him. He asked why he was crying. The woodcutter told him everything. The river god dived into the water and brought a golden axe. The woodcutter refused it. Then the god brought a silver axe. He refused that too. Finally, the god brought his iron axe. The woodcutter gladly accepted it. The god was pleased with his honesty and gave him all three axes. Moral: Honesty is the best policy.`,
+
+`The Pied Piper
+
+In the town of Hamelin, there was a terrible rat infestation. The rats were everywhere — in houses, shops, and streets. The mayor promised a large reward to anyone who could rid the town of rats. A mysterious piper appeared, dressed in colorful clothes. He played a magical tune on his pipe, and all the rats followed him to the river, where they drowned. But the mayor refused to pay. In revenge, the piper played a different tune. All the children of the town followed him out of the gates and were never seen again. The mayor learned his lesson too late. Moral: Always keep your promises.`,
+
+`Unity is Strength
+
+Once upon a time, an old farmer lived with his four sons. They always quarreled among themselves. The farmer was very worried. One day, he called all his sons and gave them a bundle of sticks. He asked them to break it. Each son tried but failed. Then the farmer untied the bundle and gave them single sticks. They broke them easily. The farmer said, "My sons, if you remain united like the bundle, nobody can harm you. But if you quarrel, you will be broken like the single sticks." The sons understood and promised to live in unity. Moral: Unity is strength.`,
+
+`Money Cannot Buy Happiness
+
+Once there was a rich man who had everything — a big house, expensive cars, and plenty of money. But he was never happy. He felt lonely and depressed. One day, he met a poor farmer who lived in a small hut. The farmer had a loving family and always smiled. The rich man asked, "How can you be so happy with so little?" The farmer replied, "I have my family, my health, and peace of mind. Money cannot buy these." The rich man realized that true happiness comes from love and contentment, not wealth. He changed his life and found joy in simple things. Moral: Money cannot buy happiness.`,
+
+`Dress Does Not Make a Man Great
+
+Once a jackal found a tiger's skin in the jungle. He wore it and began to roam around proudly. Other animals were afraid of him, thinking he was a real tiger. The jackal enjoyed the power. One day, he tried to roar like a tiger. But he could only howl like a jackal. The animals realized the truth and chased him away. The jackal learned that external appearance cannot change one's true nature. Moral: Dress does not make a man great. Character and ability matter more than appearance.`,
+
+`Nobody Believes a Liar
+
+There was a shepherd boy who looked after sheep near a village. He often felt bored. One day, he shouted, "Wolf! Wolf!" The villagers ran to help him. But there was no wolf. The boy laughed at them. He repeated this trick several times. The villagers became angry. One day, a real wolf came and attacked the sheep. The boy cried for help, but nobody came. The wolf killed many sheep. The boy realized his mistake. Moral: Nobody believes a liar, even when he tells the truth.`,
+
+`The Honesty of a Student
+
+Rahim was a poor but honest student. One day, he found a wallet containing a large amount of money on his way to school. He thought the owner must be worried. He waited there for some time. Finally, a man came searching for his wallet. Rahim asked some questions and confirmed he was the owner. He returned the wallet. The man was very grateful and offered him a reward. Rahim refused, saying honesty is its own reward. The man praised his character and promised to help him with his studies. Moral: Honesty brings respect and rewards.`,
+
+`A Wonderful Goose
+
+Once a farmer had a wonderful goose that laid a golden egg every day. The farmer became rich. But he was greedy. He thought the goose must have a lump of gold inside. He decided to kill it and get all the gold at once. He cut open the goose but found nothing. The goose died, and the golden eggs stopped coming. The farmer realized his foolishness. He lost his source of wealth because of greed. Moral: Greed brings destruction.`,
+
+`The Foolish Crow and the Clever Fox
+
+A crow found a piece of meat and sat on a tree branch. A fox saw this and wanted the meat. He flattered the crow, saying, "Your voice is so beautiful. Please sing a song for me." The foolish crow felt proud and opened its mouth to sing. The meat fell down. The fox picked it up and ran away. The crow realized its foolishness. Moral: Do not trust flatterers.`,
+
+`Slow and Steady Wins the Race
+
+Once a hare and a tortoise decided to race. The hare was very fast and confident. He ran ahead and then slept under a tree, thinking the tortoise could never catch up. The tortoise walked slowly but steadily. He never stopped. When the hare woke up, he saw the tortoise near the finish line. He ran as fast as he could, but the tortoise had already won. Moral: Slow and steady wins the race.`,
+
+`Who is to Bell the Cat?
+
+The mice in a house were troubled by a cat. Every day, the cat killed some mice. The mice held a meeting to discuss how to save themselves. One young mouse proposed, "Let us tie a bell around the cat's neck. When the bell rings, we will know the cat is coming and run away." All the mice praised the idea. Then an old mouse asked, "But who will bell the cat?" Nobody answered. Everyone was silent. Moral: It is easy to propose but difficult to execute.`,
+
+`A Thirsty Crow
+
+One hot summer day, a crow was very thirsty. It flew from place to place looking for water. At last, it found a pitcher with a little water at the bottom. The crow tried to reach the water but could not. It thought of a plan. It picked up small pebbles and dropped them into the pitcher one by one. The water level rose gradually. Finally, the crow drank the water and quenched its thirst. Moral: Where there is a will, there is a way.`,
+
+`Grapes are Sour
+
+A hungry fox saw some grapes hanging from a vine. The grapes looked ripe and delicious. The fox jumped again and again to reach them. But the grapes were too high. After many attempts, the fox gave up. As it walked away, it said, "The grapes are probably sour anyway." The fox tried to console itself by belittling what it could not get. Moral: It is easy to despise what you cannot obtain.`,
+
+`A Friend in Need is a Friend Indeed
+
+Once two friends were walking through a forest. Suddenly, a bear appeared. One friend quickly climbed a tree, leaving the other behind. The second friend did not know how to climb. He lay down on the ground and held his breath, pretending to be dead. The bear sniffed him and went away. After the bear left, the first friend came down and asked what the bear had said. The second friend replied, "The bear told me not to trust a friend who leaves you in danger." Moral: A friend in need is a friend indeed.`,
+
+`Failure is the Pillar of Success
+
+Thomas Edison failed thousands of times before inventing the light bulb. When asked about his failures, he said, "I have not failed. I have just found 10,000 ways that won't work." Failure teaches us valuable lessons. It makes us stronger and wiser. Many successful people faced repeated failures before achieving greatness. We should not fear failure. Instead, we should learn from it and try again. Every failure brings us one step closer to success. Moral: Failure is the pillar of success.`
+    ],
+
+    graph: [
+`Number of Internet Users
+
+The graph shows the number of internet users in Bangladesh from 2015 to 2025. In 2015, the number was about 40 million. It increased steadily to 65 million in 2018. By 2020, during the pandemic, the number jumped to 95 million as online activities grew. In 2022, it reached 120 million. The latest data for 2025 shows approximately 150 million internet users. The graph indicates a consistent upward trend, reflecting digital transformation in education, business, and communication. Mobile internet dominates with 85% of total users.`,
+
+`Different Types of Transportation Used by Students
+
+The pie chart shows the types of transportation used by students in a city. Public bus covers 35% — the largest share. Rickshaw accounts for 25%. Walking represents 20%. Private car is 12%. Bicycle makes up 5%, and motorcycle is 3%. The chart reveals that most students depend on public transport and non-motorized vehicles. Only a small portion uses private vehicles. This suggests the need for better public transport and safe walking infrastructure for students.`,
+
+`Monthly Income Distribution
+
+The pie chart shows how a middle-class family distributes their monthly income of 50,000 Taka. Food expenses take the largest share at 35% (17,500 Taka). House rent is 20% (10,000 Taka). Education costs 15% (7,500 Taka). Healthcare is 10% (5,000 Taka). Transportation accounts for 8% (4,000 Taka). Savings and miscellaneous expenses make up the remaining 12% (6,000 Taka). The chart highlights that food and housing consume more than half of the income.`,
+
+`Time Allocation of Students Daily Activities
+
+The bar chart illustrates how students allocate their time in a 24-hour day. Sleeping takes 7 hours. Studying occupies 6 hours. School or college time is 5 hours. Recreation and sports take 2 hours. Eating and personal care account for 2 hours. Using mobile/TV takes 1.5 hours. Traveling requires 0.5 hours. The chart shows that students spend most of their time on sleep, study, and institutional education. Recreation time is limited, suggesting a need for balanced schedules.`,
+
+`Source of Air Pollution in the City
+
+The pie chart shows the major sources of air pollution in Dhaka city. Vehicle emissions contribute the highest at 40%. Industrial pollution accounts for 25%. Dust from construction and roads is 20%. Brick kilns contribute 10%. Waste burning and other sources make up 5%. The chart clearly indicates that vehicular smoke is the primary culprit. Controlling traffic and promoting public transport can significantly reduce air pollution.`,
+
+`Choice of Profession by Educated People
+
+The bar chart shows the career preferences of educated youth. Government jobs are the most preferred at 35%. Private sector jobs attract 25%. Business/entrepreneurship is chosen by 15%. Higher studies abroad accounts for 12%. Teaching and research is 8%. Freelancing/IT sector attracts 5%. The chart reflects the strong attraction toward government jobs due to security and benefits. However, entrepreneurship is growing among educated youth.`,
+
+`Population Growth Rate
+
+The line graph shows Bangladesh's population growth rate from 1980 to 2025. In 1980, the growth rate was 2.4%. It declined to 1.8% in 2000. By 2010, it further dropped to 1.2%. In 2020, the rate was 1.0%. The projected rate for 2025 is 0.9%. The graph shows a steady decline due to education, family planning, and women's empowerment. However, the absolute population continues to increase, putting pressure on resources.`,
+
+`Literacy Rate of Bangladesh
+
+The bar chart shows the literacy rate of Bangladesh from 1991 to 2024. In 1991, it was only 35%. By 2001, it rose to 47%. In 2011, the rate reached 57%. By 2020, it jumped to 75%. The latest data for 2024 shows approximately 76.5%. The chart indicates significant progress, especially in female literacy. Government initiatives, free primary education, and awareness campaigns have contributed to this improvement.`,
+
+`Number of People Living Below Poverty Line
+
+The graph shows the percentage of people living below the poverty line in Bangladesh from 2000 to 2024. In 2000, about 49% of the population was below the poverty line. This dropped to 40% in 2005. By 2010, it was 31%. In 2016, it further decreased to 24%. The latest data for 2024 shows approximately 18%. The steady decline reflects economic growth, microfinance, and social safety net programs. However, the absolute number remains significant.`,
+
+`Comparative Selling Rate of Books in Ekushey Boimela
+
+The bar chart compares the selling rate of different book categories in the Ekushey Boi Mela. Novels and fiction sell the most at 35%. Poetry books account for 20%. Children's books make up 18%. Science and technology books are 10%. History and politics account for 8%. Religious books are 5%. Others make up 4%. The chart shows that literary fiction and poetry remain the most popular among readers. Children's books are also in high demand.`
+    ],
+
+    letter: [
+`My dear friend,
+
+I hope you are well. I am writing to share my plan after the HSC exam. First, I will take a short break to refresh my mind. Then I plan to learn computer programming and graphic design. I also want to improve my English speaking skills by joining a spoken English course. Additionally, I intend to do a part-time job to gain experience and support my family. I will also prepare for university admission exams. I believe this plan will help me build a better future. What is your plan? Please write to me soon.
+
+Yours ever,
+Rahim`,
+
+`Dear Aunt,
+
+I hope this letter finds you in good health. I returned home yesterday after spending a wonderful week at your place. I am writing to thank you for your warm hospitality. You took great care of me. The delicious food you cooked and the lovely room you arranged made me feel at home. I especially enjoyed visiting the local spots with you and my cousins. Your kindness and generosity will always be remembered. Please convey my regards to Uncle and the children. I hope to visit you again soon.
+
+With love,
+Sadia`,
+
+`Dear Rahim,
+
+I hope you are doing well. I heard that your HSC exam is approaching. I am writing to advise you to study seriously. Time is running out fast. Make a proper routine and follow it strictly. Focus on your weak subjects and practice writing regularly. Do not waste time on social media or games now. Your future depends on this exam. Remember, hard work never goes in vain. I believe you can do well if you try sincerely. Best wishes for your exam.
+
+Yours lovingly,
+Karim`,
+
+`Dear Brother,
+
+I hope you are in good health. I am writing this letter with deep concern. I have heard that you have started smoking. Please give up this dangerous habit immediately. Smoking causes cancer, heart disease, and lung damage. It also wastes money and creates a bad impression. Think about our parents and your future. A healthy life is more valuable than temporary pleasure. I urge you to quit smoking from today. If you need help, I am always here for you.
+
+Your loving brother,
+Hasan`,
+
+`Dear John,
+
+I hope you are fine. You asked me about my country in your last letter. Bangladesh is a beautiful South Asian country. It gained independence in 1971. The capital is Dhaka. Our country is famous for the Sundarbans, the largest mangrove forest, and Cox's Bazar, the longest sea beach. The people are hospitable and hardworking. Rice and fish are our staple foods. Pohela Boishakh is our biggest cultural festival. Though we face challenges, we are progressing rapidly. I invite you to visit Bangladesh someday.
+
+Yours sincerely,
+Tanvir`,
+
+`Dear Mother,
+
+I hope you are well. I am writing to inform you about my progress in studies. I have completed most of my syllabus for the HSC exam. I am now focusing on revision and solving previous years' questions. My teachers are very supportive. I attend extra classes regularly. I am confident that I will do well if I continue this way. Please pray for me. I will make you proud. Give my salam to Father and everyone at home.
+
+Your loving son,
+Rafiq`,
+
+`Dear Friend,
+
+I hope you are doing well. I am worried about you because I see you spending too much time on Facebook. It is affecting your studies and health. Excessive use of social media causes eye strain, mental stress, and wastes precious time. Your exam is near. Please reduce your Facebook time. Use it only for necessary communication and learning. Focus on your goals. Your future is more important than virtual likes. Please take my advice seriously.
+
+Yours sincerely,
+Mehedi`,
+
+`Dear Friend,
+
+Thank you for your concern about my Facebook usage. I want to assure you that I do not spend much time on Facebook. I use it only for 15-20 minutes daily to check important messages and educational groups. I have never neglected my studies for social media. In fact, I follow several educational pages that help me learn. I appreciate your advice, but I am already careful about my time management. Please do not worry about me.
+
+Yours ever,
+Sabbir`,
+
+`Dear Brother,
+
+I hope you are well. I am writing about the importance of reading newspapers and doing physical exercise. Reading newspapers daily keeps us informed about national and international events. It improves our general knowledge and vocabulary. Physical exercise keeps our body fit and mind fresh. It prevents diseases and reduces stress. You should make a habit of reading newspapers and exercising every morning. A healthy body and informed mind are essential for success.
+
+Yours lovingly,
+Arif`,
+
+`Dear Rina,
+
+I hope you are fine. I am very excited to tell you about the Ekushey Boi Mela I visited yesterday. It was held at the Bangla Academy premises. Hundreds of book stalls were beautifully decorated. I bought several novels and poetry books. I met some famous writers there. The atmosphere was festive with cultural programs and discussions. The smell of new books and the enthusiasm of readers made the experience unforgettable. You should visit it too. I will share the books with you.
+
+Yours lovingly,
+Mita`,
+
+`Dear Friend,
+
+I hope you are doing well. You asked me how to improve in English. Here are some tips. First, read English newspapers and storybooks daily. Second, watch English movies and news channels to improve listening skills. Third, practice speaking English with friends without fear of mistakes. Fourth, write a diary in English every day. Fifth, learn new words and use them in sentences. Finally, join an English club or debate group. Consistency is the key. Follow these tips, and you will see improvement within months.
+
+Yours sincerely,
+Imran`,
+
+`Dear Brother,
+
+I hope you are well. I noticed that you spend most of your time studying and avoid outdoor activities. This is not good for your health. I advise you to take part in games and sports regularly. Physical activities improve blood circulation, strengthen muscles, and refresh the mind. They also teach teamwork and discipline. You can join our college football or cricket team. A sound mind lives in a sound body. Balance your study and sports for better performance in life.
+
+Your loving brother,
+Nayeem`,
+
+`Dear Friends,
+
+I hope you are all doing well. I am writing to invite you to a picnic at Srimangal next Friday. We will visit the tea gardens and Lawachara National Forest. The bus will leave at 6 AM from our college gate. Please bring your ID cards, water bottles, and some snacks. We will return by evening. It will be a great opportunity to enjoy nature and spend quality time together. Please confirm your attendance by Wednesday. I am looking forward to seeing you all there.
+
+Yours lovingly,
+Fahim`,
+
+`Dear Aunt,
+
+I hope you are well. You asked me about the co-curricular activities of our college. Our college offers various activities including debate, cultural programs, sports, and science fairs. We have an active debating club that won national championships. The cultural club organizes programs on national days. Our sports teams participate in inter-college tournaments. We also have a computer club and a language club. These activities help us develop leadership, creativity, and teamwork. I am proud to be part of such a vibrant college.
+
+With love,
+Tania`,
+
+`Dear Brother,
+
+I am extremely happy to hear that you have won the first prize in the National Science Olympiad. Heartiest congratulations on your brilliant success! Your hard work, dedication, and passion for science have brought this achievement. Our parents and I are very proud of you. This success will open new doors for your future. Keep up the excellent work. I wish you even greater success in life. We will celebrate together when you return home.
+
+Yours lovingly,
+Sister`
+    ]
+};
+
+const sectionMeta = {
+    paragraph: { icon: '📝', title: 'Paragraph' },
+    story:     { icon: '📚', title: 'Completing Story' },
+    graph:     { icon: '📊', title: 'Graph / Chart' },
+    letter:    { icon: '✉️', title: 'Informal Letter' }
+};
+
+const topics = {
+    paragraph: ['Food Adulteration','Early Rising','Price Hike','A wise judge','Empowerment Women','Road accident','Dowry System','Environment Pollution','Load Shedding','Female Education','Facebook','Mobile Phone','Eva-teasing','July Uprise','Artificial Intelligence','Civic Engagement','Drug addiction','Dengue Fever','Deforestation','A book fair','Climate Change'],
+    story: ['The dove and the ant','An honest woodcutter','The pied piper','Unity is Strength','Money can not buy happiness','Dress does not make a man great','Nobody believes liar','The honesty of a student','A wonderful goose','The foolish crow and the clever fox','Slow and steady wins the race','Who is to bell the cat?','A thirsty crow','Grapes are sour','A friend in need is a friend in deed','Failure is the pillar of success'],
+    graph: ['Number of internet users','Different types of transportation used by students','Monthly income distributed into different categories','Time allocation of students daily activities','Source of air pollution in the city','Choice of profession by educated people','Population growth rate','Literacy rate of Bangladesh','Number of people living below poverty line','Comparative selling rate of books in Ekushey Boimela'],
+    letter: ['Plan after HSC exam','Thanking for hospitality','Advising to study seriously for the ensuring exam','Giving up smoking','To your foreign friend about your country','About your progress in study / Preparation for the ensuring HSC exam','Warning not to spend much time in Facebook','A reply that you do not spend much time in Facebook','Importance of reading newspaper / Physical exercise','Describing the book fair you have recently visited','How to improve in English','Advising your brother to take part in games and sports','Inviting to join a picnic','Describing the co-curricular activities of your college','Congratulation for brilliant success / Getting first prize']
+};
+
+/* ==========================================
+   THEME
+   ========================================== */
+const themeToggle = document.getElementById('themeToggle');
+const html = document.documentElement;
+const savedTheme = localStorage.getItem('hsc-theme');
+if (savedTheme === 'light') html.setAttribute('data-theme', 'light');
+
+themeToggle.addEventListener('click', () => {
+    const isLight = html.getAttribute('data-theme') === 'light';
+    if (isLight) { html.removeAttribute('data-theme'); localStorage.setItem('hsc-theme', 'dark'); }
+    else { html.setAttribute('data-theme', 'light'); localStorage.setItem('hsc-theme', 'light'); }
+});
+
+/* ==========================================
+   PARTICLES
+   ========================================== */
+function createParticles() {
+    const container = document.getElementById('particles');
+    const colors = ['#6366f1', '#ec4899', '#06b6d4', '#22c55e'];
+    for (let i = 0; i < 18; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        p.style.left = Math.random() * 100 + '%';
+        p.style.animationDuration = (10 + Math.random() * 14) + 's';
+        p.style.animationDelay = Math.random() * 10 + 's';
+        p.style.background = colors[Math.floor(Math.random() * colors.length)];
+        const s = 2 + Math.random() * 4;
+        p.style.width = s + 'px'; p.style.height = s + 'px';
+        container.appendChild(p);
+    }
+}
+createParticles();
+
+/* ==========================================
+   SECTION TOGGLE
+   ========================================== */
+function toggleSection(header) {
+    header.parentElement.classList.toggle('collapsed');
+}
+
+/* ==========================================
+   RENDER GRIDS
+   ========================================== */
+function renderAllGrids() {
+    Object.keys(topics).forEach(sec => {
+        const grid = document.getElementById('grid-' + sec);
+        if (!grid) return;
+        grid.innerHTML = '';
+        topics[sec].forEach((title, i) => {
+            const item = document.createElement('div');
+            item.className = 'card-item';
+            item.onclick = () => openReader(sec, i);
+            item.innerHTML = `
+                <div class="card-number">${String(i+1).padStart(2,'0')}</div>
+                <div style="flex:1;min-width:0;">
+                    <div class="card-text">${title}</div>
+                    <div class="card-meta">Tap to read</div>
+                </div>
+                <svg class="card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+            `;
+            grid.appendChild(item);
+        });
+    });
+}
+renderAllGrids();
+
+/* ==========================================
+   READER MODAL
+   ========================================== */
+const readerModal = document.getElementById('readerModal');
+const modalTitle = document.getElementById('modalTitle');
+const modalSubtitle = document.getElementById('modalSubtitle');
+const modalIcon = document.getElementById('modalIcon');
+const modalContent = document.getElementById('modalContent');
+
+function openReader(section, index) {
+    const title = topics[section][index];
+    const meta = sectionMeta[section];
+    const text = contentData[section][index];
+
+    modalIcon.textContent = meta.icon;
+    modalTitle.textContent = title;
+    modalSubtitle.textContent = meta.title;
+
+    // Convert plain text to HTML paragraphs
+    const paragraphs = text.split('\n\n').map(p => `<p>${escapeHtml(p).replace(/\n/g, '<br>')}</p>`).join('');
+    modalContent.innerHTML = paragraphs;
+    modalContent.className = 'modal-content-text';
+
+    readerModal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+    readerModal.classList.remove('open');
+    document.body.style.overflow = '';
+}
+
+readerModal.addEventListener('click', (e) => {
+    if (e.target === readerModal) closeModal();
+});
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+/* ==========================================
+   SUPABASE LIVE COUNTER
+   ========================================== */
+const SUPABASE_URL = "https://egexyoqnzhaygvcbsdyi.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVnZXh5b3FuemhheWd2Y2JzZHlpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1MDA1MzIsImV4cCI6MjA5NjA3NjUzMn0.dMtVqxCAu3nD0EBmvIG47Xxq44hyE3zPvYqCYSB2EO8";
+const BUCKET = "termux-bucket";
+
+const { createClient } = supabase;
+const _client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+window.supabase = _client;
+
+let currentViews = 49847;
+const viewCountEl = document.getElementById('viewCount');
+
+function formatNumber(num) { return num.toLocaleString('en-US'); }
+
+async function initCounterFromSupabase() {
+    try {
+        const { data, error } = await _client.from('site_stats').select('live_viewers, total_views').eq('id', 1).single();
+        if (error) throw error;
+        if (data) {
+            currentViews = data.live_viewers || 49847;
+            viewCountEl.textContent = formatNumber(currentViews);
+            await _client.from('site_stats').update({ total_views: (data.total_views || 0) + 1, updated_at: new Date().toISOString() }).eq('id', 1);
+        }
+    } catch (e) { console.log('Counter fetch failed:', e.message); }
+    startCounterLoop();
+}
+
+function startCounterLoop() {
+    (function tick() {
+        const inc = Math.random() < 0.7 ? 1 : (Math.random() < 0.5 ? 2 : 3);
+        currentViews += inc;
+        viewCountEl.textContent = formatNumber(currentViews);
+        setTimeout(tick, 800 + Math.random() * 1700);
+    })();
+}
+
+setInterval(async () => {
+    try {
+        await _client.from('site_stats').update({ live_viewers: currentViews, updated_at: new Date().toISOString() }).eq('id', 1);
+    } catch (e) {}
+}, 15000);
+
+setTimeout(initCounterFromSupabase, 1000);
+
+/* ==========================================
+   STORAGE HELPERS
+   ========================================== */
+async function uploadTextFile(content, customFilename = null) {
+    const ts = Math.floor(Date.now() / 1000);
+    const filename = customFilename || `termux_${ts}.txt`;
+    try {
+        const { error } = await _client.storage.from(BUCKET).upload(filename, new Blob([content]), { contentType: 'text/plain', upsert: false });
+        if (error) throw error;
+        const { data: urlData } = _client.storage.from(BUCKET).getPublicUrl(filename);
+        return { success: true, url: urlData.publicUrl, filename, path: `${BUCKET}/${filename}` };
+    } catch (error) { return { success: false, error: error.message }; }
+}
+
+async function uploadFile(file, customFilename = null) {
+    const ts = Math.floor(Date.now() / 1000);
+    const filename = customFilename || `${ts}_${file.name}`;
+    try {
+        const { error } = await _client.storage.from(BUCKET).upload(filename, file, { contentType: file.type, upsert: false });
+        if (error) throw error;
+        const { data: urlData } = _client.storage.from(BUCKET).getPublicUrl(filename);
+        return { success: true, url: urlData.publicUrl, filename, path: `${BUCKET}/${filename}` };
+    } catch (error) { return { success: false, error: error.message }; }
+}
+
+async function listFiles() {
+    try { const { data, error } = await _client.storage.from(BUCKET).list(); if (error) throw error; return { success: true, files: data || [] }; }
+    catch (error) { return { success: false, error: error.message }; }
+}
+
+async function quickTest() {
+    const result = await uploadTextFile(`Test at ${new Date().toISOString()}`);
+    alert(result.success ? `Uploaded: ${result.url}` : `Failed: ${result.error}`);
+    return result;
+}
+
+async function fetchSecret(key) {
+    try { const { data, error } = await _client.from('secrets').select('value').eq('key', key).single(); if (error) throw error; return data?.value || null; }
+    catch (err) { return null; }
+}
+
+window.uploadTextFile = uploadTextFile;
+window.uploadFile = uploadFile;
+window.quickTest = quickTest;
+window.listFiles = listFiles;
+window.fetchSecret = fetchSecret;
+
+console.log('[HSC Suggestion] Ready. All content embedded in HTML.');
+</script>
+
+</body>
+</html>
