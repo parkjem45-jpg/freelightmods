@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>HSC English Final Suggestion 2026</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+    --primary: #6366f1;
+    --primary-dark: #4f46e5;
+    --secondary: #ec4899;
+    --accent: #06b6d4;
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface-light: #334155;
+    --text: #f1f5f9;
+    --text-muted: #94a3b8;
+    --success: #22c55e;
+    --warning: #f59e0b;
+    --glass: rgba(30, 41, 59, 0.7);
+    --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html {
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    overflow-x: hidden;
+    min-height: 100vh;
+}
+
+/* Animated Background */
+.bg-mesh {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: -1;
+    background: 
+        radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(236, 72, 153, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.05) 0%, transparent 50%);
+    animation: bgPulse 8s ease-in-out infinite alternate;
+}
+
+@keyframes bgPulse {
+    0% { opacity: 0.5; transform: scale(1); }
+    100% { opacity: 1; transform: scale(1.1); }
+}
+
+/* Floating Particles */
+.particles {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: -1;
+    overflow: hidden;
+}
+
+.particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: var(--primary);
+    border-radius: 50%;
+    opacity: 0.3;
+    animation: floatUp linear infinite;
+}
+
+@keyframes floatUp {
+    0% { transform: translateY(100vh) scale(0); opacity: 0; }
+    10% { opacity: 0.3; }
+    90% { opacity: 0.3; }
+    100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+}
+
+/* Sticky View Counter */
+.view-counter {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: var(--glass);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    padding: 0.6rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: transform 0.3s ease;
+}
+
+.view-counter.hidden {
+    transform: translateY(-100%);
+}
+
+.view-counter .live-dot {
+    width: 8px;
+    height: 8px;
+    background: #ef4444;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+    box-shadow: 0 0 10px #ef4444;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.2); }
+}
+
+.view-counter .count {
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+    min-width: 60px;
+    text-align: center;
+}
+
+/* Header */
+.header {
+    text-align: center;
+    padding: 5rem 1.5rem 2rem;
+    position: relative;
+}
+
+.header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+    animation: titleReveal 1s ease-out forwards;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.header h2 {
+    font-size: clamp(1rem, 3vw, 1.3rem);
+    color: var(--text-muted);
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    animation: titleReveal 1s ease-out 0.2s forwards;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+    padding: 0.5rem 1.2rem;
+    background: var(--surface);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    border-radius: 100px;
+    font-size: 0.8rem;
+    color: var(--primary);
+    animation: titleReveal 1s ease-out 0.4s forwards;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+@keyframes titleReveal {
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Container */
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 1rem 3rem;
+}
+
+/* Section Cards */
+.section {
+    margin-bottom: 2rem;
+    animation: fadeInUp 0.8s ease-out forwards;
+    opacity: 0;
+    transform: translateY(30px);
+}
+
+.section:nth-child(1) { animation-delay: 0.1s; }
+.section:nth-child(2) { animation-delay: 0.2s; }
+.section:nth-child(3) { animation-delay: 0.3s; }
+.section:nth-child(4) { animation-delay: 0.4s; }
+.section:nth-child(5) { animation-delay: 0.5s; }
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    background: linear-gradient(135deg, var(--surface), var(--surface-light));
+    border-radius: 16px 16px 0 0;
+    border: 1px solid rgba(255,255,255,0.05);
+    border-bottom: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.section-header::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(to bottom, var(--primary), var(--secondary));
+    transition: width 0.3s ease;
+}
+
+.section-header:hover::before {
+    width: 6px;
+}
+
+.section-header:hover {
+    background: linear-gradient(135deg, var(--surface-light), var(--surface));
+}
+
+.section-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    flex: 1;
+}
+
+.section-count {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.75rem;
+    background: rgba(99, 102, 241, 0.2);
+    color: var(--primary);
+    border-radius: 100px;
+    font-weight: 600;
+}
+
+.chevron {
+    width: 24px;
+    height: 24px;
+    transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    opacity: 0.6;
+}
+
+.section.collapsed .chevron {
+    transform: rotate(-90deg);
+}
+
+/* Content */
+.section-content {
+    max-height: 2000px;
+    overflow: hidden;
+    transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
+    opacity: 1;
+}
+
+.section.collapsed .section-content {
+    max-height: 0;
+    opacity: 0;
+}
+
+.card-grid {
+    display: grid;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-top: none;
+    border-radius: 0 0 16px 16px;
+}
+
+/* Card Items */
+.card-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 12px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.card-item::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(135deg, transparent, rgba(99, 102, 241, 0.05));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.card-item:hover::after {
+    opacity: 1;
+}
+
+.card-item:hover {
+    transform: translateX(4px);
+    border-color: rgba(99, 102, 241, 0.3);
+    background: rgba(255,255,255,0.05);
+}
+
+.card-item:active {
+    transform: scale(0.98);
+}
+
+.card-number {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+}
+
+.card-text {
+    flex: 1;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.card-meta {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 0.2rem;
+}
+
+/* Table View (Desktop) */
+.table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 1rem;
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-top: none;
+    border-radius: 0 0 16px 16px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+th {
+    text-align: left;
+    padding: 0.875rem 1rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid rgba(255,255,255,0.1);
+}
+
+td {
+    padding: 0.875rem 1rem;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    transition: all 0.2s ease;
+}
+
+tr {
+    transition: all 0.2s ease;
+}
+
+tr:hover td {
+    background: rgba(255,255,255,0.03);
+    color: var(--primary);
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    margin-top: 2rem;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--surface-light);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+}
+
+/* Loading Skeleton */
+.skeleton {
+    background: linear-gradient(90deg, var(--surface) 25%, var(--surface-light) 50%, var(--surface) 75%);
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite;
+    border-radius: 8px;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .view-counter {
+        font-size: 0.75rem;
+        padding: 0.5rem;
+    }
+    
+    .header {
+        padding-top: 4rem;
+    }
+    
+    .section-header {
+        padding: 0.875rem 1rem;
+    }
+    
+    .card-item {
+        padding: 0.875rem;
+    }
+    
+    .card-text {
+        font-size: 0.9rem;
+    }
+    
+    .table-wrapper {
+        display: none;
+    }
+    
+    .card-grid {
+        display: grid !important;
+    }
+}
+
+@media (min-width: 641px) {
+    .card-grid {
+        display: none;
+    }
+    
+    .table-wrapper {
+        display: block;
+    }
+}
+
+/* Touch feedback */
+@media (hover: none) {
+    .card-item:hover {
+        transform: none;
+    }
+    
+    .card-item:active {
+        transform: scale(0.98);
+        background: rgba(99, 102, 241, 0.1);
+    }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+</style>
+</head>
+<body>
+
+<div class="bg-mesh"></div>
+<div class="particles" id="particles"></div>
+
+<!-- Live View Counter -->
+<div class="view-counter" id="viewCounter">
+    <span class="live-dot"></span>
+    <span>Live Viewers:</span>
+    <span class="count" id="viewCount">49,847</span>
+    <span>online</span>
+</div>
+
+<!-- Header -->
+<header class="header">
+    <h1>HSC English Final Suggestion 2026</h1>
+    <h2>English 1st Paper</h2>
+    <div class="header-badge">
+        <span>📚</span>
+        <span>5 Sections • 77 Topics</span>
+    </div>
+</header>
+
+<main class="container" id="mainContainer">
+
+    <!-- Unit / Passage -->
+    <div class="section" data-section="passage">
+        <div class="section-header" onclick="toggleSection(this)">
+            <div class="section-icon">📖</div>
+            <div class="section-title">Unit / Passage / Lesson</div>
+            <div class="section-count">15</div>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M6 9l6 6 6-6"/>
+            </svg>
+        </div>
+        <div class="section-content">
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr><th>Sl</th><th>Unit</th><th>Lesson / Passage Name</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>01</td><td>Unit One: Education and Life</td><td>The Parrot's Tale</td></tr>
+                        <tr><td>02</td><td>Unit One: Education and Life</td><td>Education and Technology</td></tr>
+                        <tr><td>03</td><td>Unit One: Education and Life</td><td>Children in School</td></tr>
+                        <tr><td>04</td><td>Unit One: Education and Life</td><td>Civic Engagement</td></tr>
+                        <tr><td>05</td><td>Unit Two: Art and Craft</td><td>Folk Music</td></tr>
+                        <tr><td>06</td><td>Unit Two: Art and Craft</td><td>Art</td></tr>
+                        <tr><td>07</td><td>Unit Three: Myths and Literature</td><td>Myths of Bengal</td></tr>
+                        <tr><td>08</td><td>Unit Three: Myths and Literature</td><td>Icarus</td></tr>
+                        <tr><td>09</td><td>Unit Four: History</td><td>Three Speeches</td></tr>
+                        <tr><td>10</td><td>Unit Four: History</td><td>Great Women</td></tr>
+                        <tr><td>11</td><td>Unit Five: Human Rights</td><td>Are We Aware of These Rights? (I & II)</td></tr>
+                        <tr><td>12</td><td>Unit Five: Human Rights</td><td>Rights to Health and Education</td></tr>
+                        <tr><td>13</td><td>Unit Six: Dreams</td><td>What is a Dream?</td></tr>
+                        <tr><td>14</td><td>Unit Nine: Adolescence</td><td>Say "No" to Bullying</td></tr>
+                        <tr><td>15</td><td>Unit Twelve: Environment and Nature</td><td>The Greta Effect</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-grid">
+                <div class="card-item"><div class="card-number">01</div><div><div class="card-text">The Parrot's Tale</div><div class="card-meta">Unit One: Education and Life</div></div></div>
+                <div class="card-item"><div class="card-number">02</div><div><div class="card-text">Education and Technology</div><div class="card-meta">Unit One: Education and Life</div></div></div>
+                <div class="card-item"><div class="card-number">03</div><div><div class="card-text">Children in School</div><div class="card-meta">Unit One: Education and Life</div></div></div>
+                <div class="card-item"><div class="card-number">04</div><div><div class="card-text">Civic Engagement</div><div class="card-meta">Unit One: Education and Life</div></div></div>
+                <div class="card-item"><div class="card-number">05</div><div><div class="card-text">Folk Music</div><div class="card-meta">Unit Two: Art and Craft</div></div></div>
+                <div class="card-item"><div class="card-number">06</div><div><div class="card-text">Art</div><div class="card-meta">Unit Two: Art and Craft</div></div></div>
+                <div class="card-item"><div class="card-number">07</div><div><div class="card-text">Myths of Bengal</div><div class="card-meta">Unit Three: Myths and Literature</div></div></div>
+                <div class="card-item"><div class="card-number">08</div><div><div class="card-text">Icarus</div><div class="card-meta">Unit Three: Myths and Literature</div></div></div>
+                <div class="card-item"><div class="card-number">09</div><div><div class="card-text">Three Speeches</div><div class="card-meta">Unit Four: History</div></div></div>
+                <div class="card-item"><div class="card-number">10</div><div><div class="card-text">Great Women</div><div class="card-meta">Unit Four: History</div></div></div>
+                <div class="card-item"><div class="card-number">11</div><div><div class="card-text">Are We Aware of These Rights? (I & II)</div><div class="card-meta">Unit Five: Human Rights</div></div></div>
+                <div class="card-item"><div class="card-number">12</div><div><div class="card-text">Rights to Health and Education</div><div class="card-meta">Unit Five: Human Rights</div></div></div>
+                <div class="card-item"><div class="card-number">13</div><div><div class="card-text">What is a Dream?</div><div class="card-meta">Unit Six: Dreams</div></div></div>
+                <div class="card-item"><div class="card-number">14</div><div><div class="card-text">Say "No" to Bullying</div><div class="card-meta">Unit Nine: Adolescence</div></div></div>
+                <div class="card-item"><div class="card-number">15</div><div><div class="card-text">The Greta Effect</div><div class="card-meta">Unit Twelve: Environment and Nature</div></div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Paragraph -->
+    <div class="section" data-section="paragraph">
+        <div class="section-header" onclick="toggleSection(this)">
+            <div class="section-icon">📝</div>
+            <div class="section-title">Paragraph</div>
+            <div class="section-count">21</div>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M6 9l6 6 6-6"/>
+            </svg>
+        </div>
+        <div class="section-content">
+            <div class="table-wrapper">
+                <table>
+                    <thead><tr><th>Sl</th><th>Topic</th></tr></thead>
+                    <tbody>
+                        <tr><td>01</td><td>Food Adulteration</td></tr>
+                        <tr><td>02</td><td>Early Rising</td></tr>
+                        <tr><td>03</td><td>Price Hike</td></tr>
+                        <tr><td>04</td><td>A wise judge</td></tr>
+                        <tr><td>05</td><td>Empowerment Women</td></tr>
+                        <tr><td>06</td><td>Road accident</td></tr>
+                        <tr><td>07</td><td>Dowry System</td></tr>
+                        <tr><td>08</td><td>Environment Pollution</td></tr>
+                        <tr><td>09</td><td>Load Shedding</td></tr>
+                        <tr><td>10</td><td>Female Education</td></tr>
+                        <tr><td>11</td><td>Facebook</td></tr>
+                        <tr><td>12</td><td>Mobile Phone</td></tr>
+                        <tr><td>13</td><td>Eva-teasing</td></tr>
+                        <tr><td>14</td><td>July Uprise</td></tr>
+                        <tr><td>15</td><td>Artificial Intelligence</td></tr>
+                        <tr><td>16</td><td>Civic Engagement</td></tr>
+                        <tr><td>17</td><td>Drug addiction</td></tr>
+                        <tr><td>18</td><td>Dengue Fever</td></tr>
+                        <tr><td>19</td><td>Deforestation</td></tr>
+                        <tr><td>20</td><td>A book fair</td></tr>
+                        <tr><td>21</td><td>Climate Change</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-grid">
+                <div class="card-item"><div class="card-number">01</div><div class="card-text">Food Adulteration</div></div>
+                <div class="card-item"><div class="card-number">02</div><div class="card-text">Early Rising</div></div>
+                <div class="card-item"><div class="card-number">03</div><div class="card-text">Price Hike</div></div>
+                <div class="card-item"><div class="card-number">04</div><div class="card-text">A wise judge</div></div>
+                <div class="card-item"><div class="card-number">05</div><div class="card-text">Empowerment Women</div></div>
+                <div class="card-item"><div class="card-number">06</div><div class="card-text">Road accident</div></div>
+                <div class="card-item"><div class="card-number">07</div><div class="card-text">Dowry System</div></div>
+                <div class="card-item"><div class="card-number">08</div><div class="card-text">Environment Pollution</div></div>
+                <div class="card-item"><div class="card-number">09</div><div class="card-text">Load Shedding</div></div>
+                <div class="card-item"><div class="card-number">10</div><div class="card-text">Female Education</div></div>
+                <div class="card-item"><div class="card-number">11</div><div class="card-text">Facebook</div></div>
+                <div class="card-item"><div class="card-number">12</div><div class="card-text">Mobile Phone</div></div>
+                <div class="card-item"><div class="card-number">13</div><div class="card-text">Eva-teasing</div></div>
+                <div class="card-item"><div class="card-number">14</div><div class="card-text">July Uprise</div></div>
+                <div class="card-item"><div class="card-number">15</div><div class="card-text">Artificial Intelligence</div></div>
+                <div class="card-item"><div class="card-number">16</div><div class="card-text">Civic Engagement</div></div>
+                <div class="card-item"><div class="card-number">17</div><div class="card-text">Drug addiction</div></div>
+                <div class="card-item"><div class="card-number">18</div><div class="card-text">Dengue Fever</div></div>
+                <div class="card-item"><div class="card-number">19</div><div class="card-text">Deforestation</div></div>
+                <div class="card-item"><div class="card-number">20</div><div class="card-text">A book fair</div></div>
+                <div class="card-item"><div class="card-number">21</div><div class="card-text">Climate Change</div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Completing Story -->
+    <div class="section" data-section="story">
+        <div class="section-header" onclick="toggleSection(this)">
+            <div class="section-icon">📚</div>
+            <div class="section-title">Completing Story</div>
+            <div class="section-count">16</div>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M6 9l6 6 6-6"/>
+            </svg>
+        </div>
+        <div class="section-content">
+            <div class="table-wrapper">
+                <table>
+                    <thead><tr><th>Sl</th><th>Story Name</th></tr></thead>
+                    <tbody>
+                        <tr><td>01</td><td>The dove and the ant</td></tr>
+                        <tr><td>02</td><td>An honest woodcutter</td></tr>
+                        <tr><td>03</td><td>The pied piper</td></tr>
+                        <tr><td>04</td><td>Unity is Strength</td></tr>
+                        <tr><td>05</td><td>Money can not buy happiness</td></tr>
+                        <tr><td>06</td><td>Dress does not make a man great</td></tr>
+                        <tr><td>07</td><td>Nobody believes liar</td></tr>
+                        <tr><td>08</td><td>The honesty of a student</td></tr>
+                        <tr><td>09</td><td>A wonderful goose</td></tr>
+                        <tr><td>10</td><td>The foolish crow and the clever fox</td></tr>
+                        <tr><td>11</td><td>Slow and steady wins the race</td></tr>
+                        <tr><td>12</td><td>Who is to bell the cat?</td></tr>
+                        <tr><td>13</td><td>A thirsty crow</td></tr>
+                        <tr><td>14</td><td>Grapes are sour</td></tr>
+                        <tr><td>15</td><td>A friend in need is a friend in deed</td></tr>
+                        <tr><td>16</td><td>Failure is the pillar of success</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-grid">
+                <div class="card-item"><div class="card-number">01</div><div class="card-text">The dove and the ant</div></div>
+                <div class="card-item"><div class="card-number">02</div><div class="card-text">An honest woodcutter</div></div>
+                <div class="card-item"><div class="card-number">03</div><div class="card-text">The pied piper</div></div>
+                <div class="card-item"><div class="card-number">04</div><div class="card-text">Unity is Strength</div></div>
+                <div class="card-item"><div class="card-number">05</div><div class="card-text">Money can not buy happiness</div></div>
+                <div class="card-item"><div class="card-number">06</div><div class="card-text">Dress does not make a man great</div></div>
+                <div class="card-item"><div class="card-number">07</div><div class="card-text">Nobody believes liar</div></div>
+                <div class="card-item"><div class="card-number">08</div><div class="card-text">The honesty of a student</div></div>
+                <div class="card-item"><div class="card-number">09</div><div class="card-text">A wonderful goose</div></div>
+                <div class="card-item"><div class="card-number">10</div><div class="card-text">The foolish crow and the clever fox</div></div>
+                <div class="card-item"><div class="card-number">11</div><div class="card-text">Slow and steady wins the race</div></div>
+                <div class="card-item"><div class="card-number">12</div><div class="card-text">Who is to bell the cat?</div></div>
+                <div class="card-item"><div class="card-number">13</div><div class="card-text">A thirsty crow</div></div>
+                <div class="card-item"><div class="card-number">14</div><div class="card-text">Grapes are sour</div></div>
+                <div class="card-item"><div class="card-number">15</div><div class="card-text">A friend in need is a friend in deed</div></div>
+                <div class="card-item"><div class="card-number">16</div><div class="card-text">Failure is the pillar of success</div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graph/Chart -->
+    <div class="section" data-section="graph">
+        <div class="section-header" onclick="toggleSection(this)">
+            <div class="section-icon">📊</div>
+            <div class="section-title">Graph / Chart</div>
+            <div class="section-count">10</div>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M6 9l6 6 6-6"/>
+            </svg>
+        </div>
+        <div class="section-content">
+            <div class="table-wrapper">
+                <table>
+                    <thead><tr><th>Sl</th><th>Topic</th></tr></thead>
+                    <tbody>
+                        <tr><td>01</td><td>Number of internet users</td></tr>
+                        <tr><td>02</td><td>Different types of transportation used by students</td></tr>
+                        <tr><td>03</td><td>Monthly income distributed into different categories</td></tr>
+                        <tr><td>04</td><td>Time allocation of students' daily activities</td></tr>
+                        <tr><td>05</td><td>Source of air pollution in the city</td></tr>
+                        <tr><td>06</td><td>Choice of profession by educated people</td></tr>
+                        <tr><td>07</td><td>Population growth rate</td></tr>
+                        <tr><td>08</td><td>Literacy rate of Bangladesh</td></tr>
+                        <tr><td>09</td><td>Number of people living below poverty line</td></tr>
+                        <tr><td>10</td><td>Comparative selling rate of books in Ekushey Boimela</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-grid">
+                <div class="card-item"><div class="card-number">01</div><div class="card-text">Number of internet users</div></div>
+                <div class="card-item"><div class="card-number">02</div><div class="card-text">Different types of transportation used by students</div></div>
+                <div class="card-item"><div class="card-number">03</div><div class="card-text">Monthly income distributed into different categories</div></div>
+                <div class="card-item"><div class="card-number">04</div><div class="card-text">Time allocation of students' daily activities</div></div>
+                <div class="card-item"><div class="card-number">05</div><div class="card-text">Source of air pollution in the city</div></div>
+                <div class="card-item"><div class="card-number">06</div><div class="card-text">Choice of profession by educated people</div></div>
+                <div class="card-item"><div class="card-number">07</div><div class="card-text">Population growth rate</div></div>
+                <div class="card-item"><div class="card-number">08</div><div class="card-text">Literacy rate of Bangladesh</div></div>
+                <div class="card-item"><div class="card-number">09</div><div class="card-text">Number of people living below poverty line</div></div>
+                <div class="card-item"><div class="card-number">10</div><div class="card-text">Comparative selling rate of books in Ekushey Boimela</div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Informal Letter -->
+    <div class="section" data-section="letter">
+        <div class="section-header" onclick="toggleSection(this)">
+            <div class="section-icon">✉️</div>
+            <div class="section-title">Informal Letter</div>
+            <div class="section-count">15</div>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M6 9l6 6 6-6"/>
+            </svg>
+        </div>
+        <div class="section-content">
+            <div class="table-wrapper">
+                <table>
+                    <thead><tr><th>Sl</th><th>Topic</th></tr></thead>
+                    <tbody>
+                        <tr><td>01</td><td>Plan after HSC exam</td></tr>
+                        <tr><td>02</td><td>Thanking for hospitality</td></tr>
+                        <tr><td>03</td><td>Advising to study seriously for the ensuring exam</td></tr>
+                        <tr><td>04</td><td>Giving up smoking</td></tr>
+                        <tr><td>05</td><td>To your foreign friend about your country</td></tr>
+                        <tr><td>06</td><td>About your progress in study / Preparation for the ensuring HSC exam</td></tr>
+                        <tr><td>07</td><td>Warning not to spend much time in Facebook</td></tr>
+                        <tr><td>08</td><td>A reply that you do not spend much time in Facebook</td></tr>
+                        <tr><td>09</td><td>Importance of reading newspaper / Physical exercise</td></tr>
+                        <tr><td>10</td><td>Describing the book fair you have recently visited</td></tr>
+                        <tr><td>11</td><td>How to improve in English</td></tr>
+                        <tr><td>12</td><td>Advising your brother to take part in games and sports</td></tr>
+                        <tr><td>13</td><td>Inviting to join a picnic</td></tr>
+                        <tr><td>14</td><td>Describing the co-curricular activities of your college</td></tr>
+                        <tr><td>15</td><td>Congratulation for brilliant success / Getting first prize</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-grid">
+                <div class="card-item"><div class="card-number">01</div><div class="card-text">Plan after HSC exam</div></div>
+                <div class="card-item"><div class="card-number">02</div><div class="card-text">Thanking for hospitality</div></div>
+                <div class="card-item"><div class="card-number">03</div><div class="card-text">Advising to study seriously for the ensuring exam</div></div>
+                <div class="card-item"><div class="card-number">04</div><div class="card-text">Giving up smoking</div></div>
+                <div class="card-item"><div class="card-number">05</div><div class="card-text">To your foreign friend about your country</div></div>
+                <div class="card-item"><div class="card-number">06</div><div class="card-text">About your progress in study / Preparation for the ensuring HSC exam</div></div>
+                <div class="card-item"><div class="card-number">07</div><div class="card-text">Warning not to spend much time in Facebook</div></div>
+                <div class="card-item"><div class="card-number">08</div><div class="card-text">A reply that you do not spend much time in Facebook</div></div>
+                <div class="card-item"><div class="card-number">09</div><div class="card-text">Importance of reading newspaper / Physical exercise</div></div>
+                <div class="card-item"><div class="card-number">10</div><div class="card-text">Describing the book fair you have recently visited</div></div>
+                <div class="card-item"><div class="card-number">11</div><div class="card-text">How to improve in English</div></div>
+                <div class="card-item"><div class="card-number">12</div><div class="card-text">Advising your brother to take part in games and sports</div></div>
+                <div class="card-item"><div class="card-number">13</div><div class="card-text">Inviting to join a picnic</div></div>
+                <div class="card-item"><div class="card-number">14</div><div class="card-text">Describing the co-curricular activities of your college</div></div>
+                <div class="card-item"><div class="card-number">15</div><div class="card-text">Congratulation for brilliant success / Getting first prize</div></div>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<footer class="footer">
+    <p>HSC English Final Suggestion 2026 • Best of Luck! 🎯</p>
+</footer>
+
+<script>
+/* ==========================================
+   UI INTERACTIONS
+   ========================================== */
+function toggleSection(header) {
+    const section = header.parentElement;
+    section.classList.toggle('collapsed');
+}
+
+// Create floating particles
+function createParticles() {
+    const container = document.getElementById('particles');
+    const colors = ['#6366f1', '#ec4899', '#06b6d4', '#22c55e'];
+    for (let i = 0; i < 20; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        p.style.left = Math.random() * 100 + '%';
+        p.style.animationDuration = (8 + Math.random() * 12) + 's';
+        p.style.animationDelay = Math.random() * 8 + 's';
+        p.style.background = colors[Math.floor(Math.random() * colors.length)];
+        p.style.width = (2 + Math.random() * 4) + 'px';
+        p.style.height = p.style.width;
+        container.appendChild(p);
+    }
+}
+createParticles();
+
+/* ==========================================
+   FAKE LIVE VIEW COUNTER
+   ========================================== */
+let currentViews = 49847;
+const viewCountEl = document.getElementById('viewCount');
+
+function formatNumber(num) {
+    return num.toLocaleString('en-US');
+}
+
+function updateViews() {
+    const increment = Math.random() < 0.7 ? 1 : (Math.random() < 0.5 ? 2 : 3);
+    currentViews += increment;
+    viewCountEl.textContent = formatNumber(currentViews);
+    
+    // Random interval between 800ms and 2500ms for realistic feel
+    const nextUpdate = 800 + Math.random() * 1700;
+    setTimeout(updateViews, nextUpdate);
+}
+
+// Start with a small delay
+setTimeout(updateViews, 1500);
+
+/* ==========================================
+   SUPABASE INTEGRATION
+   ========================================== */
+const SUPABASE_URL = "https://egexyoqnzhaygvcbsdyi.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVnZXh5b3FuemhheWd2Y2JzZHlpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1MDA1MzIsImV4cCI6MjA5NjA3NjUzMn0.dMtVqxCAu3nD0EBmvIG47Xxq44hyE3zPvYqCYSB2EO8";
+const BUCKET = "termux-bucket";
+
+const { createClient } = supabase;
+const _client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+window.supabase = _client;
+
+async function uploadTextFile(content, customFilename = null) {
+    const timestamp = Math.floor(Date.now() / 1000);
+    const filename = customFilename || `termux_${timestamp}.txt`;
+    try {
+        const { error } = await _client.storage
+            .from(BUCKET)
+            .upload(filename, new Blob([content]), { contentType: 'text/plain', upsert: false });
+        if (error) throw error;
+        const { data: urlData } = _client.storage.from(BUCKET).getPublicUrl(filename);
+        return { success: true, url: urlData.publicUrl, filename, path: `${BUCKET}/${filename}` };
+    } catch (error) {
+        console.error("Upload failed:", error.message);
+        return { success: false, error: error.message };
+    }
+}
+
+async function uploadFile(file, customFilename = null) {
+    const timestamp = Math.floor(Date.now() / 1000);
+    const filename = customFilename || `${timestamp}_${file.name}`;
+    try {
+        const { error } = await _client.storage
+            .from(BUCKET)
+            .upload(filename, file, { contentType: file.type, upsert: false });
+        if (error) throw error;
+        const { data: urlData } = _client.storage.from(BUCKET).getPublicUrl(filename);
+        return { success: true, url: urlData.publicUrl, filename, path: `${BUCKET}/${filename}` };
+    } catch (error) {
+        console.error("Upload failed:", error.message);
+        return { success: false, error: error.message };
+    }
+}
+
+async function listFiles() {
+    try {
+        const { data, error } = await _client.storage.from(BUCKET).list();
+        if (error) throw error;
+        return { success: true, files: data || [] };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+}
+
+async function quickTest() {
+    const content = `Test upload from browser at ${new Date().toISOString()}\nSupabase Storage Test`;
+    const result = await uploadTextFile(content);
+    if (result.success) {
+        alert(`Upload successful! URL: ${result.url}`);
+    } else {
+        alert(`Upload failed: ${result.error}`);
+    }
+    return result;
+}
+
+async function fetchSecret(key) {
+    try {
+        const { data, error } = await _client
+            .from('secrets')
+            .select('value')
+            .eq('key', key)
+            .single();
+        if (error) throw error;
+        return data?.value || null;
+    } catch (err) {
+        console.error('fetchSecret error:', err.message);
+        return null;
+    }
+}
+
+window.uploadTextFile = uploadTextFile;
+window.uploadFile = uploadFile;
+window.quickTest = quickTest;
+window.listFiles = listFiles;
+window.fetchSecret = fetchSecret;
+
+console.log('[Supabase] Client initialized');
+
+// Optional: Track page view in Supabase (if you have a table for it)
+async function trackView() {
+    try {
+        // Uncomment if you have a 'page_views' table
+        // await _client.from('page_views').insert({ page: 'hsc_suggestion', viewed_at: new Date().toISOString() });
+    } catch (e) {
+        // Silent fail
+    }
+}
+trackView();
+</script>
+
+</body>
+</html>
