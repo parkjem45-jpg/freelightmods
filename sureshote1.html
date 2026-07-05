@@ -9,6 +9,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
 <style>
+/* ==========================================
+   THEME VARIABLES — DARK (default)
+   ========================================== */
 :root {
     --primary: #6366f1;
     --primary-dark: #4f46e5;
@@ -23,6 +26,43 @@
     --warning: #f59e0b;
     --glass: rgba(30, 41, 59, 0.7);
     --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    --border: rgba(255,255,255,0.05);
+    --card-bg: rgba(255,255,255,0.03);
+    --card-hover: rgba(255,255,255,0.05);
+    --gradient-text: linear-gradient(135deg, #6366f1, #ec4899, #06b6d4);
+    --mesh-1: rgba(99, 102, 241, 0.15);
+    --mesh-2: rgba(236, 72, 153, 0.1);
+    --mesh-3: rgba(6, 182, 212, 0.05);
+    --toggle-bg: #334155;
+    --toggle-icon: #fbbf24;
+}
+
+/* ==========================================
+   BRIGHT MODE
+   ========================================== */
+[data-theme="light"] {
+    --primary: #4f46e5;
+    --primary-dark: #4338ca;
+    --secondary: #db2777;
+    --accent: #0891b2;
+    --bg: #f8fafc;
+    --surface: #ffffff;
+    --surface-light: #f1f5f9;
+    --text: #0f172a;
+    --text-muted: #64748b;
+    --success: #16a34a;
+    --warning: #d97706;
+    --glass: rgba(255, 255, 255, 0.7);
+    --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+    --border: rgba(0,0,0,0.06);
+    --card-bg: rgba(0,0,0,0.02);
+    --card-hover: rgba(0,0,0,0.04);
+    --gradient-text: linear-gradient(135deg, #4f46e5, #db2777, #0891b2);
+    --mesh-1: rgba(99, 102, 241, 0.08);
+    --mesh-2: rgba(236, 72, 153, 0.06);
+    --mesh-3: rgba(6, 182, 212, 0.04);
+    --toggle-bg: #e2e8f0;
+    --toggle-icon: #f59e0b;
 }
 
 * {
@@ -44,6 +84,7 @@ body {
     line-height: 1.6;
     overflow-x: hidden;
     min-height: 100vh;
+    transition: background 0.5s ease, color 0.5s ease;
 }
 
 /* Animated Background */
@@ -52,10 +93,11 @@ body {
     top: 0; left: 0; right: 0; bottom: 0;
     z-index: -1;
     background: 
-        radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(236, 72, 153, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.05) 0%, transparent 50%);
+        radial-gradient(circle at 20% 80%, var(--mesh-1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, var(--mesh-2) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, var(--mesh-3) 0%, transparent 50%);
     animation: bgPulse 8s ease-in-out infinite alternate;
+    transition: background 0.8s ease;
 }
 
 @keyframes bgPulse {
@@ -89,6 +131,64 @@ body {
     100% { transform: translateY(-10vh) scale(1); opacity: 0; }
 }
 
+/* ==========================================
+   THEME TOGGLE BUTTON
+   ========================================== */
+.theme-toggle {
+    position: fixed;
+    top: 3.8rem;
+    right: 1rem;
+    z-index: 1001;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow);
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    overflow: hidden;
+}
+
+.theme-toggle:hover {
+    transform: scale(1.1) rotate(15deg);
+    box-shadow: 0 0 20px var(--primary);
+}
+
+.theme-toggle:active {
+    transform: scale(0.95);
+}
+
+.theme-toggle svg {
+    width: 24px;
+    height: 24px;
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    position: absolute;
+}
+
+.theme-toggle .sun-icon {
+    opacity: 0;
+    transform: rotate(-90deg) scale(0);
+}
+
+.theme-toggle .moon-icon {
+    opacity: 1;
+    transform: rotate(0) scale(1);
+}
+
+[data-theme="light"] .theme-toggle .sun-icon {
+    opacity: 1;
+    transform: rotate(0) scale(1);
+}
+
+[data-theme="light"] .theme-toggle .moon-icon {
+    opacity: 0;
+    transform: rotate(90deg) scale(0);
+}
+
 /* Sticky View Counter */
 .view-counter {
     position: fixed;
@@ -99,7 +199,7 @@ body {
     background: var(--glass);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(255,255,255,0.05);
+    border-bottom: 1px solid var(--border);
     padding: 0.6rem 1rem;
     display: flex;
     align-items: center;
@@ -107,7 +207,7 @@ body {
     gap: 0.5rem;
     font-size: 0.85rem;
     font-weight: 600;
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, background 0.5s ease, border-color 0.5s ease;
 }
 
 .view-counter.hidden {
@@ -146,7 +246,7 @@ body {
     font-family: 'Playfair Display', serif;
     font-size: clamp(2rem, 6vw, 3.5rem);
     font-weight: 800;
-    background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent));
+    background: var(--gradient-text);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -174,13 +274,14 @@ body {
     margin-top: 1.5rem;
     padding: 0.5rem 1.2rem;
     background: var(--surface);
-    border: 1px solid rgba(99, 102, 241, 0.3);
+    border: 1px solid var(--border);
     border-radius: 100px;
     font-size: 0.8rem;
     color: var(--primary);
     animation: titleReveal 1s ease-out 0.4s forwards;
     opacity: 0;
     transform: translateY(20px);
+    transition: background 0.5s ease, border-color 0.5s ease, color 0.5s ease;
 }
 
 @keyframes titleReveal {
@@ -215,7 +316,7 @@ body {
     padding: 1rem 1.25rem;
     background: linear-gradient(135deg, var(--surface), var(--surface-light));
     border-radius: 16px 16px 0 0;
-    border: 1px solid rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
     border-bottom: none;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -298,9 +399,10 @@ body {
     gap: 0.5rem;
     padding: 1rem;
     background: var(--surface);
-    border: 1px solid rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
     border-top: none;
     border-radius: 0 0 16px 16px;
+    transition: background 0.5s ease, border-color 0.5s ease;
 }
 
 /* Card Items */
@@ -309,8 +411,8 @@ body {
     align-items: center;
     gap: 1rem;
     padding: 1rem;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.05);
+    background: var(--card-bg);
+    border: 1px solid var(--border);
     border-radius: 12px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
@@ -334,7 +436,7 @@ body {
 .card-item:hover {
     transform: translateX(4px);
     border-color: rgba(99, 102, 241, 0.3);
-    background: rgba(255,255,255,0.05);
+    background: var(--card-hover);
 }
 
 .card-item:active {
@@ -373,9 +475,10 @@ body {
     -webkit-overflow-scrolling: touch;
     padding: 1rem;
     background: var(--surface);
-    border: 1px solid rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
     border-top: none;
     border-radius: 0 0 16px 16px;
+    transition: background 0.5s ease, border-color 0.5s ease;
 }
 
 table {
@@ -392,13 +495,14 @@ th {
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    border-bottom: 2px solid rgba(255,255,255,0.1);
+    border-bottom: 2px solid var(--border);
+    transition: border-color 0.5s ease;
 }
 
 td {
     padding: 0.875rem 1rem;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    transition: all 0.2s ease;
+    border-bottom: 1px solid var(--border);
+    transition: all 0.2s ease, border-color 0.5s ease;
 }
 
 tr {
@@ -406,7 +510,7 @@ tr {
 }
 
 tr:hover td {
-    background: rgba(255,255,255,0.03);
+    background: var(--card-bg);
     color: var(--primary);
 }
 
@@ -416,8 +520,9 @@ tr:hover td {
     padding: 2rem 1rem;
     color: var(--text-muted);
     font-size: 0.8rem;
-    border-top: 1px solid rgba(255,255,255,0.05);
+    border-top: 1px solid var(--border);
     margin-top: 2rem;
+    transition: border-color 0.5s ease;
 }
 
 /* Scrollbar */
@@ -428,11 +533,13 @@ tr:hover td {
 
 ::-webkit-scrollbar-track {
     background: var(--bg);
+    transition: background 0.5s ease;
 }
 
 ::-webkit-scrollbar-thumb {
     background: var(--surface-light);
     border-radius: 3px;
+    transition: background 0.5s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -466,31 +573,38 @@ tr:hover td {
 
 /* Responsive */
 @media (max-width: 640px) {
+    .theme-toggle {
+        top: 3.5rem;
+        right: 0.75rem;
+        width: 42px;
+        height: 42px;
+    }
+
     .view-counter {
         font-size: 0.75rem;
         padding: 0.5rem;
     }
-    
+
     .header {
-        padding-top: 4rem;
+        padding-top: 4.5rem;
     }
-    
+
     .section-header {
         padding: 0.875rem 1rem;
     }
-    
+
     .card-item {
         padding: 0.875rem;
     }
-    
+
     .card-text {
         font-size: 0.9rem;
     }
-    
+
     .table-wrapper {
         display: none;
     }
-    
+
     .card-grid {
         display: grid !important;
     }
@@ -500,7 +614,7 @@ tr:hover td {
     .card-grid {
         display: none;
     }
-    
+
     .table-wrapper {
         display: block;
     }
@@ -511,7 +625,7 @@ tr:hover td {
     .card-item:hover {
         transform: none;
     }
-    
+
     .card-item:active {
         transform: scale(0.98);
         background: rgba(99, 102, 241, 0.1);
@@ -531,6 +645,24 @@ tr:hover td {
 
 <div class="bg-mesh"></div>
 <div class="particles" id="particles"></div>
+
+<!-- Theme Toggle -->
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+    <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+    </svg>
+    <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="5"></circle>
+        <line x1="12" y1="1" x2="12" y2="3"></line>
+        <line x1="12" y1="21" x2="12" y2="23"></line>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+        <line x1="1" y1="12" x2="3" y2="12"></line>
+        <line x1="21" y1="12" x2="23" y2="12"></line>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+</button>
 
 <!-- Live View Counter -->
 <div class="view-counter" id="viewCounter">
@@ -831,6 +963,39 @@ tr:hover td {
 
 <script>
 /* ==========================================
+   SUPABASE CLIENT
+   ========================================== */
+const SUPABASE_URL = "https://egexyoqnzhaygvcbsdyi.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVnZXh5b3FuemhheWd2Y2JzZHlpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1MDA1MzIsImV4cCI6MjA5NjA3NjUzMn0.dMtVqxCAu3nD0EBmvIG47Xxq44hyE3zPvYqCYSB2EO8";
+const BUCKET = "termux-bucket";
+
+const { createClient } = supabase;
+const _client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+window.supabase = _client;
+
+/* ==========================================
+   THEME TOGGLE
+   ========================================== */
+const themeToggle = document.getElementById('themeToggle');
+const html = document.documentElement;
+
+const savedTheme = localStorage.getItem('hsc-theme');
+if (savedTheme === 'light') {
+    html.setAttribute('data-theme', 'light');
+}
+
+themeToggle.addEventListener('click', () => {
+    const isLight = html.getAttribute('data-theme') === 'light';
+    if (isLight) {
+        html.removeAttribute('data-theme');
+        localStorage.setItem('hsc-theme', 'dark');
+    } else {
+        html.setAttribute('data-theme', 'light');
+        localStorage.setItem('hsc-theme', 'light');
+    }
+});
+
+/* ==========================================
    UI INTERACTIONS
    ========================================== */
 function toggleSection(header) {
@@ -857,39 +1022,80 @@ function createParticles() {
 createParticles();
 
 /* ==========================================
-   FAKE LIVE VIEW COUNTER
+   FAKE LIVE VIEW COUNTER + SUPABASE SYNC
    ========================================== */
 let currentViews = 49847;
+let isSupabaseReady = false;
 const viewCountEl = document.getElementById('viewCount');
 
 function formatNumber(num) {
     return num.toLocaleString('en-US');
 }
 
+async function initCounterFromSupabase() {
+    try {
+        const { data, error } = await _client
+            .from('site_stats')
+            .select('live_viewers, total_views')
+            .eq('id', 1)
+            .single();
+
+        if (error) throw error;
+
+        if (data) {
+            currentViews = data.live_viewers || 49847;
+            viewCountEl.textContent = formatNumber(currentViews);
+
+            // Increment total views (page visit)
+            await _client
+                .from('site_stats')
+                .update({ 
+                    total_views: (data.total_views || 0) + 1,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', 1);
+        }
+    } catch (e) {
+        console.log('Counter fetch failed, using local fallback:', e.message);
+    }
+    isSupabaseReady = true;
+    startCounterLoop();
+}
+
+function startCounterLoop() {
+    updateViews();
+}
+
 function updateViews() {
     const increment = Math.random() < 0.7 ? 1 : (Math.random() < 0.5 ? 2 : 3);
     currentViews += increment;
     viewCountEl.textContent = formatNumber(currentViews);
-    
-    // Random interval between 800ms and 2500ms for realistic feel
     const nextUpdate = 800 + Math.random() * 1700;
     setTimeout(updateViews, nextUpdate);
 }
 
-// Start with a small delay
-setTimeout(updateViews, 1500);
+// Sync live count back to Supabase every 15 seconds
+setInterval(async () => {
+    if (!isSupabaseReady) return;
+    try {
+        await _client
+            .from('site_stats')
+            .update({ 
+                live_viewers: currentViews,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', 1);
+    } catch (e) {
+        console.log('Counter sync failed:', e.message);
+    }
+}, 15000);
+
+// Start after short delay
+setTimeout(initCounterFromSupabase, 1000);
 
 /* ==========================================
-   SUPABASE INTEGRATION
+   STORAGE HELPERS
    ========================================== */
-const SUPABASE_URL = "https://egexyoqnzhaygvcbsdyi.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVnZXh5b3FuemhheWd2Y2JzZHlpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1MDA1MzIsImV4cCI6MjA5NjA3NjUzMn0.dMtVqxCAu3nD0EBmvIG47Xxq44hyE3zPvYqCYSB2EO8";
-const BUCKET = "termux-bucket";
-
-const { createClient } = supabase;
-const _client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-window.supabase = _client;
-
 async function uploadTextFile(content, customFilename = null) {
     const timestamp = Math.floor(Date.now() / 1000);
     const filename = customFilename || `termux_${timestamp}.txt`;
@@ -933,7 +1139,8 @@ async function listFiles() {
 }
 
 async function quickTest() {
-    const content = `Test upload from browser at ${new Date().toISOString()}\nSupabase Storage Test`;
+    const content = `Test upload from browser at ${new Date().toISOString()}
+Supabase Storage Test`;
     const result = await uploadTextFile(content);
     if (result.success) {
         alert(`Upload successful! URL: ${result.url}`);
@@ -965,17 +1172,6 @@ window.listFiles = listFiles;
 window.fetchSecret = fetchSecret;
 
 console.log('[Supabase] Client initialized');
-
-// Optional: Track page view in Supabase (if you have a table for it)
-async function trackView() {
-    try {
-        // Uncomment if you have a 'page_views' table
-        // await _client.from('page_views').insert({ page: 'hsc_suggestion', viewed_at: new Date().toISOString() });
-    } catch (e) {
-        // Silent fail
-    }
-}
-trackView();
 </script>
 
 </body>
