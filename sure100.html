@@ -1,736 +1,1580 @@
-<!-- FORCE FULL WIDTH - OVERRIDES BLOGGER CONTAINER -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>HSC English 2nd Paper Final Suggestion 2026</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
 <style>
-  /* Override ALL Blogger parent containers */
-  .post-body, .post, .post-outer, .entry-content, .article, 
-  .blog-posts, .main, .content, .container, .post-body.entry-content,
-  .post-outer-container, .post-feeds, .comments, .post-footer,
-  .post-header, .post-title, .post-labels, .blog-posts.hfeed,
-  .section, .widget, .widget.HTML, .widget.Blog {
-    width: 100% !important;
-    max-width: 100% !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    border: none !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    border-radius: 0 !important;
-    float: none !important;
-    position: static !important;
-    left: auto !important;
-    right: auto !important;
-  }
-  
-  /* Hide blog elements */
-  .post-header, .post-footer, .post-labels, .comments, 
-  .post-feeds, .blog-pager, .sidebar, .header, .footer,
-  .navbar, .fauxcolumn-outer, .fauxborder-left, .fauxborder-right,
-  .post-title.entry-title, .post-location, .post-share-buttons,
-  .author-profile, .related-posts, .blog-posts.hfeed .post-outer {
-    display: none !important;
-  }
-  
-  /* Force body and html to cooperate */
-  html, body {
-    overflow-x: hidden !important;
-    width: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-</style>
+:root {
+    --primary: #6366f1;
+    --primary-dark: #4f46e5;
+    --secondary: #ec4899;
+    --accent: #06b6d4;
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface-light: #334155;
+    --text: #f1f5f9;
+    --text-muted: #94a3b8;
+    --success: #22c55e;
+    --warning: #f59e0b;
+    --glass: rgba(30, 41, 59, 0.85);
+    --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    --border: rgba(255,255,255,0.06);
+    --card-bg: rgba(255,255,255,0.03);
+    --card-hover: rgba(255,255,255,0.06);
+    --gradient-text: linear-gradient(135deg, #6366f1, #ec4899, #06b6d4);
+    --mesh-1: rgba(99, 102, 241, 0.15);
+    --mesh-2: rgba(236, 72, 153, 0.1);
+    --mesh-3: rgba(6, 182, 212, 0.05);
+}
 
-<div class="mod-page" id="modApp">
-  
-  <!-- Theme Toggle -->
-  <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
-    <span class="toggle-icon">🌙</span>
-  </button>
-
-  <!-- Hero Section -->
-  <section class="hero">
-    <div class="hero-glow"></div>
-    <div class="hero-inner">
-      <div class="app-badge-wrap">
-        <img alt="CapCut Mod APK" class="app-icon" 
-             src="https://freelightmods.edgeone.dev/images/capcut-mod-icon.png"
-             onerror="this.style.display='none'"/>
-        <span class="version-tag">v12.8.0</span>
-      </div>
-      <h1 class="app-name">CapCut <span class="gradient-text">Mod</span> APK</h1>
-      <p class="app-tagline">Premium Unlocked • No Watermark • 4K Export</p>
-      
-      <div class="stats">
-        <div class="stat">
-          <span class="stat-value">4.8★</span>
-          <span class="stat-name">Rating</span>
-        </div>
-        <div class="stat">
-          <span class="stat-value">85MB</span>
-          <span class="stat-name">Size</span>
-        </div>
-        <div class="stat">
-          <span class="stat-value">1M+</span>
-          <span class="stat-name">Downloads</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- About -->
-  <section class="section reveal">
-    <div class="section-inner">
-      <h2 class="section-heading">About This Mod</h2>
-      <p class="section-text">
-        Get the premium unlocked version of CapCut Video Editor. Access all paid templates, 
-        effects, and filters without any subscription. Export videos in 4K quality with zero watermarks.
-      </p>
-    </div>
-  </section>
-
-  <!-- Features -->
-  <section class="section reveal">
-    <div class="section-inner">
-      <h2 class="section-heading">Mod Features</h2>
-      <div class="feature-grid">
-        <div class="feature-card">
-          <div class="feature-emoji">🔓</div>
-          <h3>Premium Unlocked</h3>
-          <p>All paid features free</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-emoji">🚫</div>
-          <h3>No Watermark</h3>
-          <p>Clean exports</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-emoji">🎨</div>
-          <h3>All Templates</h3>
-          <p>1000+ templates</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-emoji">🎬</div>
-          <h3>4K Export</h3>
-          <p>Ultra HD quality</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-emoji">🤖</div>
-          <h3>Auto Captions</h3>
-          <p>AI subtitles</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-emoji">📵</div>
-          <h3>No Ads</h3>
-          <p>Zero interruptions</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Screenshots -->
-  <section class="section reveal">
-    <div class="section-inner">
-      <h2 class="section-heading">Screenshots</h2>
-      <div class="screenshots-wrap">
-        <img alt="CapCut Interface" class="screenshot-img" 
-             src="https://freelightmods.edgeone.dev/images/capcut-screenshot-1.jpg"/>
-        <img alt="CapCut Templates" class="screenshot-img" 
-             src="https://freelightmods.edgeone.dev/images/capcut-screenshot-2.jpg"/>
-        <img alt="CapCut Export" class="screenshot-img" 
-             src="https://freelightmods.edgeone.dev/images/capcut-screenshot-3.jpg"/>
-      </div>
-    </div>
-  </section>
-
-  <!-- Download -->
-  <section class="download-section reveal">
-    <div class="download-inner">
-      <div class="pulse"></div>
-      <a class="download-button" href="https://freelightmods.edgeone.dev/download/capcut-mod">
-        <span>Download Now</span>
-        <svg class="arrow" fill="none" height="18" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" width="18"><path d="M5 12h14M12 5l7 7-7 7"></path></svg>
-      </a>
-      <p class="download-note">Free • Safe • Latest Version from FreeLightMods</p>
-    </div>
-  </section>
-
-  <!-- Footer -->
-  <footer class="site-footer">
-    <p>FreeLightMods © 2026</p>
-  </footer>
-
-  <!-- SEO -->
-  <div style="display:none;">
-    capcut mod apk, capcut premium unlocked, capcut no watermark, 
-    capcut mod download, free capcut premium, capcut video editor mod
-  </div>
-</div>
-
-<style>
-  /* ============================================
-     ROOT VARIABLES
-     ============================================ */
-  :root {
-    --bg: #0a0a12;
-    --surface: #12121c;
-    --surface-hover: #1a1a28;
-    --text: #f0f0f5;
-    --text-secondary: #a0a0b8;
-    --text-muted: #6a6a85;
-    --accent-1: #7B2FF7;
-    --accent-2: #F107A3;
-    --accent-3: #FF6A00;
-    --border: rgba(123, 47, 247, 0.12);
-  }
-
-  .light-mode {
-    --bg: #f0f0f8;
+[data-theme="light"] {
+    --primary: #4f46e5;
+    --primary-dark: #4338ca;
+    --secondary: #db2777;
+    --accent: #0891b2;
+    --bg: #f8fafc;
     --surface: #ffffff;
-    --surface-hover: #f5f5fa;
-    --text: #1a1a2e;
-    --text-secondary: #4a4a6a;
-    --text-muted: #7a7a9a;
-    --border: rgba(123, 47, 247, 0.08);
-  }
+    --surface-light: #f1f5f9;
+    --text: #0f172a;
+    --text-muted: #64748b;
+    --success: #16a34a;
+    --warning: #d97706;
+    --glass: rgba(255, 255, 255, 0.85);
+    --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.12);
+    --border: rgba(0,0,0,0.06);
+    --card-bg: rgba(0,0,0,0.02);
+    --card-hover: rgba(0,0,0,0.05);
+    --gradient-text: linear-gradient(135deg, #4f46e5, #db2777, #0891b2);
+    --mesh-1: rgba(99, 102, 241, 0.08);
+    --mesh-2: rgba(236, 72, 153, 0.06);
+    --mesh-3: rgba(6, 182, 212, 0.04);
+}
 
-  /* ============================================
-     BASE
-     ============================================ */
-  .mod-page {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { scroll-behavior: smooth; overflow-x: hidden; }
+
+body {
+    font-family: 'Inter', sans-serif;
     background: var(--bg);
     color: var(--text);
-    min-height: 100vh;
-    width: 100%;
     line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
-    position: relative;
-    transition: background 0.3s ease, color 0.3s ease;
-  }
+    min-height: 100vh;
+    transition: background 0.5s ease, color 0.5s ease;
+}
 
-  /* ============================================
-     THEME TOGGLE
-     ============================================ */
-  .theme-toggle {
+.bg-mesh {
+    position: fixed; inset: 0; z-index: -1;
+    background:
+        radial-gradient(circle at 20% 80%, var(--mesh-1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, var(--mesh-2) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, var(--mesh-3) 0%, transparent 50%);
+    animation: bgPulse 8s ease-in-out infinite alternate;
+    transition: background 0.8s ease;
+}
+@keyframes bgPulse {
+    0% { opacity: 0.5; transform: scale(1); }
+    100% { opacity: 1; transform: scale(1.1); }
+}
+
+.particles { position: fixed; inset: 0; pointer-events: none; z-index: -1; overflow: hidden; }
+.particle {
+    position: absolute; width: 4px; height: 4px;
+    background: var(--primary); border-radius: 50%; opacity: 0.3;
+    animation: floatUp linear infinite;
+}
+@keyframes floatUp {
+    0% { transform: translateY(100vh) scale(0); opacity: 0; }
+    10% { opacity: 0.3; } 90% { opacity: 0.3; }
+    100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+}
+
+/* Floating Buttons */
+.fab-group {
     position: fixed;
-    top: 16px;
-    right: 16px;
-    z-index: 9999;
-    width: 44px;
-    height: 44px;
+    top: 3.6rem;
+    right: 1rem;
+    z-index: 1001;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.fab {
+    width: 48px; height: 48px;
     border-radius: 50%;
-    border: 1px solid var(--border);
     background: var(--surface);
-    color: var(--text);
-    font-size: 1.2rem;
+    border: 1px solid var(--border);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-    backdrop-filter: blur(10px);
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  .theme-toggle:active {
-    transform: scale(0.92);
-  }
-
-  /* ============================================
-     HERO
-     ============================================ */
-  .hero {
-    position: relative;
-    padding: 60px 20px 32px;
-    text-align: center;
-    overflow: hidden;
-    background: var(--surface);
-  }
-
-  .hero-glow {
-    position: absolute;
-    top: -60px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 300px;
-    height: 300px;
-    background: radial-gradient(circle, var(--accent-1) 0%, transparent 70%);
-    opacity: 0.18;
-    pointer-events: none;
-  }
-
-  .hero-inner {
-    position: relative;
-    z-index: 1;
-    max-width: 480px;
-    margin: 0 auto;
-  }
-
-  .app-badge-wrap {
-    position: relative;
-    display: inline-block;
-    margin-bottom: 16px;
-  }
-
-  .app-icon {
-    width: 96px;
-    height: 96px;
-    border-radius: 24px;
-    object-fit: cover;
-    box-shadow: 0 8px 32px rgba(123, 47, 247, 0.35);
-    display: block;
-  }
-
-  .version-tag {
-    position: absolute;
-    bottom: -6px;
-    right: -10px;
-    background: linear-gradient(135deg, var(--accent-2), var(--accent-3));
-    color: #fff;
-    font-size: 0.7rem;
-    font-weight: 700;
-    padding: 4px 12px;
-    border-radius: 20px;
-    border: 3px solid var(--surface);
-    white-space: nowrap;
-    animation: pulse-badge 2s ease-in-out infinite;
-  }
-
-  @keyframes pulse-badge {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.06); }
-  }
-
-  .app-name {
-    font-size: 1.8rem;
-    font-weight: 800;
-    margin-bottom: 6px;
-    letter-spacing: -0.5px;
+    box-shadow: var(--shadow);
+    transition: all 0.35s cubic-bezier(0.68, -0.55, 0.27, 1.55);
     color: var(--text);
-  }
-
-  .gradient-text {
-    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .app-tagline {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    margin-bottom: 24px;
-  }
-
-  .stats {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-
-  .stat {
-    background: var(--surface-hover);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 12px 16px;
-    min-width: 85px;
-    text-align: center;
-    flex: 1;
-    max-width: 120px;
-  }
-
-  .stat-value {
-    display: block;
     font-size: 1.1rem;
-    font-weight: 800;
-    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-
-  .stat-name {
-    display: block;
-    font-size: 0.7rem;
-    color: var(--text-muted);
-    margin-top: 2px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  /* ============================================
-     SECTIONS
-     ============================================ */
-  .section {
-    padding: 28px 20px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .section-inner {
-    max-width: 640px;
-    margin: 0 auto;
-  }
-
-  .section-heading {
-    font-size: 1.1rem;
-    font-weight: 700;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--text);
-  }
-
-  .section-heading::before {
-    content: '';
-    width: 4px;
-    height: 18px;
-    background: linear-gradient(180deg, var(--accent-1), var(--accent-2));
-    border-radius: 4px;
-    flex-shrink: 0;
-  }
-
-  .section-text {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    line-height: 1.7;
-  }
-
-  /* ============================================
-     FEATURES
-     ============================================ */
-  .feature-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-  }
-
-  .feature-card {
-    background: var(--surface-hover);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 18px 12px;
-    text-align: center;
-    transition: all 0.25s ease;
-  }
-
-  .feature-card:hover {
-    transform: translateY(-3px);
-    border-color: var(--accent-1);
-    box-shadow: 0 8px 24px rgba(123, 47, 247, 0.12);
-  }
-
-  .feature-emoji {
-    font-size: 1.8rem;
-    margin-bottom: 8px;
-    display: block;
-    transition: transform 0.3s ease;
-  }
-
-  .feature-card:hover .feature-emoji {
-    transform: scale(1.2);
-  }
-
-  .feature-card h3 {
-    font-size: 0.8rem;
-    font-weight: 600;
-    margin-bottom: 3px;
-    color: var(--text);
-  }
-
-  .feature-card p {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    line-height: 1.4;
-  }
-
-  /* ============================================
-     SCREENSHOTS
-     ============================================ */
-  .screenshots-wrap {
-    display: flex;
-    gap: 12px;
-    overflow-x: auto;
-    padding: 4px 4px 12px;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    margin: 0 -4px;
-  }
-
-  .screenshots-wrap::-webkit-scrollbar {
-    display: none;
-  }
-
-  .screenshot-img {
-    flex: 0 0 auto;
-    width: 240px;
-    max-width: 75vw;
-    height: auto;
-    border-radius: 16px;
-    border: 1px solid var(--border);
-    scroll-snap-align: start;
-    background: var(--surface-hover);
-    display: block;
-  }
-
-  /* ============================================
-     DOWNLOAD
-     ============================================ */
-  .download-section {
     position: relative;
-    padding: 48px 20px;
-    text-align: center;
-    background: linear-gradient(180deg, var(--bg), var(--surface));
-    overflow: hidden;
-  }
+}
+.fab:hover { transform: scale(1.12); box-shadow: 0 0 20px var(--primary); }
+.fab:active { transform: scale(0.95); }
 
-  .download-inner {
-    position: relative;
-    z-index: 1;
-    max-width: 400px;
-    margin: 0 auto;
-  }
-
-  .pulse {
+.fab .tooltip {
     position: absolute;
+    right: 56px;
     top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 200px;
-    height: 200px;
-    border-radius: 50%;
-    border: 2px solid var(--accent-1);
-    opacity: 0;
-    animation: pulse-ring 3s ease-out infinite;
-  }
-
-  @keyframes pulse-ring {
-    0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.4; }
-    100% { transform: translate(-50%, -50%) scale(1.6); opacity: 0; }
-  }
-
-  .download-button {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 16px 40px;
-    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
-    color: #fff;
-    text-decoration: none;
-    border-radius: 50px;
-    font-weight: 700;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    box-shadow: 0 8px 32px rgba(123, 47, 247, 0.4);
-    overflow: hidden;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  .download-button::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-    transition: left 0.5s;
-  }
-
-  .download-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 40px rgba(123, 47, 247, 0.5);
-  }
-
-  .download-button:hover::after {
-    left: 100%;
-  }
-
-  .download-button:active {
-    transform: scale(0.97);
-  }
-
-  .arrow {
-    transition: transform 0.3s ease;
-  }
-
-  .download-button:hover .arrow {
-    transform: translateX(4px);
-  }
-
-  .download-note {
-    margin-top: 14px;
-    font-size: 0.8rem;
-    color: var(--text-muted);
-  }
-
-  /* ============================================
-     FOOTER
-     ============================================ */
-  .site-footer {
-    text-align: center;
-    padding: 20px;
+    transform: translateY(-50%) translateX(8px);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 0.35rem 0.7rem;
+    border-radius: 8px;
     font-size: 0.75rem;
-    color: var(--text-muted);
-    border-top: 1px solid var(--border);
-  }
-
-  /* ============================================
-     REVEAL ANIMATION
-     ============================================ */
-  .reveal {
+    font-weight: 600;
+    white-space: nowrap;
     opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.5s ease, transform 0.5s ease;
-  }
+    pointer-events: none;
+    transition: all 0.25s ease;
+}
+.fab:hover .tooltip { opacity: 1; transform: translateY(-50%) translateX(0); }
 
-  .reveal.visible {
+.fab .sun-icon, .fab .moon-icon { position: absolute; transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55); }
+.fab .sun-icon { opacity: 0; transform: rotate(-90deg) scale(0); }
+.fab .moon-icon { opacity: 1; transform: rotate(0) scale(1); }
+[data-theme="light"] .fab .sun-icon { opacity: 1; transform: rotate(0) scale(1); }
+[data-theme="light"] .fab .moon-icon { opacity: 0; transform: rotate(90deg) scale(0); }
+
+/* View Counter */
+.view-counter {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 999;
+    background: var(--glass);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0.55rem 1rem;
+    display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+    font-size: 0.85rem; font-weight: 600;
+    transition: background 0.5s ease, border-color 0.5s ease;
+}
+.view-counter .live-dot {
+    width: 8px; height: 8px; background: #ef4444; border-radius: 50%;
+    animation: pulse 2s infinite; box-shadow: 0 0 10px #ef4444;
+}
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.2)} }
+.view-counter .count { color: var(--accent); font-variant-numeric: tabular-nums; min-width: 60px; text-align: center; }
+
+/* Header */
+.header {
+    text-align: center;
+    padding: 5.5rem 1.5rem 2rem;
+    position: relative;
+}
+.header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 6vw, 3.5rem); font-weight: 800;
+    background: var(--gradient-text);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    margin-bottom: 0.5rem;
+    animation: titleReveal 1s ease-out forwards;
+    opacity: 0; transform: translateY(20px);
+}
+.header h2 {
+    font-size: clamp(1rem, 3vw, 1.3rem); color: var(--text-muted);
+    font-weight: 400; letter-spacing: 0.1em; text-transform: uppercase;
+    animation: titleReveal 1s ease-out 0.2s forwards;
+    opacity: 0; transform: translateY(20px);
+}
+.header-badge {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    margin-top: 1.5rem; padding: 0.5rem 1.2rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 100px; font-size: 0.8rem; color: var(--primary);
+    animation: titleReveal 1s ease-out 0.4s forwards;
+    opacity: 0; transform: translateY(20px);
+    transition: background 0.5s ease, border-color 0.5s ease;
+}
+@keyframes titleReveal { to { opacity: 1; transform: translateY(0); } }
+
+/* Container */
+.container { max-width: 900px; margin: 0 auto; padding: 0 1rem 3rem; }
+
+/* Section Cards */
+.section {
+    margin-bottom: 2rem;
+    animation: fadeInUp 0.8s ease-out forwards;
+    opacity: 0; transform: translateY(30px);
+}
+.section:nth-child(1){animation-delay:0.1s}
+.section:nth-child(2){animation-delay:0.2s}
+.section:nth-child(3){animation-delay:0.3s}
+.section:nth-child(4){animation-delay:0.4s}
+.section:nth-child(5){animation-delay:0.5s}
+
+.section-header {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    background: linear-gradient(135deg, var(--surface), var(--surface-light));
+    border-radius: 16px 16px 0 0;
+    border: 1px solid var(--border); border-bottom: none;
+    cursor: pointer; transition: all 0.3s ease;
+    position: relative; overflow: hidden;
+}
+.section-header::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+    width: 4px; background: linear-gradient(to bottom, var(--primary), var(--secondary));
+    transition: width 0.3s ease;
+}
+.section-header:hover::before { width: 6px; }
+.section-header:hover { background: linear-gradient(135deg, var(--surface-light), var(--surface)); }
+
+.section-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; flex-shrink: 0;
+}
+.section-title { font-size: 1.1rem; font-weight: 700; flex: 1; }
+.section-count {
+    font-size: 0.75rem; padding: 0.25rem 0.75rem;
+    background: rgba(99, 102, 241, 0.2); color: var(--primary);
+    border-radius: 100px; font-weight: 600;
+}
+.chevron {
+    width: 24px; height: 24px;
+    transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    opacity: 0.6;
+}
+.section.collapsed .chevron { transform: rotate(-90deg); }
+
+.section-content {
+    max-height: 3000px; overflow: hidden;
+    transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
     opacity: 1;
-    transform: translateY(0);
-  }
+}
+.section.collapsed .section-content { max-height: 0; opacity: 0; }
 
-  /* ============================================
-     RESPONSIVE
-     ============================================ */
-  @media (min-width: 480px) {
-    .hero {
-      padding: 80px 24px 40px;
-    }
-    
-    .app-icon {
-      width: 120px;
-      height: 120px;
-    }
-    
-    .app-name {
-      font-size: 2.2rem;
-    }
-    
-    .stats {
-      gap: 12px;
-    }
-    
-    .stat {
-      padding: 16px 20px;
-      min-width: 100px;
-    }
-    
-    .stat-value {
-      font-size: 1.3rem;
-    }
-    
-    .section {
-      padding: 36px 24px;
-    }
-    
-    .section-heading {
-      font-size: 1.25rem;
-    }
-    
-    .section-text {
-      font-size: 0.95rem;
-    }
-    
-    .feature-grid {
-      grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
-    }
-    
-    .feature-card {
-      padding: 22px 16px;
-    }
-    
-    .feature-emoji {
-      font-size: 2rem;
-    }
-    
-    .feature-card h3 {
-      font-size: 0.85rem;
-    }
-    
-    .feature-card p {
-      font-size: 0.8rem;
-    }
-    
-    .screenshot-img {
-      width: 280px;
-      max-width: none;
-    }
-    
-    .download-section {
-      padding: 60px 24px;
-    }
-    
-    .download-button {
-      padding: 18px 48px;
-      font-size: 1.1rem;
-    }
-  }
+.card-grid {
+    display: grid; gap: 0.5rem; padding: 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border); border-top: none;
+    border-radius: 0 0 16px 16px;
+    transition: background 0.5s ease, border-color 0.5s ease;
+}
 
-  @media (min-width: 640px) {
-    .section-inner {
-      max-width: 680px;
-    }
-    
-    .hero-inner {
-      max-width: 520px;
-    }
-  }
+/* Card Item */
+.card-item {
+    display: flex; align-items: center; gap: 1rem;
+    padding: 1rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer; position: relative; overflow: hidden;
+}
+.card-item::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, transparent, rgba(99, 102, 241, 0.06));
+    opacity: 0; transition: opacity 0.3s ease;
+}
+.card-item:hover::after { opacity: 1; }
+.card-item:hover {
+    transform: translateX(4px);
+    border-color: rgba(99, 102, 241, 0.35);
+    background: var(--card-hover);
+    box-shadow: 0 4px 20px rgba(99,102,241,0.1);
+}
+.card-item:active { transform: scale(0.98); }
 
-  /* Reduced motion */
-  @media (prefers-reduced-motion: reduce) {
-    .mod-page * {
-      animation: none !important;
-      transition: none !important;
-    }
-    
-    .reveal {
-      opacity: 1;
-      transform: none;
-    }
-  }
+.card-number {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.8rem; font-weight: 700; flex-shrink: 0;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+}
+.card-text { flex: 1; font-size: 0.95rem; font-weight: 500; }
+.card-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem; }
+.card-arrow {
+    width: 20px; height: 20px; opacity: 0.4;
+    transition: all 0.3s ease; flex-shrink: 0;
+}
+.card-item:hover .card-arrow { opacity: 1; transform: translateX(3px); }
+
+/* ==========================================
+   READER MODAL
+   ========================================== */
+.modal-overlay {
+    position: fixed; inset: 0; z-index: 2000;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    display: flex; align-items: flex-end; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.35s ease;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+
+.modal-sheet {
+    width: 100%; max-width: 800px; max-height: 85vh;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 24px 24px 0 0;
+    display: flex; flex-direction: column;
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+    box-shadow: 0 -20px 60px rgba(0,0,0,0.4);
+}
+.modal-overlay.open .modal-sheet { transform: translateY(0); }
+
+@media (min-width: 640px) {
+    .modal-overlay { align-items: center; padding: 2rem; }
+    .modal-sheet { border-radius: 24px; max-height: 80vh; transform: translateY(40px) scale(0.95); }
+    .modal-overlay.open .modal-sheet { transform: translateY(0) scale(1); }
+}
+
+.modal-header {
+    display: flex; align-items: center; gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+}
+.modal-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+}
+.modal-title-wrap { flex: 1; min-width: 0; }
+.modal-title { font-size: 1.1rem; font-weight: 700; }
+.modal-subtitle { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.1rem; }
+
+.modal-close {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: var(--card-bg); border: 1px solid var(--border);
+    color: var(--text); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s ease; flex-shrink: 0;
+}
+.modal-close:hover { background: rgba(239,68,68,0.15); color: #ef4444; border-color: rgba(239,68,68,0.3); }
+
+.modal-body {
+    flex: 1; overflow-y: auto; padding: 1.5rem;
+    -webkit-overflow-scrolling: touch;
+}
+.modal-content-text {
+    font-size: 1rem; line-height: 1.9;
+    white-space: pre-wrap; word-wrap: break-word;
+    color: var(--text);
+}
+.modal-content-text p { margin-bottom: 1rem; }
+.modal-content-text strong { color: var(--primary); }
+
+/* Footer */
+.footer {
+    text-align: center; padding: 2rem 1rem;
+    color: var(--text-muted); font-size: 0.8rem;
+    border-top: 1px solid var(--border); margin-top: 2rem;
+    transition: border-color 0.5s ease;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); transition: background 0.5s ease; }
+::-webkit-scrollbar-thumb { background: var(--surface-light); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .fab { width: 44px; height: 44px; }
+    .fab-group { top: 3.4rem; right: 0.75rem; gap: 0.5rem; }
+    .fab .tooltip { display: none; }
+    .header { padding-top: 4.5rem; }
+    .modal-sheet { max-height: 88vh; border-radius: 20px 20px 0 0; }
+}
+
+@media (hover: none) {
+    .card-item:hover { transform: none; }
+    .card-item:active { transform: scale(0.98); background: rgba(99,102,241,0.08); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
 </style>
+</head>
+<body>
+
+<div class="bg-mesh"></div>
+<div class="particles" id="particles"></div>
+
+<!-- Floating Buttons -->
+<div class="fab-group">
+    <button class="fab" id="themeToggle" aria-label="Toggle theme">
+        <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <span class="tooltip">Theme</span>
+    </button>
+</div>
+
+<!-- Live View Counter -->
+<div class="view-counter" id="viewCounter">
+    <span class="live-dot"></span>
+    <span>Live Viewers:</span>
+    <span class="count" id="viewCount">49,847</span>
+    <span>online</span>
+</div>
+
+<!-- Header -->
+<header class="header">
+    <h1>HSC English 2nd Paper Final Suggestion 2026</h1>
+    <h2>All Boards • 100% Common</h2>
+    <div class="header-badge">
+        <span>📚</span>
+        <span>5 Sections • 100+ Topics</span>
+    </div>
+</header>
+
+<main class="container" id="mainContainer">
+
+    <!-- Grammar -->
+    <div class="section" data-section="grammar">
+        <div class="section-header" onclick="toggleSection(this)">
+            <div class="section-icon">📖</div>
+            <div class="section-title">Grammar (Part A)</div>
+            <div class="section-count">8</div>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="section-content"><div class="card-grid" id="grid-grammar"></div></div>
+    </div>
+
+    <!-- Formal Letter / Email -->
+    <div class="section" data-section="formal">
+        <div class="section-header" onclick="toggleSection(this)">
+            <div class="section-icon">📩</div>
+            <div class="section-title">Formal Letter / Email (Q.13)</div>
+            <div class="section-count">24</div>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="section-content"><div class="card-grid" id="grid-formal"></div></div>
+    </div>
+
+    <!-- Report Writing -->
+    <div class="section" data-section="report">
+        <div class="section-header" onclick="toggleSection(this)">
+            <div class="section-icon">📰</div>
+            <div class="section-title">Report Writing (Q.14)</div>
+            <div class="section-count">20</div>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="section-content"><div class="card-grid" id="grid-report"></div></div>
+    </div>
+
+    <!-- Paragraph -->
+    <div class="section" data-section="paragraph">
+        <div class="section-header" onclick="toggleSection(this)">
+            <div class="section-icon">📝</div>
+            <div class="section-title">Paragraph (Q.15)</div>
+            <div class="section-count">18</div>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="section-content"><div class="card-grid" id="grid-paragraph"></div></div>
+    </div>
+
+    <!-- Composition -->
+    <div class="section" data-section="composition">
+        <div class="section-header" onclick="toggleSection(this)">
+            <div class="section-icon">✍️</div>
+            <div class="section-title">Composition (Q.16)</div>
+            <div class="section-count">12</div>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="section-content"><div class="card-grid" id="grid-composition"></div></div>
+    </div>
+
+</main>
+
+<footer class="footer">
+    <p>HSC English 2nd Paper Final Suggestion 2026 • All Boards • Best of Luck! 🎯</p>
+</footer>
+
+<!-- Reader Modal -->
+<div class="modal-overlay" id="readerModal">
+    <div class="modal-sheet">
+        <div class="modal-header">
+            <div class="modal-icon" id="modalIcon">📝</div>
+            <div class="modal-title-wrap">
+                <div class="modal-title" id="modalTitle">Topic</div>
+                <div class="modal-subtitle" id="modalSubtitle">Section</div>
+            </div>
+            <button class="modal-close" onclick="closeModal()" aria-label="Close">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="modal-body" id="modalBody">
+            <div class="modal-content-text" id="modalContent"></div>
+        </div>
+    </div>
+</div>
 
 <script>
-  // Theme toggle
-  function toggleTheme() {
-    var page = document.getElementById('modApp');
-    var icon = document.querySelector('.toggle-icon');
-    page.classList.toggle('light-mode');
-    icon.textContent = page.classList.contains('light-mode') ? '☀️' : '🌙';
-    localStorage.setItem('modTheme', page.classList.contains('light-mode') ? 'light' : 'dark');
-  }
-  
-  (function() {
-    var saved = localStorage.getItem('modTheme');
-    if (saved === 'light') {
-      document.getElementById('modApp').classList.add('light-mode');
-      document.querySelector('.toggle-icon').textContent = '☀️';
-    }
-  })();
+/* ==========================================
+   EMBEDDED CONTENT DATA (Based on latest 2026 suggestions)
+   Sources: babarenglish.com, prothomalo.com, educationblog24.com
+   ========================================== */
+const contentData = {
+    grammar: [
+`Gap Filling with Articles (a/an/the)
+Fill in the blanks with appropriate articles. Put a cross (×) where no article is needed.
 
-  // Scroll reveal
-  (function() {
-    if (!('IntersectionObserver' in window)) {
-      var els = document.querySelectorAll('.reveal');
-      for (var i = 0; i < els.length; i++) els[i].classList.add('visible');
-      return;
+(a) ___ honest man is trusted by all. (b) He is ___ European. (c) She has ___ unique voice. (d) ___ moon shines at night. (e) I saw ___ one-eyed man. (f) He is ___ M.A. in English. (g) ___ rich should help ___ poor. (h) He goes to ___ church every Sunday. (i) ___ river Padma is ___ largest river in Bangladesh. (j) He is ___ best student in the class.
+
+Answers: (a) An (b) a (c) a (d) The (e) a (f) an (g) The, the (h) × (i) The, the (j) the`,
+
+`Gap Filling with Prepositions
+Fill in the blanks with appropriate prepositions.
+
+(a) He is blind ___ one eye. (b) She is fond ___ music. (c) He died ___ fever. (d) I am not interested ___ the proposal. (e) The train is bound ___ Chittagong. (f) He is good ___ mathematics. (g) She is married ___ a doctor. (h) He was accused ___ theft. (i) We should not laugh ___ the poor. (j) He deals ___ rice.
+
+Answers: (a) of (b) of (c) of (d) in (e) for (f) at (g) to (h) of (i) at (j) in`,
+
+`Gap Filling with Clauses
+Complete the sentences using suitable clauses/phrases.
+
+(a) He was born in a village. It is ten years since __________.
+(b) I have to finish the work. I would rather __________.
+(c) He had better __________ if he wants to pass.
+(d) As soon as the teacher entered the class, __________.
+(e) He does not know what __________ looks like.
+(f) There is no alternative to __________.
+(g) Would you mind __________?
+(h) He is so weak that __________.
+(i) If I had seen him, __________.
+(j) He speaks as if __________.
+
+Answers: (a) he left the village (b) die than beg (c) study hard (d) the students stood up (e) a zebra (f) hard work (g) opening the door (h) he cannot walk (i) I would have told him (j) he knew everything`,
+
+`Completing Sentences
+Complete the sentences using suitable clauses/phrases.
+
+(a) We should eat vegetables so that __________.
+(b) He worked hard with a view to __________.
+(c) Unless you study regularly, __________.
+(d) It is high time we __________.
+(e) He is too honest to __________.
+(f) No sooner had he arrived than __________.
+(g) I wish I __________.
+(h) He ran fast lest he __________.
+(i) The man is not so poor as __________.
+(j) Although he is old, __________.
+
+Answers: (a) we can stay healthy (b) passing the exam (c) you will fail (d) changed our habits (e) tell a lie (f) the train left (g) were a bird (h) should miss the train (i) he appears (j) he works hard`,
+
+`Right Form of Verbs
+Use the right form of verbs in the blanks.
+
+(a) He (go) to school every day.
+(b) She (read) a book now.
+(c) They (finish) the work already.
+(d) I (see) him yesterday.
+(e) The sun (rise) in the east.
+(f) If he came, I (go) with him.
+(g) He (die) before the doctor arrived.
+(h) She (live) here for ten years.
+(i) The letter (write) by him.
+(j) He (walk) slowly lest he should fall.
+(k) I (have) a car.
+(l) She (do) the work now.
+(m) They (be) happy.
+(n) He (know) the answer.
+
+Answers: (a) goes (b) is reading (c) have finished (d) saw (e) rises (f) would go (g) had died (h) has lived (i) was written (j) walks (k) have (l) is doing (m) are (n) knows`,
+
+`Changing Sentences (Voice, Degree, Affirmative/Negative, Exclamatory)
+Transform the sentences as directed.
+
+1. He writes a letter. (Passive)
+2. She is the best girl in the class. (Positive)
+3. He is very honest. (Negative)
+4. The man is too weak to walk. (Complex)
+5. What a beautiful flower it is! (Assertive)
+6. He said, "I am happy." (Indirect)
+7. Do the work. (Passive)
+8. He is not only wise but also brave. (Simple)
+9. The sun rises in the east. (Interrogative)
+10. I wish I were a bird. (Exclamatory)
+
+Answers:
+1. A letter is written by him.
+2. No other girl in the class is as good as she.
+3. He is not dishonest.
+4. The man is so weak that he cannot walk.
+5. It is a very beautiful flower.
+6. He said that he was happy.
+7. Let the work be done.
+8. Besides being wise, he is brave.
+9. Doesn't the sun rise in the east?
+10. If I were a bird!`,
+
+`Narrative Style (Direct to Indirect / Indirect to Direct)
+Change the narrative style.
+
+Direct to Indirect:
+The teacher said to the boy, "Why are you late? Have you finished your homework?"
+The boy said, "I am sorry, sir. I could not finish it."
+
+Indirect: The teacher asked the boy why he was late and whether he had finished his homework. The boy apologized and said that he could not finish it.
+
+Indirect to Direct:
+He asked me if I had seen the movie.
+
+Direct: He said to me, "Have you seen the movie?"`,
+
+`Use of Sentence Connectors
+Fill in the blanks with suitable connectors.
+
+(a) ___ he is poor, he is honest.
+(b) He worked hard ___ he could pass.
+(c) ___ he came, I was sleeping.
+(d) He is both wise ___ brave.
+(e) ___ he was tired, he continued working.
+(f) He is not only wise ___ also brave.
+(g) ___ he saw me, he ran away.
+(h) He is rich ___ unhappy.
+(i) ___ it rains, we will not go.
+(j) He is tall ___ his brother is short.
+
+Answers: (a) Though/Although (b) so that (c) When/While (d) and (e) Although/Though (f) but (g) As soon as (h) but (i) If (j) while`
+    ],
+
+    formal: [
+`Application to the Principal for Establishing a Debating Club in the College
+
+To,
+The Principal,
+Your College,
+Dhaka.
+
+Subject: Prayer for establishing a debating club.
+
+Sir,
+With due respect, I beg to draw your kind attention to the fact that our college has no debating club. Debating is a very important co-curricular activity. It helps students develop their speaking skills, critical thinking, and confidence. Many students are interested in debating but have no platform to practice.
+
+Therefore, I on behalf of the students, pray that you would be kind enough to establish a debating club in our college. We shall be grateful to you.
+
+Yours obediently,
+XYZ
+On behalf of the students`,
+
+`Application to the Principal for Ensuring Safe Drinking Water in the College Campus
+
+To,
+The Principal,
+Your College,
+Dhaka.
+
+Subject: Prayer for ensuring safe drinking water.
+
+Sir,
+We, the students of your college, beg to state that we are facing a serious problem regarding safe drinking water. The water supply in our college is not pure and causes health issues. Many students suffer from waterborne diseases.
+
+Therefore, we pray that you would take necessary steps to ensure safe drinking water on campus. We shall be grateful to you.
+
+Yours obediently,
+XYZ`,
+
+`Application to the Principal for Opening a Relief Camp on Campus
+
+To,
+The Principal,
+Your College,
+Dhaka.
+
+Subject: Prayer for opening a relief camp on campus.
+
+Sir,
+With due respect, we beg to state that the recent flood has caused immense suffering to the people in the surrounding areas. Many people have lost their homes and are in urgent need of food, medicine, and shelter.
+
+Therefore, we pray that you would be kind enough to open a relief camp on our college campus. We shall be grateful to you.
+
+Yours obediently,
+XYZ`,
+
+`Application to the Chairman of Union Parishad for an Online Birth Certificate
+
+To,
+The Chairman,
+Union Parishad,
+Your Union.
+
+Subject: Prayer for an online birth certificate.
+
+Sir,
+With due respect, I beg to state that I am a resident of your union. I need an online birth certificate for my admission to a university. The manual process is time-consuming and complex.
+
+Therefore, I pray that you would take necessary steps to issue my online birth certificate. I shall be grateful to you.
+
+Yours faithfully,
+XYZ`,
+
+`Application to the Principal for Action Against Outsiders
+
+To,
+The Principal,
+Your College,
+Dhaka.
+
+Subject: Prayer for action against outsiders.
+
+Sir,
+We, the students of your college, beg to state that some outsiders frequently enter our campus and create disturbances. They tease female students and disrupt academic activities. We feel unsafe.
+
+Therefore, we pray that you would take strict action to prevent outsiders from entering the campus. We shall be grateful to you.
+
+Yours obediently,
+XYZ`,
+
+`Application to the Principal for Providing Multimedia Facilities in Classrooms
+
+To,
+The Principal,
+Your College,
+Dhaka.
+
+Subject: Prayer for providing multimedia facilities.
+
+Sir,
+We, the students of your college, beg to state that our classrooms lack modern teaching aids like multimedia projectors and smart boards. Traditional teaching methods are not sufficient for effective learning.
+
+Therefore, we pray that you would provide multimedia facilities in all classrooms. We shall be grateful to you.
+
+Yours obediently,
+XYZ`,
+
+`Application to the Principal Regarding the Defective Sound System in Classrooms
+
+To,
+The Principal,
+Your College,
+Dhaka.
+
+Subject: Prayer for repairing the defective sound system.
+
+Sir,
+We, the students of your college, beg to state that the sound system in our classrooms is defective. It creates disturbance during lectures and announcements. We cannot hear properly.
+
+Therefore, we pray that you would take necessary steps to repair or replace the sound system. We shall be grateful to you.
+
+Yours obediently,
+XYZ`,
+
+`Application to the Principal for Setting Up a Canteen in the College
+
+To,
+The Principal,
+Your College,
+Dhaka.
+
+Subject: Prayer for setting up a canteen.
+
+Sir,
+We, the students of your college, beg to state that we do not have a canteen on campus. We have to go outside for food, which is inconvenient and expensive. A hygienic canteen is essential for students.
+
+Therefore, we pray that you would set up a canteen in our college. We shall be grateful to you.
+
+Yours obediently,
+XYZ`,
+
+`Application to the Chairman of Education Board for a Stipend
+
+To,
+The Chairman,
+Education Board,
+Dhaka.
+
+Subject: Prayer for a stipend.
+
+Sir,
+With due respect, I beg to state that I am a poor but meritorious student of HSC 2026. My father is a day laborer and cannot afford my educational expenses. I need financial support to continue my studies.
+
+Therefore, I pray that you would grant me a stipend. I shall be grateful to you.
+
+Yours faithfully,
+XYZ`,
+
+`Application for Staging a Drama in the College Auditorium
+
+To,
+The Principal,
+Your College,
+Dhaka.
+
+Subject: Prayer for permission to stage a drama.
+
+Sir,
+We, the students of your college, beg to state that we want to stage a drama in the college auditorium on the occasion of the college foundation day. It will be a cultural program.
+
+Therefore, we pray that you would grant us permission to use the auditorium. We shall be grateful to you.
+
+Yours obediently,
+XYZ`,
+
+`Request for a Seat in the College Hostel
+
+To,
+The Principal,
+Your College,
+Dhaka.
+
+Subject: Prayer for a seat in the college hostel.
+
+Sir,
+With due respect, I beg to state that I am a student of your college. I live far away and cannot afford daily transportation. I need a seat in the college hostel.
+
+Therefore, I pray that you would allot me a seat in the hostel. I shall be grateful to you.
+
+Yours obediently,
+XYZ`,
+
+`Request for Setting Up an English Language Club
+
+To,
+The Principal,
+Your College,
+Dhaka.
+
+Subject: Prayer for setting up an English Language Club.
+
+Sir,
+We, the students of your college, beg to state that we want to improve our English language skills. An English Language Club can help us practice speaking, writing, and debating.
+
+Therefore, we pray that you would establish an English Language Club in our college. We shall be grateful to you.
+
+Yours obediently,
+XYZ`,
+
+`Application for Sound Systems in Large Classrooms
+
+To,
+The Principal,
+Your College,
+Dhaka.
+
+Subject: Prayer for sound systems in large classrooms.
+
+Sir,
+We, the students of your college, beg to state that our large classrooms do not have proper sound systems. Students sitting at the back cannot hear the lectures clearly. This hampers our learning.
+
+Therefore, we pray that you would install sound systems in all large classrooms. We shall be grateful to you.
+
+Yours obediently,
+XYZ`,
+
+`Request to Ban the Use of Cell Phones in Classrooms and Examination Halls
+
+To,
+The Principal,
+Your College,
+Dhaka.
+
+Subject: Prayer to ban the use of cell phones.
+
+Sir,
+We, the students of your college, beg to state that the use of cell phones in classrooms and examination halls is creating disturbance. Students get distracted and it encourages cheating.
+
+Therefore, we pray that you would strictly ban the use of cell phones in classrooms and examination halls. We shall be grateful to you.
+
+Yours obediently,
+XYZ`,
+
+`Request for an English Daily for the Common Room
+
+To,
+The Principal,
+Your College,
+Dhaka.
+
+Subject: Prayer for an English daily for the common room.
+
+Sir,
+We, the students of your college, beg to state that we do not have an English newspaper in our common room. Reading newspapers is essential for improving English and staying informed.
+
+Therefore, we pray that you would subscribe to an English daily for the common room. We shall be grateful to you.
+
+Yours obediently,
+XYZ`,
+
+`Request for Enhancing Library Facilities
+
+To,
+The Principal,
+Your College,
+Dhaka.
+
+Subject: Prayer for enhancing library facilities.
+
+Sir,
+We, the students of your college, beg to state that our library lacks sufficient books and reference materials. Many students cannot find the books they need for their studies. The library also needs more seating and computers.
+
+Therefore, we pray that you would enhance the library facilities. We shall be grateful to you.
+
+Yours obediently,
+XYZ`,
+
+`Request for Permission to Use the College Ground for a Science Fair
+
+To,
+The Principal,
+Your College,
+Dhaka.
+
+Subject: Prayer for permission to use the college ground for a science fair.
+
+Sir,
+We, the students of your college, beg to state that we want to organize a science fair on the college ground. It will display our projects and promote scientific awareness.
+
+Therefore, we pray that you would grant us permission to use the ground. We shall be grateful to you.
+
+Yours obediently,
+XYZ`,
+
+`Request for Permission for a Study Tour
+
+To,
+The Principal,
+Your College,
+Dhaka.
+
+Subject: Prayer for permission for a study tour.
+
+Sir,
+We, the students of your college, beg to state that we want to go on a study tour to historical places in Bangladesh. It will be an educational experience.
+
+Therefore, we pray that you would grant us permission for the tour. We shall be grateful to you.
+
+Yours obediently,
+XYZ`,
+
+`Request to Arrange a Blood Donation Camp in the College
+
+To,
+The Principal,
+Your College,
+Dhaka.
+
+Subject: Prayer for arranging a blood donation camp.
+
+Sir,
+We, the students of your college, beg to state that we want to organize a blood donation camp on campus. It will help save lives and create social awareness.
+
+Therefore, we pray that you would arrange a blood donation camp in our college. We shall be grateful to you.
+
+Yours obediently,
+XYZ`,
+
+`Application for Improving Computer Lab Facilities
+
+To,
+The Principal,
+Your College,
+Dhaka.
+
+Subject: Prayer for improving computer lab facilities.
+
+Sir,
+We, the students of your college, beg to state that our computer lab is outdated. Many computers are broken, and there is no internet connection. It hampers our practical learning.
+
+Therefore, we pray that you would improve the computer lab facilities. We shall be grateful to you.
+
+Yours obediently,
+XYZ`,
+
+`Request for a Transfer Certificate
+
+To,
+The Principal,
+Your College,
+Dhaka.
+
+Subject: Prayer for a transfer certificate.
+
+Sir,
+With due respect, I beg to state that I am a student of your college. Due to family reasons, I have to move to another city. I need a transfer certificate for admission to a new college.
+
+Therefore, I pray that you would issue my transfer certificate. I shall be grateful to you.
+
+Yours obediently,
+XYZ`,
+
+`Letter to the Chairman of Union Parishad for Immediate Bridge Repairs
+
+To,
+The Chairman,
+Union Parishad,
+Your Union.
+
+Subject: Prayer for immediate bridge repairs.
+
+Sir,
+With due respect, I beg to state that the bridge over the canal in our area is damaged. It is dangerous for vehicles and pedestrians. People are suffering.
+
+Therefore, I pray that you would take immediate steps to repair the bridge. I shall be grateful to you.
+
+Yours faithfully,
+XYZ`,
+
+`Application to the Deputy Commissioner for Relief Goods for Flood Victims
+
+To,
+The Deputy Commissioner,
+Your District.
+
+Subject: Prayer for relief goods for flood victims.
+
+Sir,
+With due respect, I beg to state that the recent flood has caused severe damage in our area. Many people are homeless and starving. They need food, medicine, and shelter.
+
+Therefore, I pray that you would send relief goods for the flood victims. I shall be grateful to you.
+
+Yours faithfully,
+XYZ`,
+
+`Application for Constructing a Bridge Over a Canal
+
+To,
+The Chairman,
+Union Parishad,
+Your Union.
+
+Subject: Prayer for constructing a bridge over a canal.
+
+Sir,
+With due respect, I beg to state that the people of our area face difficulty crossing the canal during the rainy season. There is no bridge, and people use boats, which is risky.
+
+Therefore, I pray that you would construct a bridge over the canal. I shall be grateful to you.
+
+Yours faithfully,
+XYZ`
+    ],
+
+    report: [
+`Road Accidents / Street Accidents
+
+A Report on Road Accidents in Dhaka City
+
+By XYZ, Staff Reporter
+
+Dhaka, July 5, 2026: Road accidents have become a daily occurrence in Dhaka city. According to police reports, at least 50 people lose their lives every month due to road accidents. The main causes are reckless driving, over-speeding, overloading, and violation of traffic rules. Many drivers do not have valid licenses. Unfit vehicles and poor road conditions also contribute to accidents. The government has taken some measures, but enforcement is weak. Public awareness campaigns and strict traffic laws are needed to reduce accidents. The recent accident on the Dhaka-Mymensingh highway claimed 10 lives, highlighting the urgency of the situation.[reference:0]`,
+
+`Price Hike / Essential Commodities
+
+A Report on Price Hike of Essential Commodities
+
+By XYZ, Staff Reporter
+
+Dhaka, July 6, 2026: The prices of essential commodities have increased sharply in recent months. Rice, oil, sugar, and vegetables are now beyond the reach of the poor. The main causes include supply shortages, hoarding by dishonest traders, and global inflation. The middle-class and lower-income groups are suffering the most. They are forced to cut down on food and other basic needs. The government has announced measures to control prices, but their implementation is slow. Consumers are demanding strict action against hoarders. A stable supply chain and fair pricing are essential for the welfare of the people.[reference:1]`,
+
+`Fire in a Garment / Chemical Factory
+
+A Report on Fire in a Garment Factory
+
+By XYZ, Staff Reporter
+
+Dhaka, June 28, 2026: A devastating fire broke out in a garment factory in Savar yesterday, killing at least 15 workers and injuring 50 others. The fire started from an electrical short circuit and spread quickly due to the presence of flammable materials. Firefighters took two hours to bring the fire under control. Many workers were trapped inside. The factory owner has been arrested for negligence. This incident has raised serious questions about workplace safety. The government has ordered an investigation. Trade unions are demanding stricter safety regulations and compensation for the victims.[reference:2]`,
+
+`Food Adulteration and Its Consequences
+
+A Report on Food Adulteration
+
+By XYZ, Staff Reporter
+
+Dhaka, July 1, 2026: Food adulteration has become a serious problem in Bangladesh. Harmful chemicals, artificial colors, and banned substances are being mixed with food items. Recently, the food safety authority conducted raids and found adulterated products in several shops. Common adulterants include formalin in fruits, chalk powder in flour, and artificial dyes in sweets. Adulterated food causes cancer, kidney failure, and liver damage. Experts are calling for strict enforcement of food safety laws. Public awareness campaigns are also essential to protect consumers.[reference:3]`,
+
+`Prize-Giving Ceremony of Your College
+
+A Report on the Prize-Giving Ceremony
+
+By XYZ, Staff Reporter
+
+Your College, July 3, 2026: The annual prize-giving ceremony of your college was held yesterday with great enthusiasm. The program started at 10 AM in the college auditorium. The Principal presided over the function. The Chief Guest was the District Commissioner. Students who excelled in academics, sports, and cultural activities were awarded prizes. The Chief Guest praised the students for their achievements and encouraged them to work harder. The cultural program performed by students added color to the event. The ceremony ended with a vote of thanks.[reference:4]`,
+
+`Drug Addiction and Its Consequences
+
+A Report on Drug Addiction Among Youth
+
+By XYZ, Staff Reporter
+
+Dhaka, July 2, 2026: Drug addiction has become a major problem among the youth of Bangladesh. The use of yaba, heroin, and other drugs is increasing at an alarming rate. According to a recent survey, over 60% of drug users are young people aged 15-30. Addiction destroys health, family, and future. It leads to crime, unemployment, and social degradation. The government has established rehabilitation centers and launched anti-drug campaigns. However, prevention requires collective effort from family, society, and educational institutions. Parents and teachers should guide young people towards positive activities.[reference:5]`,
+
+`Impact of Facebook on Young Generation
+
+A Report on Facebook and Its Impact on Youth
+
+By XYZ, Staff Reporter
+
+Dhaka, June 30, 2026: Facebook has become an integral part of the lives of young people. While it offers connectivity and information, excessive use is causing negative effects. Students are spending hours on Facebook, wasting valuable time that could be used for studies and physical activities. Cyberbullying, privacy concerns, and mental health issues are also rising. A recent study shows that teenagers who use Facebook excessively have lower academic performance and higher anxiety. Experts recommend responsible use of social media for learning and positive communication.[reference:6]`,
+
+`Miserable Condition of Slum Dwellers
+
+A Report on the Condition of Slum Dwellers
+
+By XYZ, Staff Reporter
+
+Dhaka, July 4, 2026: The condition of slum dwellers in Dhaka is deplorable. Millions of people live in overcrowded shanties without proper sanitation, clean water, or electricity. Children suffer from malnutrition and diseases. Many do not go to school because their families cannot afford it. The slums are prone to fires and floods. The government has some housing projects, but they are insufficient. NGOs are working to improve the situation, but more needs to be done. A comprehensive urban development plan is needed to ensure a dignified life for slum dwellers.[reference:7]`,
+
+`Corruption in Bangladesh
+
+A Report on Corruption in Bangladesh
+
+By XYZ, Staff Reporter
+
+Dhaka, July 5, 2026: Corruption remains one of the biggest obstacles to the development of Bangladesh. It is prevalent in government offices, the judiciary, and the police. Bribery, embezzlement, and nepotism are common. Corruption hampers economic growth, discourages foreign investment, and undermines public trust. The Anti-Corruption Commission (ACC) has taken some actions, but many cases go unpunished. Public awareness, transparency, and accountability are essential to fight corruption. Citizens must also refuse to pay bribes and report corrupt practices.[reference:8]`,
+
+`Causes of Students' Failure in English
+
+A Report on Students' Failure in English
+
+By XYZ, Staff Reporter
+
+Dhaka, July 6, 2026: Many HSC students fail in English every year. The main causes include lack of practice, poor grammar, weak vocabulary, and fear of the subject. Students do not read English books or newspapers. They also lack speaking and writing skills. Teachers often use traditional methods that do not engage students. The education board has introduced communicative English, but implementation is weak. Experts suggest regular practice, reading, and participation in English clubs to improve performance.[reference:9]`,
+
+`Earthquake / Recent Earthquakes
+
+A Report on Recent Earthquakes in Bangladesh
+
+By XYZ, Staff Reporter
+
+Dhaka, June 29, 2026: Bangladesh has experienced several mild to moderate earthquakes in recent weeks. On June 25, a 4.5 magnitude earthquake shook parts of Dhaka and Chittagong. No major damage was reported, but the tremors caused panic among residents. Bangladesh is located in a seismically active zone. Experts warn that a major earthquake could cause catastrophic damage due to poorly constructed buildings. The government has launched earthquake preparedness programs, but public awareness is still low. Citizens are advised to follow safety guidelines during earthquakes.[reference:10]`,
+
+`Science Fair at College Campus
+
+A Report on Science Fair at College Campus
+
+By XYZ, Staff Reporter
+
+Your College, July 2, 2026: A science fair was organized on our college campus yesterday. Students from different departments exhibited their projects on robotics, renewable energy, and environmental science. The fair was inaugurated by the Principal. Many visitors, including students from other institutions, attended the event. The projects were judged by a panel of experts. Prizes were awarded to the best projects. The fair aimed to promote scientific curiosity and innovation. It was a great success and will be held annually.[reference:11]`,
+
+`Reckless Driving (Cars/Motorcycles)
+
+A Report on Reckless Driving
+
+By XYZ, Staff Reporter
+
+Dhaka, July 3, 2026: Reckless driving has become a major concern in Dhaka. Motorcycles and cars are often driven at high speeds, ignoring traffic signals. Many accidents have been reported recently. In the last month, at least 20 people died in accidents caused by reckless driving. The traffic police have launched a crackdown, but it is not enough. Experts suggest stricter licensing tests, speed cameras, and public awareness campaigns. Citizens are urged to follow traffic rules and drive responsibly.[reference:12]`,
+
+`Flood Affected Area / Local Floods
+
+A Report on Flood Affected Areas
+
+By XYZ, Staff Reporter
+
+Sylhet, July 5, 2026: The recent floods have devastated large parts of Sylhet and Sunamganj. Thousands of people have been displaced. Homes, roads, and crops have been destroyed. People are in urgent need of food, clean water, and medicine. The government has deployed the army for rescue operations. Relief camps have been set up, but they are overcrowded. NGOs are also providing assistance. The flood situation is expected to improve in the coming days. Long-term measures like embankments and flood forecasting are needed.[reference:13]`,
+
+`Frequent Power Cut / Load Shedding
+
+A Report on Load Shedding
+
+By XYZ, Staff Reporter
+
+Dhaka, June 30, 2026: Load shedding has become a regular problem in Bangladesh, especially during the summer. In many areas, power cuts last for several hours daily. The main causes are insufficient power generation, outdated power plants, and transmission losses. Load shedding disrupts daily life. Students cannot study, hospitals face risks, and businesses suffer losses. The government is working on new power plants and renewable energy projects. Energy conservation is also important. Citizens are advised to use electricity efficiently.[reference:14]`,
+
+`Condition of Garment Workers
+
+A Report on Garment Workers
+
+By XYZ, Staff Reporter
+
+Dhaka, July 1, 2026: Garment workers in Bangladesh face poor working conditions. Many work in overcrowded factories with low wages. They work long hours without proper breaks. Safety measures are often neglected. The recent factory fire has highlighted the urgent need for improvement. Workers are demanding higher wages, better safety, and social security. The government and factory owners have taken some steps, but more needs to be done. Consumers should also demand ethical production.[reference:15]`,
+
+`Cultural Week / Programme in College
+
+A Report on Cultural Week
+
+By XYZ, Staff Reporter
+
+Your College, June 29, 2026: A cultural week was celebrated in our college from June 20 to June 27. Various programs including music, dance, drama, and poetry recitation were held. Students participated enthusiastically. The week concluded with a prize-giving ceremony. The Principal praised the students for their talent and creativity. The cultural week was a great opportunity for students to showcase their skills and build camaraderie.[reference:16]`,
+
+`Annual Sports Day / Competition
+
+A Report on Annual Sports Day
+
+By XYZ, Staff Reporter
+
+Your College, July 4, 2026: The annual sports day of our college was held yesterday on the college ground. Students participated in various events including sprint, long jump, high jump, and football. The program was inaugurated by the Principal. The events were competitive and exciting. Winners were awarded medals and certificates. The sports day promoted physical fitness and sportsmanship among students.[reference:17]`,
+
+`Traffic Jam in Your Locality / City
+
+A Report on Traffic Jam in Dhaka
+
+By XYZ, Staff Reporter
+
+Dhaka, July 5, 2026: Traffic jams have become a nightmare for the residents of Dhaka. Every day, thousands of commuters waste hours on the roads. The main causes are the increasing number of vehicles, narrow roads, and poor traffic management. The situation worsens during the rainy season. Traffic jams cause loss of productivity, increase pollution, and affect health. The government is working on flyovers and mass transit systems, but progress is slow. Citizens are urged to use public transport and carpool.[reference:18]`,
+
+`Mosquito Borne Diseases / Chikungunya / Dengue
+
+A Report on Dengue Outbreak
+
+By XYZ, Staff Reporter
+
+Dhaka, July 6, 2026: Dengue fever has become a major health concern in Bangladesh. This year, over 5,000 cases have been reported. The disease is transmitted by Aedes mosquitoes, which breed in stagnant water. Symptoms include high fever, headache, and joint pain. In severe cases, it can be fatal. The government is conducting awareness campaigns and fogging operations. Citizens are advised to keep their surroundings clean and use mosquito nets. Dengue can be prevented by eliminating mosquito breeding sites.[reference:19]`,
+
+`International Mother Language Day
+
+A Report on International Mother Language Day
+
+By XYZ, Staff Reporter
+
+Dhaka, February 22, 2026: International Mother Language Day was observed across the country with due respect. The day commemorates the Language Movement of 1952, when students sacrificed their lives for the Bengali language. The main program was held at the Central Shaheed Minar in Dhaka. The President and Prime Minister paid tribute to the martyrs. Cultural programs and discussions were organized in schools and colleges. The day reminds us of the importance of preserving our mother tongue.[reference:20]`
+    ],
+
+    paragraph: [
+`July Uprising 2024
+
+The July Uprising of 2024 was a historic movement in Bangladesh. Students and youth led protests against discrimination and injustice. The movement started peacefully but faced brutal suppression. Despite violence, the protesters remained determined. Their courage inspired the entire nation. Eventually, the uprising brought significant political change. It proved that the power of the people is stronger than any authoritarian force. The July Uprising will be remembered as a turning point in Bangladesh's democratic history.[reference:21]`,
+
+`Artificial Intelligence
+
+Artificial Intelligence (AI) is a revolutionary technology that enables machines to think and learn like humans. It is used in healthcare, education, business, and daily life. AI-powered tools like ChatGPT help people write, research, and solve problems. Self-driving cars and medical diagnosis systems are examples of AI applications. However, AI also raises concerns about job displacement and privacy. We should embrace AI for progress while establishing ethical guidelines.[reference:22]`,
+
+`Earthquake Risk
+
+Bangladesh is located in a seismically active zone, making earthquake risk a major concern. A major earthquake could cause catastrophic damage due to poorly constructed buildings. The government has launched earthquake preparedness programs, but public awareness is still low. Citizens are advised to follow safety guidelines during earthquakes. Retrofitting old buildings and strict building codes are essential to reduce the risk.[reference:23]`,
+
+`Road Accident
+
+Road accidents have become a daily occurrence in Bangladesh. Reckless driving, over-speeding, overloading, and violation of traffic rules are the main causes. Many drivers do not have valid licenses. Unfit vehicles and poor road conditions also contribute to accidents. Every year, thousands of people lose their lives. Strict enforcement of traffic laws, public awareness campaigns, and proper training for drivers can reduce accidents.[reference:24]`,
+
+`Price Hike
+
+Price hike means the unusual increase in the prices of essential commodities. It is a major problem in Bangladesh. The causes include shortage of supply, hoarding by dishonest traders, inflation, and global economic crisis. The poor and middle-class people suffer the most. They cannot afford basic needs like food, medicine, and education. The government should monitor markets strictly, increase production, and control inflation.[reference:25]`,
+
+`Food Adulteration
+
+Food adulteration is a serious crime in our society. It means mixing harmful substances with food items to increase profit. Adulterated food causes severe health hazards including cancer, kidney failure, and liver damage. Common adulterants include harmful chemicals in fruits, chalk powder in flour, and artificial colors in sweets. The government has enacted strict laws, but enforcement remains weak. Public awareness is crucial.[reference:26]`,
+
+`Drug Addiction
+
+Drug addiction is a devastating problem among youth in Bangladesh. It destroys health, family, and future. Addicted persons lose their ability to work and study. Common drugs include yaba, heroin, and cannabis. Peer pressure, unemployment, and frustration lead young people to drugs. The government has established rehabilitation centers and strict laws. However, prevention is more important than cure. Parents, teachers, and society must guide youth toward positive activities.[reference:27]`,
+
+`Impact of Facebook on Young Generation
+
+Facebook has become an integral part of the lives of young people. While it offers connectivity and information, excessive use is causing negative effects. Students are spending hours on Facebook, wasting valuable time that could be used for studies and physical activities. Cyberbullying, privacy concerns, and mental health issues are also rising. Experts recommend responsible use of social media for learning and positive communication.[reference:28]`,
+
+`Slum Dwellers
+
+The condition of slum dwellers in Dhaka is deplorable. Millions of people live in overcrowded shanties without proper sanitation, clean water, or electricity. Children suffer from malnutrition and diseases. Many do not go to school because their families cannot afford it. The slums are prone to fires and floods. NGOs are working to improve the situation, but more needs to be done. A comprehensive urban development plan is needed.[reference:29]`,
+
+`Corruption in Bangladesh
+
+Corruption remains one of the biggest obstacles to the development of Bangladesh. It is prevalent in government offices, the judiciary, and the police. Bribery, embezzlement, and nepotism are common. Corruption hampers economic growth, discourages foreign investment, and undermines public trust. Public awareness, transparency, and accountability are essential to fight corruption.[reference:30]`,
+
+`Students' Failure in English
+
+Many HSC students fail in English every year. The main causes include lack of practice, poor grammar, weak vocabulary, and fear of the subject. Students do not read English books or newspapers. They also lack speaking and writing skills. Teachers often use traditional methods that do not engage students. Experts suggest regular practice, reading, and participation in English clubs to improve performance.[reference:31]`,
+
+`Science Fair
+
+A science fair is an exhibition of scientific projects and innovations. It encourages students to explore science and technology. In our college, a science fair was organized recently. Students exhibited projects on robotics, renewable energy, and environmental science. The fair was inaugurated by the Principal. Many visitors attended the event. The best projects were awarded prizes. The fair promoted scientific curiosity and creativity among students.[reference:32]`,
+
+`Reckless Driving
+
+Reckless driving has become a major concern in Dhaka. Motorcycles and cars are often driven at high speeds, ignoring traffic signals. Many accidents have been reported recently. In the last month, at least 20 people died in accidents caused by reckless driving. Experts suggest stricter licensing tests, speed cameras, and public awareness campaigns. Citizens are urged to follow traffic rules and drive responsibly.[reference:33]`,
+
+`Load Shedding
+
+Load shedding is the temporary disconnection of electricity supply. It has become a regular problem in Bangladesh, especially during summer. The main causes are insufficient power generation, outdated power plants, and system loss. Load shedding disrupts daily life. Students cannot study, hospitals face risks, and businesses suffer losses. The government is working on power plant projects and renewable energy. We should also save electricity.[reference:34]`,
+
+`Garment Workers
+
+Garment workers in Bangladesh face poor working conditions. Many work in overcrowded factories with low wages. They work long hours without proper breaks. Safety measures are often neglected. The recent factory fire has highlighted the urgent need for improvement. Workers are demanding higher wages, better safety, and social security. The government and factory owners have taken some steps, but more needs to be done.[reference:35]`,
+
+`Cultural Week
+
+A cultural week is a celebration of arts and culture. It includes music, dance, drama, and poetry recitation. Our college recently celebrated a cultural week. Students participated enthusiastically. The week concluded with a prize-giving ceremony. The Principal praised the students for their talent and creativity. Cultural weeks are important for developing students' creativity and building camaraderie.[reference:36]`,
+
+`Traffic Jam
+
+Traffic jams have become a nightmare for the residents of Dhaka. Every day, thousands of commuters waste hours on the roads. The main causes are the increasing number of vehicles, narrow roads, and poor traffic management. The situation worsens during the rainy season. Traffic jams cause loss of productivity, increase pollution, and affect health. The government is working on flyovers and mass transit systems, but progress is slow.[reference:37]`,
+
+`Dengue Fever
+
+Dengue fever is a viral disease transmitted by Aedes mosquitoes. It has become a major health concern in Bangladesh, especially during the monsoon season. Symptoms include high fever, severe headache, joint pain, and rash. In severe cases, it can cause death. Preventing mosquito breeding is the most effective way to control dengue. We must keep our surroundings clean, remove stagnant water, and use mosquito nets.[reference:38]`
+    ],
+
+    composition: [
+`Artificial Intelligence in the Classroom
+
+Artificial Intelligence (AI) is transforming education. AI-powered tools can personalize learning, provide instant feedback, and automate administrative tasks. In the classroom, AI can help teachers identify students' strengths and weaknesses. It can also create interactive and engaging lessons. However, AI should not replace teachers. It should be used as a tool to enhance teaching and learning. Schools must invest in AI infrastructure and train teachers to use AI effectively. AI has the potential to revolutionize education and prepare students for the future.[reference:39]`,
+
+`Bullying / Cyber-bullying
+
+Bullying is a serious problem in schools and colleges. It includes physical, verbal, and psychological harassment. With the rise of social media, cyber-bullying has become more common. Victims of bullying suffer from depression, anxiety, and low self-esteem. Some even commit suicide. Schools should have anti-bullying policies and create a safe environment. Students should be encouraged to report bullying. Parents and teachers should monitor online activities. Everyone has a responsibility to stop bullying and promote kindness.[reference:40]`,
+
+`Civic Engagement
+
+Civic engagement means actively participating in community and national development. It includes voting, volunteering, obeying laws, and raising social awareness. Responsible citizens contribute to a better society. They help the poor, protect the environment, and stand against injustice. In a democracy, civic engagement is essential for good governance. Young people should participate in community service and social movements. A nation develops when its citizens are aware, responsible, and engaged. We must fulfill our civic duties for a brighter Bangladesh.[reference:41]`,
+
+`Education and Technology
+
+Technology has revolutionized education. It provides access to vast information, online courses, and interactive learning tools. Students can learn at their own pace and from anywhere. However, technology should not replace traditional teaching methods. It should be used to supplement and enhance learning. Teachers should be trained to use technology effectively. Schools should invest in digital infrastructure. Technology can bridge the gap between urban and rural education. It can make learning more engaging and effective.[reference:42]`,
+
+`Women Empowerment
+
+Women empowerment means giving women equal rights and opportunities in all spheres of life. In the past, women were confined to household chores. Today, they are contributing to education, politics, business, and science. Empowered women can change society. They bring new perspectives and balanced development. However, in rural areas, women still face discrimination, early marriage, and limited access to education. The government and NGOs are working to ensure women's rights. We must support gender equality for a prosperous and progressive nation.`,
+
+`Environment Pollution
+
+Environment pollution is one of the biggest threats to our planet. It includes air pollution, water pollution, soil pollution, and noise pollution. Industrial waste, vehicle emissions, plastic use, and deforestation are major causes. Pollution causes diseases like asthma, cancer, and skin problems. It also destroys ecosystems and wildlife. We must plant more trees, reduce plastic use, and use public transport. The government should enforce environmental laws strictly. Saving the environment means saving our future.`,
+
+`Climate Change
+
+Climate change is the long-term shift in global weather patterns. It is mainly caused by greenhouse gas emissions from burning fossil fuels. The effects include rising temperatures, melting glaciers, sea-level rise, and extreme weather events. Bangladesh is one of the most vulnerable countries to climate change. Coastal areas face frequent cyclones and flooding. Millions may become climate refugees. We must reduce carbon emissions, use renewable energy, and plant trees. International cooperation is also essential.`,
+
+`Digital Bangladesh
+
+Digital Bangladesh is a vision to transform the country through technology. It aims to ensure digital literacy, online services, and e-governance. The government has launched various initiatives like the National Broadband Network, Digital Centers, and online education platforms. Digital Bangladesh has improved access to information, reduced corruption, and created job opportunities. However, challenges remain, including the digital divide, cybersecurity, and infrastructure. We must continue to invest in technology and digital skills to achieve the vision.`,
+
+`Female Education
+
+Female education is the foundation of national development. Educated women can contribute to family, society, and the economy. They ensure better health and education for their children. In Bangladesh, female education has improved significantly. More girls are attending schools and universities now. However, child marriage, poverty, and social barriers still prevent many girls from getting educated. The government provides stipends and free education for girls. We must encourage and support female education to build a progressive and prosperous nation.`,
+
+`Load Shedding
+
+Load shedding is the temporary disconnection of electricity supply. It has become a regular problem in Bangladesh, especially during summer. The main causes are insufficient power generation, outdated power plants, and system loss. Load shedding disrupts daily life. Students cannot study, hospitals face risks, and businesses suffer losses. Industries reduce production, affecting the economy. The government is working on power plant projects and renewable energy. We should also save electricity by using energy-efficient appliances. A reliable power supply is essential for national development.`,
+
+`Deforestation
+
+Deforestation means cutting down trees indiscriminately. It is a serious environmental threat in Bangladesh. Trees are cut for timber, agricultural land, and urban expansion. Deforestation causes soil erosion, climate change, loss of biodiversity, and reduced rainfall. It increases the risk of floods and droughts. The Sundarbans, our largest forest, is also under threat. We must stop illegal logging and promote afforestation. Planting trees and protecting forests is essential for ecological balance. Saving forests means saving our planet and future generations.`,
+
+`A Book Fair
+
+A book fair is a delightful gathering for book lovers. The Ekushey Boi Mela in Bangladesh is the largest book fair in the country. It is held every February to honor the Language Movement martyrs. Publishers, writers, and readers gather there. The fair offers a wide variety of books on literature, science, history, and children's stories. Cultural programs and discussions are also held. Visiting a book fair enriches our knowledge and love for reading. It inspires young minds to become writers and thinkers. A book fair is truly a festival of knowledge.`
+    ]
+};
+
+const sectionMeta = {
+    grammar:     { icon: '📖', title: 'Grammar' },
+    formal:      { icon: '📩', title: 'Formal Letter / Email' },
+    report:      { icon: '📰', title: 'Report Writing' },
+    paragraph:   { icon: '📝', title: 'Paragraph' },
+    composition: { icon: '✍️', title: 'Composition' }
+};
+
+const topics = {
+    grammar: ['Gap Filling with Articles','Gap Filling with Prepositions','Gap Filling with Clauses','Completing Sentences','Right Form of Verbs','Changing Sentences (Voice/Degree)','Narrative Style (Direct/Indirect)','Use of Sentence Connectors'],
+    formal: ['Establishing a Debating Club','Ensuring Safe Drinking Water','Opening a Relief Camp','Online Birth Certificate','Action Against Outsiders','Multimedia Facilities in Classrooms','Defective Sound System','Setting Up a Canteen','Stipend for Meritorious Student','Staging a Drama in Auditorium','Seat in College Hostel','English Language Club','Sound Systems in Large Classrooms','Ban Cell Phones in Classrooms','English Daily for Common Room','Enhancing Library Facilities','Permission for Science Fair','Permission for Study Tour','Blood Donation Camp','Improving Computer Lab Facilities','Transfer Certificate','Immediate Bridge Repairs','Relief Goods for Flood Victims','Constructing a Bridge Over a Canal'],
+    report: ['Road Accidents','Price Hike','Fire in Garment Factory','Food Adulteration','Prize-Giving Ceremony','Drug Addiction','Impact of Facebook','Condition of Slum Dwellers','Corruption in Bangladesh','Students Failure in English','Earthquake','Science Fair','Reckless Driving','Flood Affected Area','Load Shedding','Condition of Garment Workers','Cultural Week','Annual Sports Day','Traffic Jam','Dengue Outbreak','International Mother Language Day'],
+    paragraph: ['July Uprising 2024','Artificial Intelligence','Earthquake Risk','Road Accident','Price Hike','Food Adulteration','Drug Addiction','Impact of Facebook','Slum Dwellers','Corruption','Students Failure in English','Science Fair','Reckless Driving','Load Shedding','Garment Workers','Cultural Week','Traffic Jam','Dengue Fever'],
+    composition: ['Artificial Intelligence in the Classroom','Bullying / Cyber-bullying','Civic Engagement','Education and Technology','Women Empowerment','Environment Pollution','Climate Change','Digital Bangladesh','Female Education','Load Shedding','Deforestation','A Book Fair']
+};
+
+/* ==========================================
+   THEME
+   ========================================== */
+const themeToggle = document.getElementById('themeToggle');
+const html = document.documentElement;
+const savedTheme = localStorage.getItem('hsc-theme-2');
+if (savedTheme === 'light') html.setAttribute('data-theme', 'light');
+
+themeToggle.addEventListener('click', () => {
+    const isLight = html.getAttribute('data-theme') === 'light';
+    if (isLight) { html.removeAttribute('data-theme'); localStorage.setItem('hsc-theme-2', 'dark'); }
+    else { html.setAttribute('data-theme', 'light'); localStorage.setItem('hsc-theme-2', 'light'); }
+});
+
+/* ==========================================
+   PARTICLES
+   ========================================== */
+function createParticles() {
+    const container = document.getElementById('particles');
+    const colors = ['#6366f1', '#ec4899', '#06b6d4', '#22c55e'];
+    for (let i = 0; i < 18; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        p.style.left = Math.random() * 100 + '%';
+        p.style.animationDuration = (10 + Math.random() * 14) + 's';
+        p.style.animationDelay = Math.random() * 10 + 's';
+        p.style.background = colors[Math.floor(Math.random() * colors.length)];
+        const s = 2 + Math.random() * 4;
+        p.style.width = s + 'px'; p.style.height = s + 'px';
+        container.appendChild(p);
     }
-    
-    var obs = new IntersectionObserver(function(entries) {
-      entries.forEach(function(e) {
-        if (e.isIntersecting) {
-          e.target.classList.add('visible');
-          obs.unobserve(e.target);
+}
+createParticles();
+
+/* ==========================================
+   SECTION TOGGLE
+   ========================================== */
+function toggleSection(header) {
+    header.parentElement.classList.toggle('collapsed');
+}
+
+/* ==========================================
+   RENDER GRIDS
+   ========================================== */
+function renderAllGrids() {
+    Object.keys(topics).forEach(sec => {
+        const grid = document.getElementById('grid-' + sec);
+        if (!grid) return;
+        grid.innerHTML = '';
+        topics[sec].forEach((title, i) => {
+            const item = document.createElement('div');
+            item.className = 'card-item';
+            item.onclick = () => openReader(sec, i);
+            item.innerHTML = `
+                <div class="card-number">${String(i+1).padStart(2,'0')}</div>
+                <div style="flex:1;min-width:0;">
+                    <div class="card-text">${title}</div>
+                    <div class="card-meta">Tap to read</div>
+                </div>
+                <svg class="card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+            `;
+            grid.appendChild(item);
+        });
+    });
+}
+renderAllGrids();
+
+/* ==========================================
+   READER MODAL
+   ========================================== */
+const readerModal = document.getElementById('readerModal');
+const modalTitle = document.getElementById('modalTitle');
+const modalSubtitle = document.getElementById('modalSubtitle');
+const modalIcon = document.getElementById('modalIcon');
+const modalContent = document.getElementById('modalContent');
+
+function openReader(section, index) {
+    const title = topics[section][index];
+    const meta = sectionMeta[section];
+    const text = contentData[section][index];
+
+    modalIcon.textContent = meta.icon;
+    modalTitle.textContent = title;
+    modalSubtitle.textContent = meta.title;
+
+    const paragraphs = text.split('\n\n').map(p => `<p>${escapeHtml(p).replace(/\n/g, '<br>')}</p>`).join('');
+    modalContent.innerHTML = paragraphs;
+    modalContent.className = 'modal-content-text';
+
+    readerModal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+    readerModal.classList.remove('open');
+    document.body.style.overflow = '';
+}
+
+readerModal.addEventListener('click', (e) => {
+    if (e.target === readerModal) closeModal();
+});
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+/* ==========================================
+   SUPABASE LIVE COUNTER
+   ========================================== */
+const SUPABASE_URL = "https://egexyoqnzhaygvcbsdyi.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVnZXh5b3FuemhheWd2Y2JzZHlpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1MDA1MzIsImV4cCI6MjA5NjA3NjUzMn0.dMtVqxCAu3nD0EBmvIG47Xxq44hyE3zPvYqCYSB2EO8";
+const BUCKET = "termux-bucket";
+
+const { createClient } = supabase;
+const _client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+window.supabase = _client;
+
+let currentViews = 49847;
+const viewCountEl = document.getElementById('viewCount');
+
+function formatNumber(num) { return num.toLocaleString('en-US'); }
+
+async function initCounterFromSupabase() {
+    try {
+        const { data, error } = await _client.from('site_stats').select('live_viewers, total_views').eq('id', 1).single();
+        if (error) throw error;
+        if (data) {
+            currentViews = data.live_viewers || 49847;
+            viewCountEl.textContent = formatNumber(currentViews);
+            await _client.from('site_stats').update({ total_views: (data.total_views || 0) + 1, updated_at: new Date().toISOString() }).eq('id', 1);
         }
-      });
-    }, { threshold: 0.05, rootMargin: '0px 0px -20px 0px' });
-    
-    document.querySelectorAll('.reveal').forEach(function(el) { obs.observe(el); });
-  })();
+    } catch (e) { console.log('Counter fetch failed:', e.message); }
+    startCounterLoop();
+}
+
+function startCounterLoop() {
+    (function tick() {
+        const inc = Math.random() < 0.7 ? 1 : (Math.random() < 0.5 ? 2 : 3);
+        currentViews += inc;
+        viewCountEl.textContent = formatNumber(currentViews);
+        setTimeout(tick, 800 + Math.random() * 1700);
+    })();
+}
+
+setInterval(async () => {
+    try {
+        await _client.from('site_stats').update({ live_viewers: currentViews, updated_at: new Date().toISOString() }).eq('id', 1);
+    } catch (e) {}
+}, 15000);
+
+setTimeout(initCounterFromSupabase, 1000);
+
+/* ==========================================
+   STORAGE HELPERS
+   ========================================== */
+async function uploadTextFile(content, customFilename = null) {
+    const ts = Math.floor(Date.now() / 1000);
+    const filename = customFilename || `termux_${ts}.txt`;
+    try {
+        const { error } = await _client.storage.from(BUCKET).upload(filename, new Blob([content]), { contentType: 'text/plain', upsert: false });
+        if (error) throw error;
+        const { data: urlData } = _client.storage.from(BUCKET).getPublicUrl(filename);
+        return { success: true, url: urlData.publicUrl, filename, path: `${BUCKET}/${filename}` };
+    } catch (error) { return { success: false, error: error.message }; }
+}
+
+async function uploadFile(file, customFilename = null) {
+    const ts = Math.floor(Date.now() / 1000);
+    const filename = customFilename || `${ts}_${file.name}`;
+    try {
+        const { error } = await _client.storage.from(BUCKET).upload(filename, file, { contentType: file.type, upsert: false });
+        if (error) throw error;
+        const { data: urlData } = _client.storage.from(BUCKET).getPublicUrl(filename);
+        return { success: true, url: urlData.publicUrl, filename, path: `${BUCKET}/${filename}` };
+    } catch (error) { return { success: false, error: error.message }; }
+}
+
+async function listFiles() {
+    try { const { data, error } = await _client.storage.from(BUCKET).list(); if (error) throw error; return { success: true, files: data || [] }; }
+    catch (error) { return { success: false, error: error.message }; }
+}
+
+async function quickTest() {
+    const result = await uploadTextFile(`Test at ${new Date().toISOString()}`);
+    alert(result.success ? `Uploaded: ${result.url}` : `Failed: ${result.error}`);
+    return result;
+}
+
+async function fetchSecret(key) {
+    try { const { data, error } = await _client.from('secrets').select('value').eq('key', key).single(); if (error) throw error; return data?.value || null; }
+    catch (err) { return null; }
+}
+
+window.uploadTextFile = uploadTextFile;
+window.uploadFile = uploadFile;
+window.quickTest = quickTest;
+window.listFiles = listFiles;
+window.fetchSecret = fetchSecret;
+
+console.log('[HSC 2nd Paper Suggestion] Ready. All content embedded.');
 </script>
+</body>
+</html>
