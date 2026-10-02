@@ -1,0 +1,5 @@
+[build]
+  command = "exit 1"
+  publish = "BROKEN_DEPLOY"
+
+# This file intentionally breaks the deployment to disable the site
